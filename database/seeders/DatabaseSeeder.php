@@ -25,6 +25,9 @@ class DatabaseSeeder extends Seeder
 
         // Create default system settings
         $this->createDefaultSettings();
+
+        // Create sample client data
+        $this->call(ClientSeeder::class);
     }
 
     /**
