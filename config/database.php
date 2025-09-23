@@ -54,13 +54,48 @@ return [
             'unix_socket' => env('DB_SOCKET', ''),
             'charset' => 'utf8mb4',
             'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
+            'prefix' => env('DB_PREFIX', ''),
             'prefix_indexes' => true,
-            'strict' => true,
-            'engine' => null,
+            'strict' => env('DB_STRICT_MODE', true),
+            'engine' => env('DB_ENGINE', 'InnoDB'),
+            'timezone' => env('DB_TIMEZONE', '+00:00'),
+            'modes' => [
+                'STRICT_TRANS_TABLES',
+                'NO_ZERO_DATE',
+                'NO_ZERO_IN_DATE',
+                'ERROR_FOR_DIVISION_BY_ZERO',
+                'NO_AUTO_CREATE_USER',
+                'NO_ENGINE_SUBSTITUTION',
+            ],
             'options' => extension_loaded('pdo_mysql') ? array_filter([
-                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                // SSL Configuration
+                PDO::MYSQL_ATTR_SSL_CA => env('DB_SSL_CA'),
+                PDO::MYSQL_ATTR_SSL_CERT => env('DB_SSL_CERT'),
+                PDO::MYSQL_ATTR_SSL_KEY => env('DB_SSL_KEY'),
+                PDO::MYSQL_ATTR_SSL_CIPHER => env('DB_SSL_CIPHER'),
+                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => env('DB_SSL_VERIFY', false),
+                
+                // Security Options
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+                PDO::ATTR_STRINGIFY_FETCHES => false,
+                PDO::ATTR_PERSISTENT => env('DB_PERSISTENT', false),
+                
+                // Connection Pooling
+                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci, sql_mode='STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION'",
             ]) : [],
+            
+            // Connection Pool Settings
+            'pool' => [
+                'min_connections' => env('DB_POOL_MIN', 1),
+                'max_connections' => env('DB_POOL_MAX', 10),
+                'connect_timeout' => env('DB_CONNECT_TIMEOUT', 10),
+                'wait_timeout' => env('DB_WAIT_TIMEOUT', 60),
+                'heartbeat' => env('DB_HEARTBEAT', -1),
+                'max_idle_time' => env('DB_MAX_IDLE_TIME', 3600),
+            ],
         ],
 
         'pgsql' => [
