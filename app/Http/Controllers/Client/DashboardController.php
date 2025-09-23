@@ -112,23 +112,26 @@ class DashboardController extends Controller
     {
         $client = Auth::guard('client')->user();
         
-        // Get client's custom capture sites
-        $captureSites = [
-            [
-                'name' => 'Site Principal',
-                'url' => route('client.capture.main', ['code' => $client->id]),
-                'description' => 'Site de captura principal com seus tracking tags',
-                'status' => 'active',
-            ],
-            [
-                'name' => 'Site Secundário',
-                'url' => route('client.capture.secondary', ['code' => $client->id]),
-                'description' => 'Site de captura secundário',
-                'status' => 'active',
-            ],
+        // Get capture site statistics (mock data for now)
+        $stats = [
+            'main_visits' => rand(100, 1000),
+            'main_conversions' => rand(10, 100),
+            'secondary_visits' => rand(50, 500),
+            'secondary_conversions' => rand(5, 50),
+            'mobile_visits' => rand(75, 750),
+            'mobile_conversions' => rand(8, 80),
+            'total_visits' => 0,
+            'total_conversions' => 0,
+            'conversion_rate' => 0,
+            'total_leads' => $client->leads()->count(),
         ];
+        
+        // Calculate totals
+        $stats['total_visits'] = $stats['main_visits'] + $stats['secondary_visits'] + $stats['mobile_visits'];
+        $stats['total_conversions'] = $stats['main_conversions'] + $stats['secondary_conversions'] + $stats['mobile_conversions'];
+        $stats['conversion_rate'] = $stats['total_visits'] > 0 ? ($stats['total_conversions'] / $stats['total_visits']) * 100 : 0;
 
-        return view('client.capture-sites', compact('captureSites'));
+        return view('client.capture-sites', compact('stats'));
     }
 
     /**

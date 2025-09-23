@@ -24,15 +24,17 @@ class SupportController extends Controller
             ->latest()
             ->paginate(15);
         
-        // Get statistics
-        $stats = [
-            'total' => $client->supportTickets()->count(),
-            'open' => $client->supportTickets()->open()->count(),
-            'resolved' => $client->supportTickets()->closed()->count(),
-            'high_priority' => $client->supportTickets()->highPriority()->count(),
-        ];
+        // Calculate average response time (in hours)
+        $avgResponseTime = $client->supportTickets()
+            ->where('status', 'closed')
+            ->whereNotNull('resolved_at')
+            ->get()
+            ->map(function ($ticket) {
+                return $ticket->created_at->diffInHours($ticket->resolved_at);
+            })
+            ->avg();
         
-        return view('client.support.index', compact('tickets', 'stats'));
+        return view('client.support.index', compact('tickets', 'client', 'avgResponseTime'));
     }
 
     /**

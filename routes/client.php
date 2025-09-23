@@ -1,13 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\DashboardController;
 use App\Http\Controllers\Client\ProfileController;
 use App\Http\Controllers\Client\LeadController;
 use App\Http\Controllers\Client\FinancialController;
 use App\Http\Controllers\Client\TrainingController;
 use App\Http\Controllers\Client\SupportController;
+use App\Http\Middleware\ClientMiddleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,24 +20,11 @@ use App\Http\Controllers\Client\SupportController;
 |
 */
 
-// Client Authentication Routes
+// Client Routes (authentication handled by unified AuthController)
 Route::prefix('client')->name('client.')->group(function () {
     
-    // Public routes (not authenticated)
-    Route::middleware('guest:client')->group(function () {
-        Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-        Route::post('/login', [AuthController::class, 'login']);
-        Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-        Route::post('/register', [AuthController::class, 'register']);
-        Route::get('/forgot-password', [AuthController::class, 'showPasswordResetForm'])->name('password.request');
-        Route::post('/forgot-password', [AuthController::class, 'sendPasswordResetLink'])->name('password.email');
-    });
-
     // Protected routes (authenticated clients only)
-    Route::middleware(['auth:client', 'client'])->group(function () {
-        
-        // Logout
-        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::middleware(['auth:client', ClientMiddleware::class])->group(function () {
         
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');

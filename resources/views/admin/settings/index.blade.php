@@ -171,7 +171,7 @@
                         <h5 class="mb-0">Tracking Codes</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('admin.settings.tracking') }}">
+                        <form method="POST" action="{{ route('admin.settings.update') }}">
                             @csrf
                             <div class="row">
                                 <div class="col-md-4 mb-3">
@@ -227,7 +227,7 @@
                         <h5 class="mb-0">reCAPTCHA Settings</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('admin.settings.recaptcha') }}">
+                        <form method="POST" action="{{ route('admin.settings.update') }}">
                             @csrf
                             <div class="mb-3">
                                 <div class="form-check">
@@ -280,7 +280,7 @@
                         <h5 class="mb-0">Financial Settings</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('admin.settings.financial') }}">
+                        <form method="POST" action="{{ route('admin.settings.update') }}">
                             @csrf
                             <div class="row">
                                 <div class="col-md-6 mb-3">

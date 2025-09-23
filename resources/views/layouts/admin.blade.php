@@ -131,7 +131,7 @@
                             <strong class="text-white">{{ auth('admin')->user()->name }}</strong>
                         </div>
                         <div class="mt-3">
-                            <form method="POST" action="{{ route('admin.logout') }}">
+                            <form method="POST" action="{{ route('auth.logout') }}">
                                 @csrf
                                 <button type="submit" class="btn btn-outline-light btn-sm w-100">
                                     <i class="bi bi-box-arrow-right me-1"></i>

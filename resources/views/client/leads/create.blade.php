@@ -1,11 +1,11 @@
 @extends('layouts.client')
 
-@section('title', 'Novo Lead')
-@section('page-title', 'Adicionar Novo Lead')
+@section('title', 'New Lead')
+@section('page-title', 'Add New Lead')
 
 @section('page-actions')
 <a href="{{ route('client.leads.index') }}" class="btn btn-outline-secondary">
-    <i class="bi bi-arrow-left me-2"></i>Voltar para Leads
+    <i class="bi bi-arrow-left me-2"></i>Back to Leads
 </a>
 @endsection
 
@@ -145,16 +145,16 @@
                             <!-- Custom fields will be added here dynamically -->
                         </div>
                         <button type="button" class="btn btn-outline-primary btn-sm" onclick="addCustomField()">
-                            <i class="bi bi-plus me-1"></i>Adicionar Campo
+                            <i class="bi bi-plus me-1"></i>Add Field
                         </button>
                     </div>
 
                     <div class="d-flex justify-content-between">
                         <a href="{{ route('client.leads.index') }}" class="btn btn-secondary">
-                            <i class="bi bi-x-circle me-2"></i>Cancelar
+                            <i class="bi bi-x-circle me-2"></i>Cancel
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle me-2"></i>Salvar Lead
+                            <i class="bi bi-check-circle me-2"></i>Save Lead
                         </button>
                     </div>
                 </form>

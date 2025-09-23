@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Client Area') - {{ config('app.name') }}</title>
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
+    <title><?php echo $__env->yieldContent('title', 'Client Area'); ?> - <?php echo e(config('app.name')); ?></title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -164,7 +164,7 @@
         }
     </style>
     
-    @stack('styles')
+    <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
 <body>
     <div class="container-fluid">
@@ -183,58 +183,58 @@
                     <!-- Navigation Menu -->
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('client.dashboard') ? 'active' : '' }}" 
-                               href="{{ route('client.dashboard') }}">
+                            <a class="nav-link <?php echo e(request()->routeIs('client.dashboard') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('client.dashboard')); ?>">
                                 <i class="bi bi-speedometer2"></i>
                                 Dashboard
                             </a>
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('client.profile.*') ? 'active' : '' }}" 
-                               href="{{ route('client.profile.index') }}">
+                            <a class="nav-link <?php echo e(request()->routeIs('client.profile.*') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('client.profile.index')); ?>">
                                 <i class="bi bi-person"></i>
                                 My Profile
                             </a>
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('client.leads.*') ? 'active' : '' }}" 
-                               href="{{ route('client.leads.index') }}">
+                            <a class="nav-link <?php echo e(request()->routeIs('client.leads.*') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('client.leads.index')); ?>">
                                 <i class="bi bi-people"></i>
                                 Leads
                             </a>
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('client.financial.*') ? 'active' : '' }}" 
-                               href="{{ route('client.financial.index') }}">
+                            <a class="nav-link <?php echo e(request()->routeIs('client.financial.*') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('client.financial.index')); ?>">
                                 <i class="bi bi-cash-stack"></i>
                                 Financial
                             </a>
                         </li>
                         
-                        @if(auth('client')->user() && auth('client')->user()->hasCourseAccess())
+                        <?php if(auth('client')->user() && auth('client')->user()->hasCourseAccess()): ?>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('client.training.*') ? 'active' : '' }}" 
-                               href="{{ route('client.training.index') }}">
+                            <a class="nav-link <?php echo e(request()->routeIs('client.training.*') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('client.training.index')); ?>">
                                 <i class="bi bi-book"></i>
                                 Training
                             </a>
                         </li>
-                        @endif
+                        <?php endif; ?>
                         
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('client.support.*') ? 'active' : '' }}" 
-                               href="{{ route('client.support.index') }}">
+                            <a class="nav-link <?php echo e(request()->routeIs('client.support.*') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('client.support.index')); ?>">
                                 <i class="bi bi-headset"></i>
                                 Support
                             </a>
                         </li>
                         
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('client.capture-sites') ? 'active' : '' }}" 
-                               href="{{ route('client.capture-sites') }}">
+                            <a class="nav-link <?php echo e(request()->routeIs('client.capture-sites') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('client.capture-sites')); ?>">
                                 <i class="bi bi-link-45deg"></i>
                                 Capture Sites
                             </a>
@@ -242,21 +242,22 @@
                     </ul>
                     
                     <!-- User Info -->
-                    @auth('client')
+                    <?php if(auth()->guard('client')->check()): ?>
                     <div class="mt-5 pt-3 border-top">
                         <div class="d-flex align-items-center">
                             <div class="user-avatar me-3">
-                                {{ substr(auth('client')->user()->name, 0, 1) }}
+                                <?php echo e(substr(auth('client')->user()->name, 0, 1)); ?>
+
                             </div>
                             <div>
-                                <div class="text-white fw-bold">{{ auth('client')->user()->name }}</div>
-                                <small class="text-white-50">{{ auth('client')->user()->masked_email }}</small>
+                                <div class="text-white fw-bold"><?php echo e(auth('client')->user()->name); ?></div>
+                                <small class="text-white-50"><?php echo e(auth('client')->user()->masked_email); ?></small>
                             </div>
                         </div>
                         
                         <div class="mt-3">
-                            <form method="POST" action="{{ route('auth.logout') }}" class="d-inline">
-                                @csrf
+                            <form method="POST" action="<?php echo e(route('auth.logout')); ?>" class="d-inline">
+                                <?php echo csrf_field(); ?>
                                 <button type="submit" class="btn btn-outline-light btn-sm w-100">
                                     <i class="bi bi-box-arrow-right me-2"></i>
                                     Logout
@@ -264,7 +265,7 @@
                             </form>
                         </div>
                     </div>
-                    @endauth
+                    <?php endif; ?>
                 </div>
             </nav>
             
@@ -272,12 +273,12 @@
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <!-- Top Navigation -->
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                    <h1 class="h2">@yield('page-title', 'Dashboard')</h1>
+                    <h1 class="h2"><?php echo $__env->yieldContent('page-title', 'Dashboard'); ?></h1>
                     
                     <div class="btn-toolbar mb-2 mb-md-0">
-                        @hasSection('page-actions')
-                            @yield('page-actions')
-                        @endif
+                        <?php if (! empty(trim($__env->yieldContent('page-actions')))): ?>
+                            <?php echo $__env->yieldContent('page-actions'); ?>
+                        <?php endif; ?>
                         
                         <!-- Notifications -->
                         <div class="dropdown me-2">
@@ -298,29 +299,32 @@
                 </div>
                 
                 <!-- Flash Messages -->
-                @if(session('success'))
+                <?php if(session('success')): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
+                        <i class="bi bi-check-circle me-2"></i><?php echo e(session('success')); ?>
+
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                @endif
+                <?php endif; ?>
                 
-                @if(session('error'))
+                <?php if(session('error')): ?>
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
+                        <i class="bi bi-exclamation-triangle me-2"></i><?php echo e(session('error')); ?>
+
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                @endif
+                <?php endif; ?>
                 
-                @if(session('warning'))
+                <?php if(session('warning')): ?>
                     <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-circle me-2"></i>{{ session('warning') }}
+                        <i class="bi bi-exclamation-circle me-2"></i><?php echo e(session('warning')); ?>
+
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                @endif
+                <?php endif; ?>
                 
                 <!-- Page Content -->
-                @yield('content')
+                <?php echo $__env->yieldContent('content'); ?>
             </main>
         </div>
     </div>
@@ -330,12 +334,12 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-6">
-                    <p class="mb-0">&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
+                    <p class="mb-0">&copy; <?php echo e(date('Y')); ?> <?php echo e(config('app.name')); ?>. All rights reserved.</p>
                 </div>
                 <div class="col-md-6 text-end">
                     <p class="mb-0">
-                        <a href="{{ route('client.support.faq') }}" class="text-white me-3">FAQ</a>
-                        <a href="{{ route('client.support.create') }}" class="text-white">Support</a>
+                        <a href="<?php echo e(route('client.support.faq')); ?>" class="text-white me-3">FAQ</a>
+                        <a href="<?php echo e(route('client.support.create')); ?>" class="text-white">Support</a>
                     </p>
                 </div>
             </div>
@@ -377,6 +381,7 @@
         });
     </script>
     
-    @stack('scripts')
+    <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
+<?php /**PATH D:\WORK-Station\freelance\workana\12\resources\views/layouts/client.blade.php ENDPATH**/ ?>

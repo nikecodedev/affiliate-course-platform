@@ -1,19 +1,19 @@
 @extends('layouts.client')
 
-@section('title', 'Gerenciar Leads')
-@section('page-title', 'Gerenciar Leads')
+@section('title', 'Manage Leads')
+@section('page-title', 'Manage Leads')
 
 @section('page-actions')
 <div class="btn-toolbar mb-2 mb-md-0">
     <div class="btn-group me-2">
         <a href="{{ route('client.leads.create') }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle me-2"></i>Novo Lead
+            <i class="bi bi-plus-circle me-2"></i>New Lead
         </a>
         <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#importModal">
-            <i class="bi bi-upload me-2"></i>Importar
+            <i class="bi bi-upload me-2"></i>Import
         </button>
         <a href="{{ route('client.leads.export', request()->query()) }}" class="btn btn-outline-success">
-            <i class="bi bi-download me-2"></i>Exportar
+            <i class="bi bi-download me-2"></i>Export
         </a>
     </div>
 </div>
@@ -130,7 +130,7 @@
 <div class="card">
     <div class="card-header">
         <h5 class="card-title mb-0">
-            <i class="bi bi-people me-2"></i>Lista de Leads
+            <i class="bi bi-people me-2"></i>Leads List
         </h5>
     </div>
     <div class="card-body">
@@ -147,7 +147,7 @@
                             <th>Contatado</th>
                             <th>Convertido</th>
                             <th>Data</th>
-                            <th>Ações</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -213,12 +213,12 @@
                                     </a>
                                     <a href="{{ route('client.leads.edit', $lead) }}" 
                                        class="btn btn-sm btn-outline-secondary" 
-                                       data-bs-toggle="tooltip" title="Editar">
+                                       data-bs-toggle="tooltip" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     <button type="button" class="btn btn-sm btn-outline-danger" 
                                             onclick="deleteLead({{ $lead->id }})" 
-                                            data-bs-toggle="tooltip" title="Excluir">
+                                            data-bs-toggle="tooltip" title="Delete">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -245,7 +245,7 @@
                 <h4 class="mt-3 text-muted">Nenhum lead encontrado</h4>
                 <p class="text-muted">Comece adicionando seu primeiro lead ou importe uma lista.</p>
                 <a href="{{ route('client.leads.create') }}" class="btn btn-primary">
-                    <i class="bi bi-plus-circle me-2"></i>Adicionar Lead
+                    <i class="bi bi-plus-circle me-2"></i>Add Lead
                 </a>
             </div>
         @endif
@@ -258,7 +258,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="bi bi-upload me-2"></i>Importar Leads
+                    <i class="bi bi-upload me-2"></i>Import Leads
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -279,9 +279,9 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-upload me-2"></i>Importar
+                        <i class="bi bi-upload me-2"></i>Import
                     </button>
                 </div>
             </form>
@@ -307,12 +307,12 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="deleteForm" method="POST" style="display: inline;">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash me-2"></i>Excluir
+                        <i class="bi bi-trash me-2"></i>Delete
                     </button>
                 </form>
             </div>

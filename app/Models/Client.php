@@ -128,6 +128,17 @@ class Client extends Authenticatable
     }
 
     /**
+     * Get active invoices (plural)
+     */
+    public function activeInvoices()
+    {
+        return $this->invoices()
+            ->where('status', 'active')
+            ->where('expires_at', '>', now())
+            ->orderBy('created_at', 'desc');
+    }
+
+    /**
      * Check if client has access to courses
      */
     public function hasCourseAccess()

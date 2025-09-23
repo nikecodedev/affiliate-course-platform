@@ -158,6 +158,18 @@ class FinancialController extends Controller
     }
 
     /**
+     * Display commission payments list
+     */
+    public function commissionPaymentsIndex()
+    {
+        $commission_payments = CommissionPayment::with(['user', 'sale'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(15);
+
+        return view('admin.financial.commission-payments.index', compact('commission_payments'));
+    }
+
+    /**
      * Display withdrawals management
      */
     public function withdrawals(Request $request)

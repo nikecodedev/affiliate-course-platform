@@ -56,12 +56,18 @@ class FinancialController extends Controller
         // Get monthly earnings for chart
         $monthlyEarnings = $this->getMonthlyEarningsData($client);
 
+        // Get pending withdrawals
+        $pendingWithdrawals = $client->withdrawalRequests()
+            ->where('status', 'pending')
+            ->latest()
+            ->limit(5)
+            ->get();
+
         return view('client.financial.index', compact(
-            'stats',
+            'client',
             'recentTransactions',
             'activeInvoices',
-            'recentWithdrawals',
-            'monthlyEarnings'
+            'pendingWithdrawals'
         ));
     }
 
@@ -102,9 +108,34 @@ class FinancialController extends Controller
             });
         }
         
-        $transactions = $query->latest()->paginate(20);
+        // Apply sorting
+        $sort = $request->get('sort', 'date_desc');
+        switch ($sort) {
+            case 'date_asc':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'amount_desc':
+                $query->orderBy('amount', 'desc');
+                break;
+            case 'amount_asc':
+                $query->orderBy('amount', 'asc');
+                break;
+            default:
+                $query->latest();
+                break;
+        }
         
-        return view('client.financial.transactions', compact('transactions'));
+        $transactions = $query->paginate(20);
+        
+        // Calculate summary statistics
+        $summary = [
+            'total_credits' => $client->transactions()->where('type', 'credit')->sum('amount'),
+            'total_debits' => $client->transactions()->where('type', 'debit')->sum('amount'),
+            'total_transactions' => $client->transactions()->count(),
+            'net_amount' => $client->total_earnings - $client->total_withdrawals,
+        ];
+        
+        return view('client.financial.transactions', compact('transactions', 'summary'));
     }
 
     /**
@@ -123,7 +154,7 @@ class FinancialController extends Controller
         
         $invoices = $query->latest()->paginate(15);
         
-        return view('client.financial.invoices', compact('invoices'));
+        return view('client.financial.invoices', compact('invoices', 'client'));
     }
 
     /**
@@ -177,7 +208,7 @@ class FinancialController extends Controller
             ->latest()
             ->paginate(15);
         
-        return view('client.financial.withdrawals', compact('withdrawals'));
+        return view('client.financial.withdrawals', compact('withdrawals', 'client'));
     }
 
     /**

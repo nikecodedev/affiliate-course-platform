@@ -147,8 +147,8 @@
                         <div class="logo">
                             <i class="bi bi-person-circle"></i>
                         </div>
-                        <h2>Área do Cliente</h2>
-                        <p>Faça login para acessar sua conta</p>
+                        <h2>Client Area</h2>
+                        <p>Login to access your account</p>
                     </div>
                     
                     <!-- Login Form -->
@@ -240,13 +240,13 @@
                             <div class="mb-2">
                                 <a href="{{ route('client.password.request') }}">
                                     <i class="bi bi-key me-1"></i>
-                                    Esqueci minha senha
+                                    Forgot my password
                                 </a>
                             </div>
                             <div>
-                                Não tem uma conta? 
+                                Don't have an account? 
                                 <a href="{{ route('client.register') }}">
-                                    Cadastre-se aqui
+                                    Register here
                                 </a>
                             </div>
                         </div>
