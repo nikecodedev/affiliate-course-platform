@@ -35,6 +35,9 @@ class DatabaseSeeder extends Seeder
         
         // Create bonus configurations and payment gateways
         $this->call(BonusConfigurationSeeder::class);
+        
+        // Create system customizations
+        $this->call(SystemCustomizationSeeder::class);
     }
 
     /**

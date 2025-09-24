@@ -38,16 +38,132 @@
         <div class="tab-content" id="settingsTabsContent">
             <!-- Appearance Settings -->
             <div class="tab-pane fade show active" id="appearance" role="tabpanel">
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h5 class="mb-0">Appearance Settings</h5>
+                <!-- Success/Error Messages -->
+                <?php if(session('success')): ?>
+                    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>
+                        <?php echo e(session('success')); ?>
+
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                    <div class="card-body">
-                        <form id="appearanceForm" enctype="multipart/form-data">
-                            <?php echo csrf_field(); ?>
+                <?php endif; ?>
+
+                <?php if($errors->any()): ?>
+                    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        <ul class="mb-0">
+                            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </ul>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
+
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Advanced Customization:</strong> For logo, colors, and branding customization, 
+                    <a href="<?php echo e(route('admin.settings.customization')); ?>" class="alert-link">click here to access the full customization panel</a>.
+                </div>
+
+                <form action="<?php echo e(route('admin.customization.update')); ?>" method="POST" enctype="multipart/form-data" id="customizationForm">
+                    <?php echo csrf_field(); ?>
+                    
+                    <!-- Company Information -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-building me-2"></i>
+                                Company Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="company_name" class="form-label">Company Name</label>
+                                        <input type="text" class="form-control" id="company_name" name="company_name" 
+                                               value="<?php echo e(old('company_name', \App\Models\SystemCustomization::getCompanyName())); ?>"
+                                               placeholder="Enter company name">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="company_email" class="form-label">Company Email</label>
+                                        <input type="email" class="form-control" id="company_email" name="company_email" 
+                                               value="<?php echo e(old('company_email', \App\Models\SystemCustomization::getCompanyEmail())); ?>"
+                                               placeholder="Enter company email">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="company_phone" class="form-label">Company Phone</label>
+                                        <input type="text" class="form-control" id="company_phone" name="company_phone" 
+                                               value="<?php echo e(old('company_phone', \App\Models\SystemCustomization::getCompanyPhone())); ?>"
+                                               placeholder="Enter company phone">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="company_address" class="form-label">Company Address</label>
+                                        <textarea class="form-control" id="company_address" name="company_address" rows="2"
+                                                  placeholder="Enter company address"><?php echo e(old('company_address', \App\Models\SystemCustomization::getCompanyAddress())); ?></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Brand Colors -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-paint-brush me-2"></i>
+                                Brand Colors
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="primary_color" class="form-label">Primary Color</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" id="primary_color" name="primary_color" 
+                                                   value="<?php echo e(old('primary_color', \App\Models\SystemCustomization::getPrimaryColor())); ?>">
+                                            <input type="text" class="form-control" id="primary_color_text" 
+                                                   value="<?php echo e(old('primary_color', \App\Models\SystemCustomization::getPrimaryColor())); ?>"
+                                                   placeholder="#007bff">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="secondary_color" class="form-label">Secondary Color</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" id="secondary_color" name="secondary_color" 
+                                                   value="<?php echo e(old('secondary_color', \App\Models\SystemCustomization::getSecondaryColor())); ?>">
+                                            <input type="text" class="form-control" id="secondary_color_text" 
+                                                   value="<?php echo e(old('secondary_color', \App\Models\SystemCustomization::getSecondaryColor())); ?>"
+                                                   placeholder="#6c757d">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Brand Assets -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="bi bi-images me-2"></i>
+                                Brand Assets
+                            </h5>
+                        </div>
+                        <div class="card-body">
                             <div class="row">
                                 <!-- Logo Upload -->
-                                <div class="col-md-6 mb-4">
+                                <div class="col-md-4 mb-4">
                                     <label class="form-label">Main Logo</label>
                                     <div class="logo-upload-container">
                                         <div class="current-logo mb-3" id="currentLogo">

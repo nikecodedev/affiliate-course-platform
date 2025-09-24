@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
-    <title><?php echo $__env->yieldContent('title', 'Admin Panel'); ?> - <?php echo e(config('app.name', 'Affiliate Platform')); ?></title>
+    <title><?php echo $__env->yieldContent('title', 'Admin Panel'); ?> - <?php echo e(\App\Models\SystemCustomization::getCompanyName()); ?></title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="<?php echo e(\App\Models\SystemCustomization::getFaviconUrl()); ?>">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -22,9 +25,14 @@
 
     <!-- Custom CSS -->
     <style>
+        :root {
+            --primary-color: <?php echo e(\App\Models\SystemCustomization::getPrimaryColor()); ?>;
+            --secondary-color: <?php echo e(\App\Models\SystemCustomization::getSecondaryColor()); ?>;
+        }
+        
         .sidebar {
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
         }
         .sidebar .nav-link {
             color: rgba(255, 255, 255, 0.8);
@@ -76,7 +84,8 @@
             <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
                 <div class="position-sticky pt-3">
                     <div class="text-center mb-4">
-                        <h4 class="text-white"><?php echo e(config('app.name')); ?></h4>
+                        <img src="<?php echo e(\App\Models\SystemCustomization::getLogoUrl()); ?>" alt="Logo" style="max-height: 40px; margin-bottom: 10px;">
+                        <h4 class="text-white"><?php echo e(\App\Models\SystemCustomization::getCompanyName()); ?></h4>
                         <small class="text-white-50">Admin Panel</small>
                     </div>
                     

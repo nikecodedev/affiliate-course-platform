@@ -27,6 +27,14 @@ class SystemSettingsController extends Controller
     }
 
     /**
+     * Show customization settings
+     */
+    public function customization()
+    {
+        return view('admin.settings.customization');
+    }
+
+    /**
      * Update system settings
      */
     public function update(Request $request)

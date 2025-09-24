@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }} - Login</title>
+    <title>{{ \App\Models\SystemCustomization::getCompanyName() }} - Login</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ \App\Models\SystemCustomization::getFaviconUrl() }}">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -23,8 +26,13 @@
     @endif
 
     <style>
+        :root {
+            --primary-color: {{ \App\Models\SystemCustomization::getPrimaryColor() }};
+            --secondary-color: {{ \App\Models\SystemCustomization::getSecondaryColor() }};
+        }
+        
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -144,9 +152,9 @@
                 <div class="login-container">
                     <div class="logo-container">
                         <div class="logo">
-                            <i class="fas fa-users"></i>
+                            <img src="{{ \App\Models\SystemCustomization::getLogoUrl() }}" alt="Logo" style="max-height: 60px;">
                         </div>
-                        <h2 class="mb-0">Welcome Back</h2>
+                        <h2 class="mb-0">{{ \App\Models\SystemCustomization::getCompanyName() }}</h2>
                         <p class="text-muted">Sign in to your account</p>
                     </div>
 

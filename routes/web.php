@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ReferralNetworkController;
 use App\Http\Controllers\Admin\BonusConfigurationController;
 use App\Http\Controllers\Admin\BonusPaymentController;
 use App\Http\Controllers\Admin\PaymentGatewayController;
+use App\Http\Controllers\Admin\SystemCustomizationController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\Admin2FAMiddleware;
@@ -65,6 +66,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // System Settings
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::get('/', [SystemSettingsController::class, 'index'])->name('index');
+            Route::get('/customization', [SystemSettingsController::class, 'customization'])->name('customization');
             Route::post('/', [SystemSettingsController::class, 'update'])->name('update');
             Route::post('/upload-logo', [SystemSettingsController::class, 'uploadLogo'])->name('upload-logo');
         });
@@ -127,6 +129,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('payment/{gateway}/toggle', [PaymentGatewayController::class, 'toggle'])->name('payment.toggle');
                 Route::post('payment/{gateway}/test', [PaymentGatewayController::class, 'test'])->name('payment.test');
             });
+
+        // System Customization
+        Route::prefix('customization')->name('customization.')->group(function () {
+            Route::get('/', [SystemCustomizationController::class, 'index'])->name('index');
+            Route::post('/update', [SystemCustomizationController::class, 'update'])->name('update');
+            Route::post('/reset', [SystemCustomizationController::class, 'reset'])->name('reset');
+            Route::post('/preview', [SystemCustomizationController::class, 'preview'])->name('preview');
+        });
 
         // Audit Logs (with audit middleware)
         Route::middleware(AuditMiddleware::class)->group(function () {
