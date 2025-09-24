@@ -1,127 +1,165 @@
 @extends('layouts.admin')
 
 @section('title', 'Plans Management')
-@section('page-title', 'Plans Management')
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-box me-2"></i>Plans Management
-                    </h5>
-                    <a href="{{ route('admin.plans.create') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>Create New Plan
-                    </a>
-                </div>
-            </div>
-            <div class="card-body">
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-box me-2"></i>
+                        Plans Management
+                    </h3>
+                    <div class="card-tools">
+                        <a href="{{ route('admin.plans.create') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>
+                            Create New Plan
+                        </a>
                     </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle me-2"></i>{{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Price</th>
-                                <th>Commission Rate</th>
-                                <th>Status</th>
-                                <th>Created</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($plans as $plan)
-                                <tr>
-                                    <td>
-                                        <span class="badge bg-secondary">#{{ $plan->id }}</span>
-                                    </td>
-                                    <td>
-                                        <div class="fw-semibold">{{ $plan->name }}</div>
-                                        <small class="text-muted">{{ Str::limit($plan->description, 50) }}</small>
-                                    </td>
-                                    <td>
-                                        <span class="fw-semibold text-success">${{ number_format($plan->price, 2) }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="fw-semibold text-warning">{{ $plan->commission_rate }}%</span>
-                                    </td>
-                                    <td>
-                                        @if($plan->is_active)
-                                            <span class="badge bg-success">
-                                                <i class="bi bi-check-circle me-1"></i>Active
-                                            </span>
-                                        @else
-                                            <span class="badge bg-danger">
-                                                <i class="bi bi-x-circle me-1"></i>Inactive
-                                            </span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <div class="text-muted">
-                                            {{ $plan->created_at->format('M d, Y') }}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="{{ route('admin.plans.show', $plan) }}" 
-                                               class="btn btn-sm btn-outline-primary" title="View">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a href="{{ route('admin.plans.edit', $plan) }}" 
-                                               class="btn btn-sm btn-outline-warning" title="Edit">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <form method="POST" action="{{ route('admin.plans.toggle.status', $plan) }}" 
-                                                  style="display: inline-block;">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit" class="btn btn-sm btn-outline-{{ $plan->is_active ? 'danger' : 'success' }}" 
-                                                        title="{{ $plan->is_active ? 'Deactivate' : 'Activate' }}">
-                                                    <i class="bi bi-{{ $plan->is_active ? 'pause' : 'play' }}"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="7" class="text-center py-4">
-                                        <div class="text-muted">
-                                            <i class="bi bi-box display-6 d-block mb-2"></i>
-                                            <h5>No Plans Found</h5>
-                                            <p>Create your first plan to get started.</p>
-                                            <a href="{{ route('admin.plans.create') }}" class="btn btn-primary">
-                                                <i class="bi bi-plus-circle me-2"></i>Create Plan
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
                 </div>
 
-                @if($plans->hasPages())
-                    <div class="d-flex justify-content-center mt-4">
-                        {{ $plans->links() }}
-                    </div>
-                @endif
+                <div class="card-body">
+                    <!-- Success/Error Messages -->
+                    @if(session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    @if($plans->count() > 0)
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Title</th>
+                                        <th>Type</th>
+                                        <th>Price</th>
+                                        <th>Direct Bonus</th>
+                                        <th>Commissions</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($plans as $plan)
+                                        <tr>
+                                            <td>
+                                                @if($plan->image)
+                                                    <img src="{{ asset('storage/' . $plan->image) }}" 
+                                                         alt="{{ $plan->title }}" 
+                                                         class="img-thumbnail" 
+                                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                                @else
+                                                    <div class="bg-light d-flex align-items-center justify-content-center" 
+                                                         style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>{{ $plan->title }}</strong>
+                                                    @if($plan->course)
+                                                        <br><small class="text-muted">Course: {{ $plan->course->title }}</small>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-{{ $plan->type === 'digital' ? 'info' : ($plan->type === 'physical' ? 'warning' : 'success') }}">
+                                                    {{ ucfirst($plan->type) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>R$ {{ number_format($plan->sale_price, 2, ',', '.') }}</strong>
+                                                    @if($plan->cost_price)
+                                                        <br><small class="text-muted">Cost: R$ {{ number_format($plan->cost_price, 2, ',', '.') }}</small>
+                                                    @endif
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @if($plan->direct_bonus_enabled)
+                                                    <span class="badge bg-success">
+                                                        {{ $plan->getFormattedDirectReferralBonusAttribute() }}
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-secondary">Disabled</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $commissionSummary = $plan->getCommissionSummary();
+                                                @endphp
+                                                @if(!empty($commissionSummary))
+                                                    <div class="small">
+                                                        @foreach($commissionSummary as $type => $value)
+                                                            <div>
+                                                                <strong>{{ ucfirst(str_replace('_', ' ', $type)) }}:</strong> {{ $value }}
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted">Not configured</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span class="badge {{ $plan->status ? 'bg-success' : 'bg-danger' }}">
+                                                    {{ $plan->status ? 'Active' : 'Inactive' }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ route('admin.plans.edit', $plan) }}" 
+                                                       class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <form action="{{ route('admin.plans.destroy', $plan) }}" 
+                                                          method="POST" 
+                                                          style="display: inline;"
+                                                          onsubmit="return confirm('Are you sure you want to delete this plan?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="d-flex justify-content-center">
+                            {{ $plans->links() }}
+                        </div>
+                    @else
+                        <div class="text-center py-5">
+                            <i class="fas fa-box fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No plans found</h5>
+                            <p class="text-muted">Create your first plan to get started.</p>
+                            <a href="{{ route('admin.plans.create') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>
+                                Create New Plan
+                            </a>
+                        </div>
+                    @endif
+                </div>
             </div>
         </div>
     </div>

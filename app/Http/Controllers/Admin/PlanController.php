@@ -18,8 +18,8 @@ class PlanController extends Controller
      */
     public function index()
     {
-        $plans = Plan::with(['products', 'courses'])
-            ->ordered()
+        $plans = Plan::with(['course'])
+            ->orderBy('created_at', 'desc')
             ->paginate(15);
 
         return view('admin.plans.index', compact('plans'));
@@ -46,19 +46,20 @@ class PlanController extends Controller
             'type' => 'required|in:physical,digital,service',
             'sale_price' => 'required|numeric|min:0',
             'cost_price' => 'nullable|numeric|min:0',
-            'commission_percentage' => 'nullable|numeric|min:0|max:100',
-            'commission_fixed' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean',
-            'sort_order' => 'nullable|integer|min:0',
-            'has_direct_referral_bonus' => 'boolean',
-            'direct_referral_is_percentage' => 'boolean',
-            'direct_referral_amount' => 'nullable|numeric|min:0',
-            'courses' => 'nullable|array',
-            'courses.*' => 'exists:courses,id',
-            'products' => 'nullable|array',
-            'products.*.name' => 'required|string|max:255',
-            'products.*.description' => 'nullable|string',
-            'products.*.download_url' => 'nullable|url',
+            'direct_bonus_enabled' => 'boolean',
+            'direct_bonus_mode' => 'nullable|in:fixed,percentage',
+            'direct_bonus_value' => 'nullable|numeric|min:0',
+            'commission_unilevel' => 'nullable|array',
+            'commission_unilevel.*.mode' => 'required|in:fixed,percentage',
+            'commission_unilevel.*.value' => 'required|numeric|min:0',
+            'commission_matrix' => 'nullable|array',
+            'commission_matrix.width' => 'nullable|integer|min:1|max:10',
+            'commission_matrix.depth' => 'nullable|integer|min:1|max:20',
+            'commission_matrix.levels' => 'nullable|array',
+            'commission_profit_sharing' => 'nullable|numeric|min:0|max:100',
+            'external_url' => 'nullable|url',
+            'course_id' => 'nullable|exists:courses,id',
+            'status' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -67,26 +68,16 @@ class PlanController extends Controller
                 ->withInput();
         }
 
-        $plan = new Plan($request->except(['image', 'courses', 'products']));
+        $planData = $request->except(['image']);
         
+        // Handle image upload
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('plans', 'public');
-            $plan->image = $imagePath;
+            $planData['image'] = $imagePath;
         }
 
-        $plan->save();
-
-        // Attach courses
-        if ($request->courses) {
-            $plan->courses()->attach($request->courses);
-        }
-
-        // Create products
-        if ($request->products) {
-            foreach ($request->products as $productData) {
-                $plan->products()->create($productData);
-            }
-        }
+        // Create the plan
+        $plan = Plan::create($planData);
 
         return redirect()->route('admin.plans.index')
             ->with('success', 'Plan created successfully.');
@@ -125,20 +116,20 @@ class PlanController extends Controller
             'type' => 'required|in:physical,digital,service',
             'sale_price' => 'required|numeric|min:0',
             'cost_price' => 'nullable|numeric|min:0',
-            'commission_percentage' => 'nullable|numeric|min:0|max:100',
-            'commission_fixed' => 'nullable|numeric|min:0',
-            'is_active' => 'boolean',
-            'sort_order' => 'nullable|integer|min:0',
-            'has_direct_referral_bonus' => 'boolean',
-            'direct_referral_is_percentage' => 'boolean',
-            'direct_referral_amount' => 'nullable|numeric|min:0',
-            'courses' => 'nullable|array',
-            'courses.*' => 'exists:courses,id',
-            'products' => 'nullable|array',
-            'products.*.id' => 'nullable|exists:plan_products,id',
-            'products.*.name' => 'required|string|max:255',
-            'products.*.description' => 'nullable|string',
-            'products.*.download_url' => 'nullable|url',
+            'direct_bonus_enabled' => 'boolean',
+            'direct_bonus_mode' => 'nullable|in:fixed,percentage',
+            'direct_bonus_value' => 'nullable|numeric|min:0',
+            'commission_unilevel' => 'nullable|array',
+            'commission_unilevel.*.mode' => 'required|in:fixed,percentage',
+            'commission_unilevel.*.value' => 'required|numeric|min:0',
+            'commission_matrix' => 'nullable|array',
+            'commission_matrix.width' => 'nullable|integer|min:1|max:10',
+            'commission_matrix.depth' => 'nullable|integer|min:1|max:20',
+            'commission_matrix.levels' => 'nullable|array',
+            'commission_profit_sharing' => 'nullable|numeric|min:0|max:100',
+            'external_url' => 'nullable|url',
+            'course_id' => 'nullable|exists:courses,id',
+            'status' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -147,7 +138,7 @@ class PlanController extends Controller
                 ->withInput();
         }
 
-        $plan->fill($request->except(['image', 'courses', 'products']));
+        $planData = $request->except(['image']);
 
         if ($request->hasFile('image')) {
             // Delete old image
@@ -156,40 +147,10 @@ class PlanController extends Controller
             }
 
             $imagePath = $request->file('image')->store('plans', 'public');
-            $plan->image = $imagePath;
+            $planData['image'] = $imagePath;
         }
 
-        $plan->save();
-
-        // Sync courses
-        if ($request->courses) {
-            $plan->courses()->sync($request->courses);
-        } else {
-            $plan->courses()->detach();
-        }
-
-        // Update products
-        if ($request->products) {
-            $existingProductIds = [];
-            
-            foreach ($request->products as $productData) {
-                if (isset($productData['id'])) {
-                    $product = $plan->products()->find($productData['id']);
-                    if ($product) {
-                        $product->update($productData);
-                        $existingProductIds[] = $product->id;
-                    }
-                } else {
-                    $newProduct = $plan->products()->create($productData);
-                    $existingProductIds[] = $newProduct->id;
-                }
-            }
-
-            // Delete products not in the request
-            $plan->products()->whereNotIn('id', $existingProductIds)->delete();
-        } else {
-            $plan->products()->delete();
-        }
+        $plan->update($planData);
 
         return redirect()->route('admin.plans.index')
             ->with('success', 'Plan updated successfully.');

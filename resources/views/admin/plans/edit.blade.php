@@ -1,40 +1,41 @@
+@extends('layouts.admin')
 
+@section('title', 'Edit Plan: ' . $plan->title)
 
-<?php $__env->startSection('title', 'Create New Plan'); ?>
-
-<?php $__env->startSection('content'); ?>
+@section('content')
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="fas fa-plus me-2"></i>
-                        Create New Plan
+                        <i class="fas fa-edit me-2"></i>
+                        Edit Plan: {{ $plan->title }}
                     </h3>
                     <div class="card-tools">
-                        <a href="<?php echo e(route('admin.plans.index')); ?>" class="btn btn-secondary btn-sm">
+                        <a href="{{ route('admin.plans.index') }}" class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left me-1"></i>
                             Back to Plans
                         </a>
                     </div>
                 </div>
 
-                <form action="<?php echo e(route('admin.plans.store')); ?>" method="POST" enctype="multipart/form-data" id="planForm">
-                    <?php echo csrf_field(); ?>
+                <form action="{{ route('admin.plans.update', $plan) }}" method="POST" enctype="multipart/form-data" id="planForm">
+                    @csrf
+                    @method('PUT')
                     <div class="card-body">
                         <!-- Success/Error Messages -->
-                        <?php if($errors->any()): ?>
+                        @if($errors->any())
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                 <i class="fas fa-exclamation-circle me-2"></i>
                                 <ul class="mb-0">
-                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                        <li><?php echo e($error); ?></li>
-                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
                                 </ul>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
-                        <?php endif; ?>
+                        @endif
 
                         <!-- Basic Information -->
                         <div class="row mb-4">
@@ -47,135 +48,72 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control <?php $__errorArgs = ['title'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
-                                           id="title" name="title" value="<?php echo e(old('title')); ?>" required>
-                                    <?php $__errorArgs = ['title'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    <input type="text" class="form-control @error('title') is-invalid @enderror" 
+                                           id="title" name="title" value="{{ old('title', $plan->title) }}" required>
+                                    @error('title')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="type" class="form-label">Type <span class="text-danger">*</span></label>
-                                    <select class="form-control <?php $__errorArgs = ['type'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
+                                    <select class="form-control @error('type') is-invalid @enderror" 
                                             id="type" name="type" required>
                                         <option value="">Select Type</option>
-                                        <option value="physical" <?php echo e(old('type') == 'physical' ? 'selected' : ''); ?>>Physical</option>
-                                        <option value="digital" <?php echo e(old('type') == 'digital' ? 'selected' : ''); ?>>Digital</option>
-                                        <option value="service" <?php echo e(old('type') == 'service' ? 'selected' : ''); ?>>Service</option>
+                                        <option value="physical" {{ old('type', $plan->type) == 'physical' ? 'selected' : '' }}>Physical</option>
+                                        <option value="digital" {{ old('type', $plan->type) == 'digital' ? 'selected' : '' }}>Digital</option>
+                                        <option value="service" {{ old('type', $plan->type) == 'service' ? 'selected' : '' }}>Service</option>
                                     </select>
-                                    <?php $__errorArgs = ['type'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    @error('type')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div class="form-group mb-3">
                                     <label for="description" class="form-label">Description</label>
-                                    <textarea class="form-control <?php $__errorArgs = ['description'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
-                                              id="description" name="description" rows="3"><?php echo e(old('description')); ?></textarea>
-                                    <?php $__errorArgs = ['description'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    <textarea class="form-control @error('description') is-invalid @enderror" 
+                                              id="description" name="description" rows="3">{{ old('description', $plan->description) }}</textarea>
+                                    @error('description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="image" class="form-label">Image</label>
-                                    <input type="file" class="form-control <?php $__errorArgs = ['image'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
+                                    @if($plan->image)
+                                        <div class="mb-2">
+                                            <img src="{{ asset('storage/' . $plan->image) }}" 
+                                                 alt="{{ $plan->title }}" 
+                                                 class="img-thumbnail" 
+                                                 style="width: 100px; height: 75px; object-fit: cover;">
+                                        </div>
+                                    @endif
+                                    <input type="file" class="form-control @error('image') is-invalid @enderror" 
                                            id="image" name="image" accept="image/*">
                                     <div class="form-text">Recommended size: 400x300px</div>
-                                    <?php $__errorArgs = ['image'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    @error('image')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="course_id" class="form-label">Course</label>
-                                    <select class="form-control <?php $__errorArgs = ['course_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
+                                    <select class="form-control @error('course_id') is-invalid @enderror" 
                                             id="course_id" name="course_id">
                                         <option value="">Select Course (Optional)</option>
-                                        <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                            <option value="<?php echo e($course->id); ?>" <?php echo e(old('course_id') == $course->id ? 'selected' : ''); ?>>
-                                                <?php echo e($course->title); ?>
-
+                                        @foreach($courses as $course)
+                                            <option value="{{ $course->id }}" {{ old('course_id', $plan->course_id) == $course->id ? 'selected' : '' }}>
+                                                {{ $course->title }}
                                             </option>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        @endforeach
                                     </select>
-                                    <?php $__errorArgs = ['course_id'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    @error('course_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -193,28 +131,14 @@ unset($__errorArgs, $__bag); ?>
                                     <label for="sale_price" class="form-label">Sale Price <span class="text-danger">*</span></label>
                                     <div class="input-group">
                                         <span class="input-group-text">R$</span>
-                                        <input type="number" class="form-control <?php $__errorArgs = ['sale_price'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
+                                        <input type="number" class="form-control @error('sale_price') is-invalid @enderror" 
                                                id="sale_price" name="sale_price" 
-                                               value="<?php echo e(old('sale_price')); ?>" 
+                                               value="{{ old('sale_price', $plan->sale_price) }}" 
                                                step="0.01" min="0" required>
                                     </div>
-                                    <?php $__errorArgs = ['sale_price'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    @error('sale_price')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -222,28 +146,14 @@ unset($__errorArgs, $__bag); ?>
                                     <label for="cost_price" class="form-label">Cost Price</label>
                                     <div class="input-group">
                                         <span class="input-group-text">R$</span>
-                                        <input type="number" class="form-control <?php $__errorArgs = ['cost_price'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
+                                        <input type="number" class="form-control @error('cost_price') is-invalid @enderror" 
                                                id="cost_price" name="cost_price" 
-                                               value="<?php echo e(old('cost_price')); ?>" 
+                                               value="{{ old('cost_price', $plan->cost_price) }}" 
                                                step="0.01" min="0">
                                     </div>
-                                    <?php $__errorArgs = ['cost_price'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    @error('cost_price')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -259,67 +169,39 @@ unset($__errorArgs, $__bag); ?>
                             <div class="col-md-12">
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" id="direct_bonus_enabled" 
-                                           name="direct_bonus_enabled" value="1" <?php echo e(old('direct_bonus_enabled') ? 'checked' : ''); ?>>
+                                           name="direct_bonus_enabled" value="1" {{ old('direct_bonus_enabled', $plan->direct_bonus_enabled) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="direct_bonus_enabled">
                                         <strong>Enable Direct Referral Bonus</strong>
                                     </label>
                                 </div>
                             </div>
-                            <div class="col-md-6" id="direct-bonus-mode" style="display: none;">
+                            <div class="col-md-6" id="direct-bonus-mode" style="display: {{ old('direct_bonus_enabled', $plan->direct_bonus_enabled) ? 'block' : 'none' }};">
                                 <div class="form-group mb-3">
                                     <label for="direct_bonus_mode" class="form-label">Payment Mode</label>
-                                    <select class="form-control <?php $__errorArgs = ['direct_bonus_mode'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
+                                    <select class="form-control @error('direct_bonus_mode') is-invalid @enderror" 
                                             id="direct_bonus_mode" name="direct_bonus_mode">
                                         <option value="">Select Mode</option>
-                                        <option value="fixed" <?php echo e(old('direct_bonus_mode') == 'fixed' ? 'selected' : ''); ?>>Fixed Amount</option>
-                                        <option value="percentage" <?php echo e(old('direct_bonus_mode') == 'percentage' ? 'selected' : ''); ?>>Percentage</option>
+                                        <option value="fixed" {{ old('direct_bonus_mode', $plan->direct_bonus_mode) == 'fixed' ? 'selected' : '' }}>Fixed Amount</option>
+                                        <option value="percentage" {{ old('direct_bonus_mode', $plan->direct_bonus_mode) == 'percentage' ? 'selected' : '' }}>Percentage</option>
                                     </select>
-                                    <?php $__errorArgs = ['direct_bonus_mode'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    @error('direct_bonus_mode')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
-                            <div class="col-md-6" id="direct-bonus-value" style="display: none;">
+                            <div class="col-md-6" id="direct-bonus-value" style="display: {{ old('direct_bonus_enabled', $plan->direct_bonus_enabled) ? 'block' : 'none' }};">
                                 <div class="form-group mb-3">
                                     <label for="direct_bonus_value" class="form-label">Bonus Value</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control <?php $__errorArgs = ['direct_bonus_value'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
+                                        <input type="number" class="form-control @error('direct_bonus_value') is-invalid @enderror" 
                                                id="direct_bonus_value" name="direct_bonus_value" 
-                                               value="<?php echo e(old('direct_bonus_value')); ?>" 
+                                               value="{{ old('direct_bonus_value', $plan->direct_bonus_value) }}" 
                                                step="0.01" min="0">
                                         <span class="input-group-text" id="direct-bonus-unit">R$</span>
                                     </div>
-                                    <?php $__errorArgs = ['direct_bonus_value'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    @error('direct_bonus_value')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -338,7 +220,46 @@ unset($__errorArgs, $__bag); ?>
                             </div>
                             <div class="col-12">
                                 <div id="unilevel-levels-container">
-                                    <!-- Unilevel levels will be added here dynamically -->
+                                    @php
+                                        $unilevelConfig = $plan->getUnilevelConfig();
+                                    @endphp
+                                    @if(!empty($unilevelConfig))
+                                        @foreach($unilevelConfig as $level => $config)
+                                            <div class="card mb-3 unilevel-level" data-level="{{ $level }}">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-1">
+                                                            <label class="form-label">Level</label>
+                                                            <input type="number" class="form-control" name="commission_unilevel[{{ $level }}][level]" 
+                                                                   value="{{ $level }}" min="1" max="20" required readonly>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">Mode</label>
+                                                            <select class="form-control" name="commission_unilevel[{{ $level }}][mode]" required>
+                                                                <option value="fixed" {{ $config['mode'] === 'fixed' ? 'selected' : '' }}>Fixed Amount</option>
+                                                                <option value="percentage" {{ $config['mode'] === 'percentage' ? 'selected' : '' }}>Percentage</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Value</label>
+                                                            <div class="input-group">
+                                                                <input type="number" class="form-control" name="commission_unilevel[{{ $level }}][value]" 
+                                                                       value="{{ $config['value'] }}" step="0.01" min="0" required>
+                                                                <span class="input-group-text unilevel-unit">R$</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">&nbsp;</label>
+                                                            <button type="button" class="btn btn-outline-danger btn-block remove-unilevel-level" 
+                                                                    style="display: block; width: 100%;">
+                                                                <i class="fas fa-trash"></i> Remove
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @endif
                                 </div>
                                 <button type="button" class="btn btn-outline-primary" id="add-unilevel-level">
                                     <i class="fas fa-plus me-1"></i>
@@ -362,58 +283,62 @@ unset($__errorArgs, $__bag); ?>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="matrix_width" class="form-label">Matrix Width</label>
-                                    <input type="number" class="form-control <?php $__errorArgs = ['commission_matrix.width'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
+                                    <input type="number" class="form-control @error('commission_matrix.width') is-invalid @enderror" 
                                            id="matrix_width" name="commission_matrix[width]" 
-                                           value="<?php echo e(old('commission_matrix.width', 2)); ?>" 
+                                           value="{{ old('commission_matrix.width', $plan->getMatrixConfig()['width'] ?? 2) }}" 
                                            min="1" max="10">
-                                    <?php $__errorArgs = ['commission_matrix.width'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    @error('commission_matrix.width')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="matrix_depth" class="form-label">Matrix Depth</label>
-                                    <input type="number" class="form-control <?php $__errorArgs = ['commission_matrix.depth'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
+                                    <input type="number" class="form-control @error('commission_matrix.depth') is-invalid @enderror" 
                                            id="matrix_depth" name="commission_matrix[depth]" 
-                                           value="<?php echo e(old('commission_matrix.depth', 5)); ?>" 
+                                           value="{{ old('commission_matrix.depth', $plan->getMatrixConfig()['depth'] ?? 5) }}" 
                                            min="1" max="20">
-                                    <?php $__errorArgs = ['commission_matrix.depth'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    @error('commission_matrix.depth')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-12">
                                 <div id="matrix-levels-container">
-                                    <!-- Matrix levels will be added here dynamically -->
+                                    @php
+                                        $matrixConfig = $plan->getMatrixConfig();
+                                    @endphp
+                                    @if(!empty($matrixConfig['levels']))
+                                        @foreach($matrixConfig['levels'] as $level => $value)
+                                            <div class="card mb-3 matrix-level" data-level="{{ $level }}">
+                                                <div class="card-body">
+                                                    <div class="row">
+                                                        <div class="col-md-1">
+                                                            <label class="form-label">Level</label>
+                                                            <input type="number" class="form-control" name="commission_matrix[levels][{{ $level }}][level]" 
+                                                                   value="{{ $level }}" min="1" max="20" required readonly>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">Commission (%)</label>
+                                                            <div class="input-group">
+                                                                <input type="number" class="form-control" name="commission_matrix[levels][{{ $level }}][value]" 
+                                                                       value="{{ $value }}" step="0.01" min="0" max="100" required>
+                                                                <span class="input-group-text">%</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-3">
+                                                            <label class="form-label">&nbsp;</label>
+                                                            <button type="button" class="btn btn-outline-danger btn-block remove-matrix-level" 
+                                                                    style="display: block; width: 100%;">
+                                                                <i class="fas fa-trash"></i> Remove
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @endif
                                 </div>
                                 <button type="button" class="btn btn-outline-primary" id="add-matrix-level">
                                     <i class="fas fa-plus me-1"></i>
@@ -434,61 +359,33 @@ unset($__errorArgs, $__bag); ?>
                                 <div class="form-group mb-3">
                                     <label for="commission_profit_sharing" class="form-label">Profit Sharing (%)</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control <?php $__errorArgs = ['commission_profit_sharing'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
+                                        <input type="number" class="form-control @error('commission_profit_sharing') is-invalid @enderror" 
                                                id="commission_profit_sharing" name="commission_profit_sharing" 
-                                               value="<?php echo e(old('commission_profit_sharing')); ?>" 
+                                               value="{{ old('commission_profit_sharing', $plan->commission_profit_sharing) }}" 
                                                step="0.01" min="0" max="100">
                                         <span class="input-group-text">%</span>
                                     </div>
-                                    <?php $__errorArgs = ['commission_profit_sharing'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    @error('commission_profit_sharing')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="external_url" class="form-label">External URL</label>
-                                    <input type="url" class="form-control <?php $__errorArgs = ['external_url'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
+                                    <input type="url" class="form-control @error('external_url') is-invalid @enderror" 
                                            id="external_url" name="external_url" 
-                                           value="<?php echo e(old('external_url')); ?>" 
+                                           value="{{ old('external_url', $plan->external_url) }}" 
                                            placeholder="https://example.com">
-                                    <?php $__errorArgs = ['external_url'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                    <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
+                                    @error('external_url')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="status" 
-                                           name="status" value="1" <?php echo e(old('status', true) ? 'checked' : ''); ?>>
+                                           name="status" value="1" {{ old('status', $plan->status) ? 'checked' : '' }}>
                                     <label class="form-check-label" for="status">
                                         <strong>Active Plan</strong>
                                     </label>
@@ -500,7 +397,7 @@ unset($__errorArgs, $__bag); ?>
                     <div class="card-footer">
                         <div class="row">
                             <div class="col-md-6">
-                                <a href="<?php echo e(route('admin.plans.index')); ?>" class="btn btn-secondary">
+                                <a href="{{ route('admin.plans.index') }}" class="btn btn-secondary">
                                     <i class="fas fa-times me-1"></i>
                                     Cancel
                                 </a>
@@ -508,7 +405,7 @@ unset($__errorArgs, $__bag); ?>
                             <div class="col-md-6 text-end">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-save me-1"></i>
-                                    Create Plan
+                                    Update Plan
                                 </button>
                             </div>
                         </div>
@@ -518,13 +415,13 @@ unset($__errorArgs, $__bag); ?>
         </div>
     </div>
 </div>
-<?php $__env->stopSection(); ?>
+@endsection
 
-<?php $__env->startSection('scripts'); ?>
+@section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let unilevelLevelCount = 0;
-    let matrixLevelCount = 0;
+    let unilevelLevelCount = {{ count($plan->getUnilevelConfig()) }};
+    let matrixLevelCount = {{ count($plan->getMatrixConfig()['levels'] ?? []) }};
     
     const directBonusEnabled = document.getElementById('direct_bonus_enabled');
     const directBonusMode = document.getElementById('direct_bonus_mode');
@@ -659,12 +556,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Initialize direct bonus visibility
+    // Add remove event listeners to existing levels
+    document.querySelectorAll('.remove-unilevel-level').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.closest('.unilevel-level').remove();
+        });
+    });
+
+    document.querySelectorAll('.remove-matrix-level').forEach(btn => {
+        btn.addEventListener('click', function() {
+            this.closest('.matrix-level').remove();
+        });
+    });
+
+    // Add mode change listeners to existing unilevel levels
+    document.querySelectorAll('.unilevel-level select[name*="[mode]"]').forEach(select => {
+        select.addEventListener('change', function() {
+            const unitElement = this.closest('.row').querySelector('.unilevel-unit');
+            if (this.value === 'percentage') {
+                unitElement.textContent = '%';
+            } else {
+                unitElement.textContent = 'R$';
+            }
+        });
+    });
+
+    // Initialize direct bonus visibility and unit
     if (directBonusEnabled.checked) {
         directBonusModeDiv.style.display = 'block';
         directBonusValueDiv.style.display = 'block';
     }
+
+    if (directBonusMode.value === 'percentage') {
+        directBonusUnit.textContent = '%';
+    } else {
+        directBonusUnit.textContent = 'R$';
+    }
 });
 </script>
-<?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.admin', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\WORK-Station\freelance\workana\12\resources\views/admin/plans/create.blade.php ENDPATH**/ ?>
+@endsection

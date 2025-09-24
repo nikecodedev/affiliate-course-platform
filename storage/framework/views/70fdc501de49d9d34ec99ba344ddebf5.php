@@ -1,131 +1,172 @@
 
 
 <?php $__env->startSection('title', 'Plans Management'); ?>
-<?php $__env->startSection('page-title', 'Plans Management'); ?>
 
 <?php $__env->startSection('content'); ?>
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-box me-2"></i>Plans Management
-                    </h5>
-                    <a href="<?php echo e(route('admin.plans.create')); ?>" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>Create New Plan
-                    </a>
-                </div>
-            </div>
-            <div class="card-body">
-                <?php if(session('success')): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle me-2"></i><?php echo e(session('success')); ?>
-
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-box me-2"></i>
+                        Plans Management
+                    </h3>
+                    <div class="card-tools">
+                        <a href="<?php echo e(route('admin.plans.create')); ?>" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>
+                            Create New Plan
+                        </a>
                     </div>
-                <?php endif; ?>
-
-                <?php if(session('error')): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle me-2"></i><?php echo e(session('error')); ?>
-
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                <?php endif; ?>
-
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Price</th>
-                                <th>Commission Rate</th>
-                                <th>Status</th>
-                                <th>Created</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php $__empty_1 = true; $__currentLoopData = $plans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $plan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                                <tr>
-                                    <td>
-                                        <span class="badge bg-secondary">#<?php echo e($plan->id); ?></span>
-                                    </td>
-                                    <td>
-                                        <div class="fw-semibold"><?php echo e($plan->name); ?></div>
-                                        <small class="text-muted"><?php echo e(Str::limit($plan->description, 50)); ?></small>
-                                    </td>
-                                    <td>
-                                        <span class="fw-semibold text-success">$<?php echo e(number_format($plan->price, 2)); ?></span>
-                                    </td>
-                                    <td>
-                                        <span class="fw-semibold text-warning"><?php echo e($plan->commission_rate); ?>%</span>
-                                    </td>
-                                    <td>
-                                        <?php if($plan->is_active): ?>
-                                            <span class="badge bg-success">
-                                                <i class="bi bi-check-circle me-1"></i>Active
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="badge bg-danger">
-                                                <i class="bi bi-x-circle me-1"></i>Inactive
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <div class="text-muted">
-                                            <?php echo e($plan->created_at->format('M d, Y')); ?>
-
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="<?php echo e(route('admin.plans.show', $plan)); ?>" 
-                                               class="btn btn-sm btn-outline-primary" title="View">
-                                                <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a href="<?php echo e(route('admin.plans.edit', $plan)); ?>" 
-                                               class="btn btn-sm btn-outline-warning" title="Edit">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            <form method="POST" action="<?php echo e(route('admin.plans.toggle.status', $plan)); ?>" 
-                                                  style="display: inline-block;">
-                                                <?php echo csrf_field(); ?>
-                                                <?php echo method_field('PATCH'); ?>
-                                                <button type="submit" class="btn btn-sm btn-outline-<?php echo e($plan->is_active ? 'danger' : 'success'); ?>" 
-                                                        title="<?php echo e($plan->is_active ? 'Deactivate' : 'Activate'); ?>">
-                                                    <i class="bi bi-<?php echo e($plan->is_active ? 'pause' : 'play'); ?>"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                                <tr>
-                                    <td colspan="7" class="text-center py-4">
-                                        <div class="text-muted">
-                                            <i class="bi bi-box display-6 d-block mb-2"></i>
-                                            <h5>No Plans Found</h5>
-                                            <p>Create your first plan to get started.</p>
-                                            <a href="<?php echo e(route('admin.plans.create')); ?>" class="btn btn-primary">
-                                                <i class="bi bi-plus-circle me-2"></i>Create Plan
-                                            </a>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
                 </div>
 
-                <?php if($plans->hasPages()): ?>
-                    <div class="d-flex justify-content-center mt-4">
-                        <?php echo e($plans->links()); ?>
+                <div class="card-body">
+                    <!-- Success/Error Messages -->
+                    <?php if(session('success')): ?>
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <?php echo e(session('success')); ?>
 
-                    </div>
-                <?php endif; ?>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if(session('error')): ?>
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <?php echo e(session('error')); ?>
+
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if($plans->count() > 0): ?>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>Title</th>
+                                        <th>Type</th>
+                                        <th>Price</th>
+                                        <th>Direct Bonus</th>
+                                        <th>Commissions</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php $__currentLoopData = $plans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $plan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <tr>
+                                            <td>
+                                                <?php if($plan->image): ?>
+                                                    <img src="<?php echo e(asset('storage/' . $plan->image)); ?>" 
+                                                         alt="<?php echo e($plan->title); ?>" 
+                                                         class="img-thumbnail" 
+                                                         style="width: 50px; height: 50px; object-fit: cover;">
+                                                <?php else: ?>
+                                                    <div class="bg-light d-flex align-items-center justify-content-center" 
+                                                         style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong><?php echo e($plan->title); ?></strong>
+                                                    <?php if($plan->course): ?>
+                                                        <br><small class="text-muted">Course: <?php echo e($plan->course->title); ?></small>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-<?php echo e($plan->type === 'digital' ? 'info' : ($plan->type === 'physical' ? 'warning' : 'success')); ?>">
+                                                    <?php echo e(ucfirst($plan->type)); ?>
+
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div>
+                                                    <strong>R$ <?php echo e(number_format($plan->sale_price, 2, ',', '.')); ?></strong>
+                                                    <?php if($plan->cost_price): ?>
+                                                        <br><small class="text-muted">Cost: R$ <?php echo e(number_format($plan->cost_price, 2, ',', '.')); ?></small>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <?php if($plan->direct_bonus_enabled): ?>
+                                                    <span class="badge bg-success">
+                                                        <?php echo e($plan->getFormattedDirectReferralBonusAttribute()); ?>
+
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-secondary">Disabled</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                    $commissionSummary = $plan->getCommissionSummary();
+                                                ?>
+                                                <?php if(!empty($commissionSummary)): ?>
+                                                    <div class="small">
+                                                        <?php $__currentLoopData = $commissionSummary; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <div>
+                                                                <strong><?php echo e(ucfirst(str_replace('_', ' ', $type))); ?>:</strong> <?php echo e($value); ?>
+
+                                                            </div>
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <span class="text-muted">Not configured</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <span class="badge <?php echo e($plan->status ? 'bg-success' : 'bg-danger'); ?>">
+                                                    <?php echo e($plan->status ? 'Active' : 'Inactive'); ?>
+
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="<?php echo e(route('admin.plans.edit', $plan)); ?>" 
+                                                       class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <form action="<?php echo e(route('admin.plans.destroy', $plan)); ?>" 
+                                                          method="POST" 
+                                                          style="display: inline;"
+                                                          onsubmit="return confirm('Are you sure you want to delete this plan?')">
+                                                        <?php echo csrf_field(); ?>
+                                                        <?php echo method_field('DELETE'); ?>
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="d-flex justify-content-center">
+                            <?php echo e($plans->links()); ?>
+
+                        </div>
+                    <?php else: ?>
+                        <div class="text-center py-5">
+                            <i class="fas fa-box fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No plans found</h5>
+                            <p class="text-muted">Create your first plan to get started.</p>
+                            <a href="<?php echo e(route('admin.plans.create')); ?>" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>
+                                Create New Plan
+                            </a>
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
     </div>

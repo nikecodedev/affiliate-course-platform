@@ -153,6 +153,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('/{type}/remove-level', [BonusController::class, 'removeLevel'])->name('remove-level');
             });
 
+            // Plan Management
+            Route::resource('plans', PlanController::class);
+
             // Payment Gateway Management
             Route::prefix('gateways')->name('gateways.')->group(function () {
                 Route::resource('payment', PaymentGatewayController::class);

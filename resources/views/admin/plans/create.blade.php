@@ -1,267 +1,331 @@
 @extends('layouts.admin')
 
-@section('title', 'Create Plan')
-@section('page-title', 'Create New Plan')
+@section('title', 'Create New Plan')
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-plus-circle me-2"></i>Create New Plan
-                </h5>
-            </div>
-            <div class="card-body">
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-plus me-2"></i>
+                        Create New Plan
+                    </h3>
+                    <div class="card-tools">
+                        <a href="{{ route('admin.plans.index') }}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to Plans
+                        </a>
                     </div>
-                @endif
+                </div>
 
-                @if($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <ul class="mb-0">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('admin.plans.store') }}" enctype="multipart/form-data">
+                <form action="{{ route('admin.plans.store') }}" method="POST" enctype="multipart/form-data" id="planForm">
                     @csrf
-                    
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="mb-3">
-                                <label for="title" class="form-label">Plan Title <span class="text-danger">*</span></label>
-                                <input type="text" 
-                                       class="form-control @error('title') is-invalid @enderror" 
-                                       id="title" 
-                                       name="title" 
-                                       value="{{ old('title') }}" 
-                                       required>
-                                @error('title')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                    <div class="card-body">
+                        <!-- Success/Error Messages -->
+                        @if($errors->any())
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <ul class="mb-0">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
+                        @endif
 
-                            <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea class="form-control @error('description') is-invalid @enderror" 
-                                          id="description" 
-                                          name="description" 
-                                          rows="4">{{ old('description') }}</textarea>
-                                @error('description')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                        <!-- Basic Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Basic Information
+                                </h5>
                             </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="sale_price" class="form-label">Sale Price <span class="text-danger">*</span></label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" 
-                                                   class="form-control @error('sale_price') is-invalid @enderror" 
-                                                   id="sale_price" 
-                                                   name="sale_price" 
-                                                   value="{{ old('sale_price') }}" 
-                                                   step="0.01" 
-                                                   min="0" 
-                                                   required>
-                                        </div>
-                                        @error('sale_price')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="cost_price" class="form-label">Cost Price</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" 
-                                                   class="form-control @error('cost_price') is-invalid @enderror" 
-                                                   id="cost_price" 
-                                                   name="cost_price" 
-                                                   value="{{ old('cost_price') }}" 
-                                                   step="0.01" 
-                                                   min="0">
-                                        </div>
-                                        @error('cost_price')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('title') is-invalid @enderror" 
+                                           id="title" name="title" value="{{ old('title') }}" required>
+                                    @error('title')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="commission_percentage" class="form-label">Commission %</label>
-                                        <div class="input-group">
-                                            <input type="number" 
-                                                   class="form-control @error('commission_percentage') is-invalid @enderror" 
-                                                   id="commission_percentage" 
-                                                   name="commission_percentage" 
-                                                   value="{{ old('commission_percentage') }}" 
-                                                   min="0" 
-                                                   max="100">
-                                            <span class="input-group-text">%</span>
-                                        </div>
-                                        @error('commission_percentage')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label for="commission_fixed" class="form-label">Fixed Commission</label>
-                                        <div class="input-group">
-                                            <span class="input-group-text">$</span>
-                                            <input type="number" 
-                                                   class="form-control @error('commission_fixed') is-invalid @enderror" 
-                                                   id="commission_fixed" 
-                                                   name="commission_fixed" 
-                                                   value="{{ old('commission_fixed') }}" 
-                                                   step="0.01" 
-                                                   min="0">
-                                        </div>
-                                        @error('commission_fixed')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                    </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="type" class="form-label">Type <span class="text-danger">*</span></label>
+                                    <select class="form-control @error('type') is-invalid @enderror" 
+                                            id="type" name="type" required>
+                                        <option value="">Select Type</option>
+                                        <option value="physical" {{ old('type') == 'physical' ? 'selected' : '' }}>Physical</option>
+                                        <option value="digital" {{ old('type') == 'digital' ? 'selected' : '' }}>Digital</option>
+                                        <option value="service" {{ old('type') == 'service' ? 'selected' : '' }}>Service</option>
+                                    </select>
+                                    @error('type')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
-
-                            <!-- Courses Selection -->
-                            <div class="mb-3">
-                                <label class="form-label">Include Courses</label>
-                                <div class="row">
-                                    @forelse($courses as $course)
-                                        <div class="col-md-6">
-                                            <div class="form-check">
-                                                <input class="form-check-input" 
-                                                       type="checkbox" 
-                                                       id="course_{{ $course->id }}" 
-                                                       name="courses[]" 
-                                                       value="{{ $course->id }}"
-                                                       {{ in_array($course->id, old('courses', [])) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="course_{{ $course->id }}">
-                                                    {{ $course->title }}
-                                                </label>
-                                            </div>
-                                        </div>
-                                    @empty
-                                        <div class="col-12">
-                                            <div class="alert alert-info">
-                                                <i class="bi bi-info-circle me-2"></i>
-                                                No courses available. <a href="{{ route('admin.courses.create') }}">Create a course first</a>.
-                                            </div>
-                                        </div>
-                                    @endforelse
+                            <div class="col-12">
+                                <div class="form-group mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea class="form-control @error('description') is-invalid @enderror" 
+                                              id="description" name="description" rows="3">{{ old('description') }}</textarea>
+                                    @error('description')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="image" class="form-label">Image</label>
+                                    <input type="file" class="form-control @error('image') is-invalid @enderror" 
+                                           id="image" name="image" accept="image/*">
+                                    <div class="form-text">Recommended size: 400x300px</div>
+                                    @error('image')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="course_id" class="form-label">Course</label>
+                                    <select class="form-control @error('course_id') is-invalid @enderror" 
+                                            id="course_id" name="course_id">
+                                        <option value="">Select Course (Optional)</option>
+                                        @foreach($courses as $course)
+                                            <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
+                                                {{ $course->title }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    @error('course_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="image" class="form-label">Plan Image</label>
-                                <input type="file" 
-                                       class="form-control @error('image') is-invalid @enderror" 
-                                       id="image" 
-                                       name="image" 
-                                       accept="image/*">
-                                <div class="form-text">Upload an image for the plan (max 2MB)</div>
-                                @error('image')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                        <!-- Pricing -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-dollar-sign me-2"></i>
+                                    Pricing
+                                </h5>
                             </div>
-
-                            <div class="mb-3">
-                                <label for="type" class="form-label">Plan Type <span class="text-danger">*</span></label>
-                                <select class="form-select @error('type') is-invalid @enderror" 
-                                        id="type" 
-                                        name="type" 
-                                        required>
-                                    <option value="">Select Type</option>
-                                    <option value="physical" {{ old('type') === 'physical' ? 'selected' : '' }}>Physical Product</option>
-                                    <option value="digital" {{ old('type') === 'digital' ? 'selected' : '' }}>Digital Product</option>
-                                    <option value="service" {{ old('type') === 'service' ? 'selected' : '' }}>Service</option>
-                                </select>
-                                @error('type')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="sale_price" class="form-label">Sale Price <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="number" class="form-control @error('sale_price') is-invalid @enderror" 
+                                               id="sale_price" name="sale_price" 
+                                               value="{{ old('sale_price') }}" 
+                                               step="0.01" min="0" required>
+                                    </div>
+                                    @error('sale_price')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="cost_price" class="form-label">Cost Price</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">R$</span>
+                                        <input type="number" class="form-control @error('cost_price') is-invalid @enderror" 
+                                               id="cost_price" name="cost_price" 
+                                               value="{{ old('cost_price') }}" 
+                                               step="0.01" min="0">
+                                    </div>
+                                    @error('cost_price')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
 
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" 
-                                           type="checkbox" 
-                                           id="is_active" 
-                                           name="is_active" 
-                                           value="1" 
-                                           {{ old('is_active', true) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="is_active">
-                                        Active Plan
+                        <!-- Direct Referral Bonus -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-handshake me-2"></i>
+                                    Direct Referral Bonus
+                                </h5>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" id="direct_bonus_enabled" 
+                                           name="direct_bonus_enabled" value="1" {{ old('direct_bonus_enabled') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="direct_bonus_enabled">
+                                        <strong>Enable Direct Referral Bonus</strong>
                                     </label>
                                 </div>
-                                <div class="form-text">Make this plan available for sale</div>
                             </div>
+                            <div class="col-md-6" id="direct-bonus-mode" style="display: none;">
+                                <div class="form-group mb-3">
+                                    <label for="direct_bonus_mode" class="form-label">Payment Mode</label>
+                                    <select class="form-control @error('direct_bonus_mode') is-invalid @enderror" 
+                                            id="direct_bonus_mode" name="direct_bonus_mode">
+                                        <option value="">Select Mode</option>
+                                        <option value="fixed" {{ old('direct_bonus_mode') == 'fixed' ? 'selected' : '' }}>Fixed Amount</option>
+                                        <option value="percentage" {{ old('direct_bonus_mode') == 'percentage' ? 'selected' : '' }}>Percentage</option>
+                                    </select>
+                                    @error('direct_bonus_mode')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6" id="direct-bonus-value" style="display: none;">
+                                <div class="form-group mb-3">
+                                    <label for="direct_bonus_value" class="form-label">Bonus Value</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control @error('direct_bonus_value') is-invalid @enderror" 
+                                               id="direct_bonus_value" name="direct_bonus_value" 
+                                               value="{{ old('direct_bonus_value') }}" 
+                                               step="0.01" min="0">
+                                        <span class="input-group-text" id="direct-bonus-unit">R$</span>
+                                    </div>
+                                    @error('direct_bonus_value')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
 
-                            <div class="mb-3">
-                                <label for="sort_order" class="form-label">Sort Order</label>
-                                <input type="number" 
-                                       class="form-control @error('sort_order') is-invalid @enderror" 
-                                       id="sort_order" 
-                                       name="sort_order" 
-                                       value="{{ old('sort_order', 0) }}" 
-                                       min="0">
-                                <div class="form-text">Lower numbers appear first</div>
-                                @error('sort_order')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                        <!-- Unilevel Commission -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-sitemap me-2"></i>
+                                    Unilevel Commission
+                                </h5>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Configure commission levels for unilevel network structure.
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div id="unilevel-levels-container">
+                                    <!-- Unilevel levels will be added here dynamically -->
+                                </div>
+                                <button type="button" class="btn btn-outline-primary" id="add-unilevel-level">
+                                    <i class="fas fa-plus me-1"></i>
+                                    Add Unilevel Level
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Matrix Commission -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-th me-2"></i>
+                                    Matrix Commission
+                                </h5>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Configure matrix structure and commission levels.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="matrix_width" class="form-label">Matrix Width</label>
+                                    <input type="number" class="form-control @error('commission_matrix.width') is-invalid @enderror" 
+                                           id="matrix_width" name="commission_matrix[width]" 
+                                           value="{{ old('commission_matrix.width', 2) }}" 
+                                           min="1" max="10">
+                                    @error('commission_matrix.width')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="matrix_depth" class="form-label">Matrix Depth</label>
+                                    <input type="number" class="form-control @error('commission_matrix.depth') is-invalid @enderror" 
+                                           id="matrix_depth" name="commission_matrix[depth]" 
+                                           value="{{ old('commission_matrix.depth', 5) }}" 
+                                           min="1" max="20">
+                                    @error('commission_matrix.depth')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div id="matrix-levels-container">
+                                    <!-- Matrix levels will be added here dynamically -->
+                                </div>
+                                <button type="button" class="btn btn-outline-primary" id="add-matrix-level">
+                                    <i class="fas fa-plus me-1"></i>
+                                    Add Matrix Level
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Additional Settings -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-cog me-2"></i>
+                                    Additional Settings
+                                </h5>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="commission_profit_sharing" class="form-label">Profit Sharing (%)</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control @error('commission_profit_sharing') is-invalid @enderror" 
+                                               id="commission_profit_sharing" name="commission_profit_sharing" 
+                                               value="{{ old('commission_profit_sharing') }}" 
+                                               step="0.01" min="0" max="100">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                    @error('commission_profit_sharing')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="external_url" class="form-label">External URL</label>
+                                    <input type="url" class="form-control @error('external_url') is-invalid @enderror" 
+                                           id="external_url" name="external_url" 
+                                           value="{{ old('external_url') }}" 
+                                           placeholder="https://example.com">
+                                    @error('external_url')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="status" 
+                                           name="status" value="1" {{ old('status', true) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="status">
+                                        <strong>Active Plan</strong>
+                                    </label>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Products Section -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <h6 class="card-title mb-0">
-                                            <i class="bi bi-box me-2"></i>Plan Products
-                                        </h6>
-                                        <button type="button" class="btn btn-sm btn-primary" onclick="addProduct()">
-                                            <i class="bi bi-plus me-1"></i>Add Product
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="card-body">
-                                    <div id="products-container">
-                                        <!-- Products will be added here dynamically -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            <div class="d-flex justify-content-between">
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-6">
                                 <a href="{{ route('admin.plans.index') }}" class="btn btn-secondary">
-                                    <i class="bi bi-arrow-left me-2"></i>Back to Plans
+                                    <i class="fas fa-times me-1"></i>
+                                    Cancel
                                 </a>
+                            </div>
+                            <div class="col-md-6 text-end">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="bi bi-save me-2"></i>Create Plan
+                                    <i class="fas fa-save me-1"></i>
+                                    Create Plan
                                 </button>
                             </div>
                         </div>
@@ -275,86 +339,148 @@
 
 @section('scripts')
 <script>
-let productCount = 0;
-
-function addProduct() {
-    const container = document.getElementById('products-container');
-    const productHtml = `
-        <div class="product-item border rounded p-3 mb-3" data-product-index="${productCount}">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h6 class="mb-0">Product ${productCount + 1}</h6>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeProduct(${productCount})">
-                    <i class="bi bi-trash"></i>
-                </button>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label">Product Name</label>
-                        <input type="text" class="form-control" name="products[${productCount}][name]" required>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label">Download URL</label>
-                        <input type="url" class="form-control" name="products[${productCount}][download_url]">
-                    </div>
-                </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Description</label>
-                <textarea class="form-control" name="products[${productCount}][description]" rows="2"></textarea>
-            </div>
-        </div>
-    `;
+document.addEventListener('DOMContentLoaded', function() {
+    let unilevelLevelCount = 0;
+    let matrixLevelCount = 0;
     
-    container.insertAdjacentHTML('beforeend', productHtml);
-    productCount++;
-}
+    const directBonusEnabled = document.getElementById('direct_bonus_enabled');
+    const directBonusMode = document.getElementById('direct_bonus_mode');
+    const directBonusValue = document.getElementById('direct_bonus_value');
+    const directBonusModeDiv = document.getElementById('direct-bonus-mode');
+    const directBonusValueDiv = document.getElementById('direct-bonus-value');
+    const directBonusUnit = document.getElementById('direct-bonus-unit');
+    
+    const unilevelContainer = document.getElementById('unilevel-levels-container');
+    const addUnilevelBtn = document.getElementById('add-unilevel-level');
+    
+    const matrixContainer = document.getElementById('matrix-levels-container');
+    const addMatrixBtn = document.getElementById('add-matrix-level');
 
-function removeProduct(index) {
-    const productItem = document.querySelector(`[data-product-index="${index}"]`);
-    if (productItem) {
-        productItem.remove();
-    }
-}
+    // Direct bonus toggle
+    directBonusEnabled.addEventListener('change', function() {
+        if (this.checked) {
+            directBonusModeDiv.style.display = 'block';
+            directBonusValueDiv.style.display = 'block';
+        } else {
+            directBonusModeDiv.style.display = 'none';
+            directBonusValueDiv.style.display = 'none';
+        }
+    });
 
-// Image preview functionality
-document.getElementById('image').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            let preview = document.getElementById('image-preview');
-            if (!preview) {
-                preview = document.createElement('img');
-                preview.id = 'image-preview';
-                preview.className = 'img-thumbnail mt-2';
-                preview.style.maxWidth = '200px';
-                preview.style.maxHeight = '200px';
-                e.target.parentNode.appendChild(preview);
+    // Direct bonus mode change
+    directBonusMode.addEventListener('change', function() {
+        if (this.value === 'percentage') {
+            directBonusUnit.textContent = '%';
+        } else {
+            directBonusUnit.textContent = 'R$';
+        }
+    });
+
+    // Add unilevel level
+    addUnilevelBtn.addEventListener('click', function() {
+        unilevelLevelCount++;
+        const levelHtml = `
+            <div class="card mb-3 unilevel-level" data-level="${unilevelLevelCount}">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-1">
+                            <label class="form-label">Level</label>
+                            <input type="number" class="form-control" name="commission_unilevel[${unilevelLevelCount}][level]" 
+                                   value="${unilevelLevelCount}" min="1" max="20" required readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Mode</label>
+                            <select class="form-control" name="commission_unilevel[${unilevelLevelCount}][mode]" required>
+                                <option value="fixed">Fixed Amount</option>
+                                <option value="percentage">Percentage</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Value</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" name="commission_unilevel[${unilevelLevelCount}][value]" 
+                                       step="0.01" min="0" required>
+                                <span class="input-group-text unilevel-unit">R$</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="button" class="btn btn-outline-danger btn-block remove-unilevel-level" 
+                                    style="display: block; width: 100%;">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        unilevelContainer.insertAdjacentHTML('beforeend', levelHtml);
+        
+        // Add remove event listener
+        const removeBtn = unilevelContainer.querySelector(`.unilevel-level[data-level="${unilevelLevelCount}"] .remove-unilevel-level`);
+        removeBtn.addEventListener('click', function() {
+            this.closest('.unilevel-level').remove();
+        });
+
+        // Add mode change listener
+        const modeSelect = unilevelContainer.querySelector(`.unilevel-level[data-level="${unilevelLevelCount}"] select[name*="[mode]"]`);
+        modeSelect.addEventListener('change', function() {
+            const unitElement = this.closest('.row').querySelector('.unilevel-unit');
+            if (this.value === 'percentage') {
+                unitElement.textContent = '%';
+            } else {
+                unitElement.textContent = 'R$';
             }
-            preview.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-    }
-});
+        });
+    });
 
-// Commission calculation
-document.getElementById('sale_price').addEventListener('input', function() {
-    const salePrice = parseFloat(this.value) || 0;
-    const commissionPercentage = parseFloat(document.getElementById('commission_percentage').value) || 0;
-    const commissionFixed = parseFloat(document.getElementById('commission_fixed').value) || 0;
-    
-    let calculatedCommission = 0;
-    if (commissionPercentage > 0) {
-        calculatedCommission = salePrice * (commissionPercentage / 100);
-    } else if (commissionFixed > 0) {
-        calculatedCommission = commissionFixed;
+    // Add matrix level
+    addMatrixBtn.addEventListener('click', function() {
+        matrixLevelCount++;
+        const levelHtml = `
+            <div class="card mb-3 matrix-level" data-level="${matrixLevelCount}">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-1">
+                            <label class="form-label">Level</label>
+                            <input type="number" class="form-control" name="commission_matrix[levels][${matrixLevelCount}][level]" 
+                                   value="${matrixLevelCount}" min="1" max="20" required readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Commission (%)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" name="commission_matrix[levels][${matrixLevelCount}][value]" 
+                                       step="0.01" min="0" max="100" required>
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <button type="button" class="btn btn-outline-danger btn-block remove-matrix-level" 
+                                    style="display: block; width: 100%;">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        matrixContainer.insertAdjacentHTML('beforeend', levelHtml);
+        
+        // Add remove event listener
+        const removeBtn = matrixContainer.querySelector(`.matrix-level[data-level="${matrixLevelCount}"] .remove-matrix-level`);
+        removeBtn.addEventListener('click', function() {
+            this.closest('.matrix-level').remove();
+        });
+    });
+
+    // Initialize direct bonus visibility
+    if (directBonusEnabled.checked) {
+        directBonusModeDiv.style.display = 'block';
+        directBonusValueDiv.style.display = 'block';
     }
-    
-    // You can display the calculated commission somewhere if needed
-    console.log('Calculated commission:', calculatedCommission);
 });
 </script>
 @endsection

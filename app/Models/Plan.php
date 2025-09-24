@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Plan extends Model
 {
@@ -17,26 +18,43 @@ class Plan extends Model
         'type',
         'sale_price',
         'cost_price',
-        'commission_percentage',
-        'commission_fixed',
-        'is_active',
-        'sort_order',
-        'has_direct_referral_bonus',
-        'direct_referral_is_percentage',
-        'direct_referral_amount',
+        'direct_bonus_enabled',
+        'direct_bonus_mode',
+        'direct_bonus_value',
+        'commission_unilevel',
+        'commission_matrix',
+        'commission_profit_sharing',
+        'external_url',
+        'course_id',
+        'status',
     ];
 
     protected $casts = [
         'sale_price' => 'decimal:2',
         'cost_price' => 'decimal:2',
-        'commission_percentage' => 'decimal:2',
-        'commission_fixed' => 'decimal:2',
-        'is_active' => 'boolean',
-        'sort_order' => 'integer',
-        'has_direct_referral_bonus' => 'boolean',
-        'direct_referral_is_percentage' => 'boolean',
-        'direct_referral_amount' => 'decimal:2',
+        'direct_bonus_enabled' => 'boolean',
+        'direct_bonus_value' => 'decimal:2',
+        'commission_unilevel' => 'array',
+        'commission_matrix' => 'array',
+        'commission_profit_sharing' => 'decimal:2',
+        'status' => 'boolean',
     ];
+
+    /**
+     * Get the course that owns this plan
+     */
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(Course::class);
+    }
+
+    /**
+     * Get the invoices for this plan
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
 
     /**
      * Plan types
@@ -98,15 +116,15 @@ class Plan extends Model
      */
     public function calculateDirectReferralBonus($saleAmount)
     {
-        if (!$this->has_direct_referral_bonus) {
+        if (!$this->direct_bonus_enabled) {
             return 0;
         }
 
-        if ($this->direct_referral_is_percentage) {
-            return ($saleAmount * $this->direct_referral_amount) / 100;
+        if ($this->direct_bonus_mode === 'percentage') {
+            return ($saleAmount * $this->direct_bonus_value) / 100;
         }
 
-        return $this->direct_referral_amount;
+        return $this->direct_bonus_value;
     }
 
     /**
@@ -114,15 +132,100 @@ class Plan extends Model
      */
     public function getFormattedDirectReferralBonusAttribute()
     {
-        if (!$this->has_direct_referral_bonus) {
+        if (!$this->direct_bonus_enabled) {
             return 'Not configured';
         }
 
-        if ($this->direct_referral_is_percentage) {
-            return $this->direct_referral_amount . '%';
+        if ($this->direct_bonus_mode === 'percentage') {
+            return $this->direct_bonus_value . '%';
         }
 
-        return 'R$ ' . number_format($this->direct_referral_amount, 2, ',', '.');
+        return 'R$ ' . number_format($this->direct_bonus_value, 2, ',', '.');
+    }
+
+    /**
+     * Calculate unilevel commission for a specific level
+     */
+    public function calculateUnilevelCommission($level, $saleAmount)
+    {
+        $unilevelConfig = $this->commission_unilevel ?? [];
+        
+        if (!isset($unilevelConfig[$level])) {
+            return 0;
+        }
+
+        $config = $unilevelConfig[$level];
+        
+        if ($config['mode'] === 'percentage') {
+            return ($saleAmount * $config['value']) / 100;
+        }
+
+        return $config['value'];
+    }
+
+    /**
+     * Calculate matrix commission for a specific level
+     */
+    public function calculateMatrixCommission($level, $saleAmount)
+    {
+        $matrixConfig = $this->commission_matrix ?? [];
+        
+        if (!isset($matrixConfig['levels'][$level])) {
+            return 0;
+        }
+
+        $value = $matrixConfig['levels'][$level];
+        
+        // Assuming matrix commissions are always percentage
+        return ($saleAmount * $value) / 100;
+    }
+
+    /**
+     * Get matrix configuration
+     */
+    public function getMatrixConfig()
+    {
+        return $this->commission_matrix ?? [
+            'width' => 2,
+            'depth' => 5,
+            'levels' => []
+        ];
+    }
+
+    /**
+     * Get unilevel configuration
+     */
+    public function getUnilevelConfig()
+    {
+        return $this->commission_unilevel ?? [];
+    }
+
+    /**
+     * Get formatted commission summary
+     */
+    public function getCommissionSummary()
+    {
+        $summary = [];
+        
+        if ($this->direct_bonus_enabled) {
+            $summary['direct_referral'] = $this->getFormattedDirectReferralBonusAttribute();
+        }
+        
+        $unilevelConfig = $this->getUnilevelConfig();
+        if (!empty($unilevelConfig)) {
+            $summary['unilevel'] = count($unilevelConfig) . ' levels configured';
+        }
+        
+        $matrixConfig = $this->getMatrixConfig();
+        if (!empty($matrixConfig['levels'])) {
+            $summary['matrix'] = $matrixConfig['width'] . 'x' . $matrixConfig['depth'] . ' matrix';
+        }
+        
+        if ($this->commission_profit_sharing) {
+            $summary['profit_sharing'] = $this->commission_profit_sharing . '%';
+        }
+        
+        return $summary;
     }
 
     /**
@@ -130,7 +233,7 @@ class Plan extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where('status', true);
     }
 
     /**
