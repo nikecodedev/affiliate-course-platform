@@ -91,7 +91,7 @@ class SystemCustomizationController extends Controller
                 return response()->json($responseData);
             }
             
-            return redirect()->route('admin.customization.index')
+            return redirect()->route('admin.settings.index')
                 ->with('success', 'Customization settings updated successfully!');
 
         } catch (\Exception $e) {
@@ -164,7 +164,7 @@ class SystemCustomizationController extends Controller
             // Delete customizations
             SystemCustomization::truncate();
 
-            return redirect()->route('admin.customization.index')
+            return redirect()->route('admin.settings.index')
                 ->with('success', 'Customization settings reset to defaults!');
 
         } catch (\Exception $e) {
