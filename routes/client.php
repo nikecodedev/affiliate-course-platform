@@ -7,6 +7,8 @@ use App\Http\Controllers\Client\LeadController;
 use App\Http\Controllers\Client\FinancialController;
 use App\Http\Controllers\Client\TrainingController;
 use App\Http\Controllers\Client\SupportController;
+use App\Http\Controllers\Client\BonusController;
+use App\Http\Controllers\Client\NetworkController;
 use App\Http\Middleware\ClientMiddleware;
 
 /*
@@ -90,16 +92,32 @@ Route::prefix('client')->name('client.')->group(function () {
             Route::get('/downloads', [TrainingController::class, 'downloads'])->name('downloads');
         });
         
-        // Support System
-        Route::prefix('support')->name('support.')->group(function () {
-            Route::get('/', [SupportController::class, 'index'])->name('index');
-            Route::get('/create', [SupportController::class, 'create'])->name('create');
-            Route::post('/', [SupportController::class, 'store'])->name('store');
-            Route::get('/tickets/{ticket}', [SupportController::class, 'show'])->name('ticket.show');
-            Route::post('/tickets/{ticket}/responses', [SupportController::class, 'storeResponse'])->name('ticket.response');
-            Route::post('/tickets/{ticket}/close', [SupportController::class, 'closeTicket'])->name('ticket.close');
-            Route::get('/faq', [SupportController::class, 'faq'])->name('faq');
-        });
+            // Support System
+            Route::prefix('support')->name('support.')->group(function () {
+                Route::get('/', [SupportController::class, 'index'])->name('index');
+                Route::get('/create', [SupportController::class, 'create'])->name('create');
+                Route::post('/', [SupportController::class, 'store'])->name('store');
+                Route::get('/tickets/{ticket}', [SupportController::class, 'show'])->name('ticket.show');
+                Route::post('/tickets/{ticket}/responses', [SupportController::class, 'storeResponse'])->name('ticket.response');
+                Route::post('/tickets/{ticket}/close', [SupportController::class, 'closeTicket'])->name('ticket.close');
+                Route::get('/faq', [SupportController::class, 'faq'])->name('faq');
+            });
+
+            // Bonus Management
+            Route::prefix('bonus')->name('bonus.')->group(function () {
+                Route::get('/', [BonusController::class, 'index'])->name('index');
+                Route::get('/payments', [BonusController::class, 'payments'])->name('payments');
+                Route::get('/statistics', [BonusController::class, 'statistics'])->name('statistics');
+                Route::get('/chart-data', [BonusController::class, 'getChartData'])->name('chart-data');
+                Route::get('/export', [BonusController::class, 'export'])->name('export');
+            });
+
+            // Network Management
+            Route::prefix('network')->name('network.')->group(function () {
+                Route::get('/', [NetworkController::class, 'index'])->name('index');
+                Route::get('/visualization', [NetworkController::class, 'visualization'])->name('visualization');
+                Route::get('/chart-data', [NetworkController::class, 'getChartData'])->name('chart-data');
+            });
         
         // Capture Sites (public routes with client code)
         Route::prefix('capture')->name('capture.')->group(function () {

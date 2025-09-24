@@ -27,8 +27,14 @@ class DatabaseSeeder extends Seeder
         // Create default system settings
         $this->createDefaultSettings();
 
+        // Create plans
+        $this->call(PlanSeeder::class);
+        
         // Create sample client data
         $this->call(ClientSeeder::class);
+        
+        // Create bonus configurations and payment gateways
+        $this->call(BonusConfigurationSeeder::class);
     }
 
     /**

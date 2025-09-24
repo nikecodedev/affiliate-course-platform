@@ -10,6 +10,11 @@ use App\Http\Controllers\Admin\SaleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\FinancialController;
+use App\Http\Controllers\Admin\ReferralNetworkController;
+use App\Http\Controllers\Admin\BonusConfigurationController;
+use App\Http\Controllers\Admin\BonusPaymentController;
+use App\Http\Controllers\Admin\PaymentGatewayController;
+use App\Http\Controllers\WebhookController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\Admin2FAMiddleware;
 use App\Http\Middleware\AuditMiddleware;
@@ -83,17 +88,44 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('courses/{course}/activate', [CourseController::class, 'activate'])->name('courses.activate');
         Route::post('courses/{course}/deactivate', [CourseController::class, 'deactivate'])->name('courses.deactivate');
 
-        // Financial Management
-        Route::prefix('financial')->name('financial.')->group(function () {
-            Route::get('/', [FinancialController::class, 'index'])->name('index');
-            Route::get('/withdrawals', [FinancialController::class, 'withdrawals'])->name('withdrawals');
-            Route::post('/withdrawals/{withdrawal}/approve', [FinancialController::class, 'approveWithdrawal'])->name('withdrawals.approve');
-            Route::post('/withdrawals/{withdrawal}/reject', [FinancialController::class, 'rejectWithdrawal'])->name('withdrawals.reject');
-            Route::get('/reports', [FinancialController::class, 'reports'])->name('reports');
-            Route::resource('expenses', FinancialController::class)->except(['index', 'show']);
-            Route::get('/commission-payments', [FinancialController::class, 'commissionPaymentsIndex'])->name('commission-payments.index');
-            Route::resource('commission-payments', FinancialController::class)->except(['index', 'show']);
-        });
+            // Financial Management
+            Route::prefix('financial')->name('financial.')->group(function () {
+                Route::get('/', [FinancialController::class, 'index'])->name('index');
+                Route::get('/withdrawals', [FinancialController::class, 'withdrawals'])->name('withdrawals');
+                Route::post('/withdrawals/{withdrawal}/approve', [FinancialController::class, 'approveWithdrawal'])->name('withdrawals.approve');
+                Route::post('/withdrawals/{withdrawal}/reject', [FinancialController::class, 'rejectWithdrawal'])->name('withdrawals.reject');
+                Route::get('/reports', [FinancialController::class, 'reports'])->name('reports');
+                Route::resource('expenses', FinancialController::class)->except(['index', 'show']);
+                Route::get('/commission-payments', [FinancialController::class, 'commissionPaymentsIndex'])->name('commission-payments.index');
+                Route::resource('commission-payments', FinancialController::class)->except(['index', 'show']);
+            });
+
+            // Referral Network Management
+            Route::prefix('network')->name('network.')->group(function () {
+                Route::get('/', [ReferralNetworkController::class, 'index'])->name('index');
+                Route::get('/visualization', [ReferralNetworkController::class, 'visualization'])->name('visualization');
+                Route::get('/statistics', [ReferralNetworkController::class, 'statistics'])->name('statistics');
+                Route::get('/export', [ReferralNetworkController::class, 'export'])->name('export');
+                Route::get('/search', [ReferralNetworkController::class, 'search'])->name('search');
+                Route::get('/{client}', [ReferralNetworkController::class, 'show'])->name('show');
+            });
+
+            // Bonus Management
+            Route::prefix('bonus')->name('bonus.')->group(function () {
+                Route::resource('configurations', BonusConfigurationController::class);
+                Route::post('configurations/{configuration}/toggle', [BonusConfigurationController::class, 'toggle'])->name('configurations.toggle');
+                Route::post('configurations/{configuration}/duplicate', [BonusConfigurationController::class, 'duplicate'])->name('configurations.duplicate');
+                Route::get('configurations/statistics', [BonusConfigurationController::class, 'statistics'])->name('configurations.statistics');
+                
+                Route::resource('payments', BonusPaymentController::class);
+            });
+
+            // Payment Gateway Management
+            Route::prefix('gateways')->name('gateways.')->group(function () {
+                Route::resource('payment', PaymentGatewayController::class);
+                Route::post('payment/{gateway}/toggle', [PaymentGatewayController::class, 'toggle'])->name('payment.toggle');
+                Route::post('payment/{gateway}/test', [PaymentGatewayController::class, 'test'])->name('payment.test');
+            });
 
         // Audit Logs (with audit middleware)
         Route::middleware(AuditMiddleware::class)->group(function () {
@@ -102,4 +134,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             })->name('audit-logs');
         });
     });
+});
+
+// Webhook routes (no middleware for external access)
+Route::prefix('webhooks')->group(function () {
+    Route::post('asaas', [WebhookController::class, 'asaas'])->name('webhooks.asaas');
+    Route::post('stone', [WebhookController::class, 'stone'])->name('webhooks.stone');
+    Route::post('pagseguro', [WebhookController::class, 'pagseguro'])->name('webhooks.pagseguro');
+    Route::post('pix', [WebhookController::class, 'pix'])->name('webhooks.pix');
+    Route::post('bitcoin', [WebhookController::class, 'bitcoin'])->name('webhooks.bitcoin');
 });

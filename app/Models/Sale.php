@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Sale extends Model
 {
@@ -102,6 +103,22 @@ class Sale extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(Admin::class, 'created_by');
+    }
+
+    /**
+     * Client who made the purchase
+     */
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'user_id');
+    }
+
+    /**
+     * Bonus payments generated from this sale
+     */
+    public function bonusPayments(): HasMany
+    {
+        return $this->hasMany(BonusPayment::class, 'sale_id');
     }
 
     /**

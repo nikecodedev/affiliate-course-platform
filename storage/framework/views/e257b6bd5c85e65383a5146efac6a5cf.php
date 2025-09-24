@@ -214,6 +214,22 @@
                             </a>
                         </li>
                         
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo e(request()->routeIs('client.bonus.*') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('client.bonus.index')); ?>">
+                                <i class="bi bi-gift"></i>
+                                Bonuses
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo e(request()->routeIs('client.network.*') ? 'active' : ''); ?>" 
+                               href="<?php echo e(route('client.network.index')); ?>">
+                                <i class="bi bi-diagram-3"></i>
+                                Network
+                            </a>
+                        </li>
+                        
                         <?php if(auth('client')->user() && auth('client')->user()->hasCourseAccess()): ?>
                         <li class="nav-item">
                             <a class="nav-link <?php echo e(request()->routeIs('client.training.*') ? 'active' : ''); ?>" 
