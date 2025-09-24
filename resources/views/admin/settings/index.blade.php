@@ -9,12 +9,12 @@
         <!-- Settings Tabs -->
         <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="appearance-tab" data-bs-toggle="tab" data-bs-target="#appearance" type="button" role="tab">
-                    <i class="bi bi-palette me-2"></i>Appearance
-                </button>
+                <a class="nav-link" href="{{ route('admin.settings.customization') }}" target="_blank">
+                    <i class="bi bi-palette me-2"></i>Customization
+                </a>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="seo-tab" data-bs-toggle="tab" data-bs-target="#seo" type="button" role="tab">
+                <button class="nav-link active" id="seo-tab" data-bs-toggle="tab" data-bs-target="#seo" type="button" role="tab">
                     <i class="bi bi-search me-2"></i>SEO
                 </button>
             </li>
@@ -36,244 +36,45 @@
         </ul>
 
         <div class="tab-content" id="settingsTabsContent">
-            <!-- Appearance Settings -->
-            <div class="tab-pane fade show active" id="appearance" role="tabpanel">
-                <!-- Success/Error Messages -->
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
-                        <i class="fas fa-check-circle me-2"></i>
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                @if($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
-                        <i class="fas fa-exclamation-circle me-2"></i>
-                        <ul class="mb-0">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <strong>Advanced Customization:</strong> For logo, colors, and branding customization, 
-                    <a href="{{ route('admin.settings.customization') }}" class="alert-link">click here to access the full customization panel</a>.
-                </div>
-
-                <form action="{{ route('admin.customization.update') }}" method="POST" enctype="multipart/form-data" id="customizationForm">
-                    @csrf
-                    
-                    <!-- Company Information -->
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="bi bi-building me-2"></i>
-                                Company Information
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="company_name" class="form-label">Company Name</label>
-                                        <input type="text" class="form-control" id="company_name" name="company_name" 
-                                               value="{{ old('company_name', \App\Models\SystemCustomization::getCompanyName()) }}"
-                                               placeholder="Enter company name">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="company_email" class="form-label">Company Email</label>
-                                        <input type="email" class="form-control" id="company_email" name="company_email" 
-                                               value="{{ old('company_email', \App\Models\SystemCustomization::getCompanyEmail()) }}"
-                                               placeholder="Enter company email">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="company_phone" class="form-label">Company Phone</label>
-                                        <input type="text" class="form-control" id="company_phone" name="company_phone" 
-                                               value="{{ old('company_phone', \App\Models\SystemCustomization::getCompanyPhone()) }}"
-                                               placeholder="Enter company phone">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="company_address" class="form-label">Company Address</label>
-                                        <textarea class="form-control" id="company_address" name="company_address" rows="2"
-                                                  placeholder="Enter company address">{{ old('company_address', \App\Models\SystemCustomization::getCompanyAddress()) }}</textarea>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Brand Colors -->
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="bi bi-paint-brush me-2"></i>
-                                Brand Colors
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="primary_color" class="form-label">Primary Color</label>
-                                        <div class="input-group">
-                                            <input type="color" class="form-control form-control-color" id="primary_color" name="primary_color" 
-                                                   value="{{ old('primary_color', \App\Models\SystemCustomization::getPrimaryColor()) }}">
-                                            <input type="text" class="form-control" id="primary_color_text" 
-                                                   value="{{ old('primary_color', \App\Models\SystemCustomization::getPrimaryColor()) }}"
-                                                   placeholder="#007bff">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="secondary_color" class="form-label">Secondary Color</label>
-                                        <div class="input-group">
-                                            <input type="color" class="form-control form-control-color" id="secondary_color" name="secondary_color" 
-                                                   value="{{ old('secondary_color', \App\Models\SystemCustomization::getSecondaryColor()) }}">
-                                            <input type="text" class="form-control" id="secondary_color_text" 
-                                                   value="{{ old('secondary_color', \App\Models\SystemCustomization::getSecondaryColor()) }}"
-                                                   placeholder="#6c757d">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Brand Assets -->
-                    <div class="card mt-3">
-                        <div class="card-header">
-                            <h5 class="mb-0">
-                                <i class="bi bi-images me-2"></i>
-                                Brand Assets
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <!-- Logo Upload -->
-                                <div class="col-md-4 mb-4">
-                                    <label class="form-label">Main Logo</label>
-                                    <div class="logo-upload-container">
-                                        <div class="current-logo mb-3" id="currentLogo">
-                                            @if($groups['appearance']->get('logo_path')?->value)
-                                                <img src="{{ asset('storage/' . $groups['appearance']->get('logo_path')->value) }}" 
-                                                     alt="Current Logo" class="img-fluid" style="max-height: 100px;">
-                                            @else
-                                                <div class="no-logo-placeholder bg-light border rounded p-4 text-center">
-                                                    <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
-                                                    <p class="text-muted mt-2">No logo uploaded</p>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <input type="file" class="form-control" id="logo" accept="image/*">
-                                        <small class="form-text text-muted">Recommended: 200x60px, PNG or JPG format</small>
-                                    </div>
-                                </div>
-
-                                <!-- Dark Logo Upload -->
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label">Dark Logo (Optional)</label>
-                                    <div class="logo-upload-container">
-                                        <div class="current-logo mb-3" id="currentDarkLogo">
-                                            @if($groups['appearance']->get('logo_dark_path')?->value)
-                                                <img src="{{ asset('storage/' . $groups['appearance']->get('logo_dark_path')->value) }}" 
-                                                     alt="Current Dark Logo" class="img-fluid" style="max-height: 100px;">
-                                            @else
-                                                <div class="no-logo-placeholder bg-dark border rounded p-4 text-center">
-                                                    <i class="bi bi-image text-light" style="font-size: 2rem;"></i>
-                                                    <p class="text-light mt-2">No dark logo uploaded</p>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <input type="file" class="form-control" id="logoDark" accept="image/*">
-                                        <small class="form-text text-muted">For dark themes, same size as main logo</small>
-                                    </div>
-                                </div>
-
-                                <!-- Favicon Upload -->
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label">Favicon</label>
-                                    <div class="favicon-upload-container">
-                                        <div class="current-favicon mb-3" id="currentFavicon">
-                                            @if($groups['appearance']->get('favicon_path')?->value)
-                                                <img src="{{ asset('storage/' . $groups['appearance']->get('favicon_path')->value) }}" 
-                                                     alt="Current Favicon" style="width: 32px; height: 32px;">
-                                            @else
-                                                <div class="no-favicon-placeholder bg-light border rounded p-2 text-center" style="width: 32px; height: 32px;">
-                                                    <i class="bi bi-star text-muted"></i>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <input type="file" class="form-control" id="favicon" accept="image/*">
-                                        <small class="form-text text-muted">Recommended: 32x32px, ICO or PNG format</small>
-                                    </div>
-                                </div>
-
-                                <!-- Background Image Upload -->
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label">Background Image (Optional)</label>
-                                    <div class="background-upload-container">
-                                        <div class="current-background mb-3" id="currentBackground">
-                                            @if($groups['appearance']->get('background_path')?->value)
-                                                <img src="{{ asset('storage/' . $groups['appearance']->get('background_path')->value) }}" 
-                                                     alt="Current Background" class="img-fluid" style="max-height: 100px; border-radius: 0.5rem;">
-                                            @else
-                                                <div class="no-background-placeholder bg-light border rounded p-4 text-center">
-                                                    <i class="bi bi-image text-muted" style="font-size: 2rem;"></i>
-                                                    <p class="text-muted mt-2">No background uploaded</p>
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <input type="file" class="form-control" id="background" accept="image/*">
-                                        <small class="form-text text-muted">For login page background, JPG or PNG format</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
             <!-- SEO Settings -->
-            <div class="tab-pane fade" id="seo" role="tabpanel">
+            <div class="tab-pane fade show active" id="seo" role="tabpanel">
                 <div class="card mt-3">
                     <div class="card-header">
                         <h5 class="mb-0">SEO Settings</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('admin.settings.update') }}">
+                        <form id="seoForm">
                             @csrf
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="site_title" class="form-label">Site Title</label>
-                                    <input type="text" class="form-control" id="site_title" name="settings[site_title]" 
-                                           value="{{ $groups['seo']->get('site_title')?->value ?? '' }}">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="site_title" class="form-label">Site Title</label>
+                                        <input type="text" class="form-control" id="site_title" name="site_title" 
+                                               value="{{ $groups['seo']->get('site_title')?->value ?? '' }}" 
+                                               placeholder="Enter site title">
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="site_keywords" class="form-label">Keywords</label>
-                                    <input type="text" class="form-control" id="site_keywords" name="settings[site_keywords]" 
-                                           value="{{ $groups['seo']->get('site_keywords')?->value ?? '' }}">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="site_description" class="form-label">Site Description</label>
+                                        <textarea class="form-control" id="site_description" name="site_description" rows="3"
+                                                  placeholder="Enter site description">{{ $groups['seo']->get('site_description')?->value ?? '' }}</textarea>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group mb-3">
+                                        <label for="site_keywords" class="form-label">Site Keywords</label>
+                                        <input type="text" class="form-control" id="site_keywords" name="site_keywords" 
+                                               value="{{ $groups['seo']->get('site_keywords')?->value ?? '' }}" 
+                                               placeholder="Enter keywords separated by commas">
+                                    </div>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                <label for="site_description" class="form-label">Meta Description</label>
-                                <textarea class="form-control" id="site_description" name="settings[site_description]" rows="3">{{ $groups['seo']->get('site_description')?->value ?? '' }}</textarea>
-                                <small class="form-text text-muted">Recommended: 150-160 characters</small>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-lg me-1"></i>Save SEO Settings
+                                </button>
                             </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle me-2"></i>Save SEO Settings
-                            </button>
                         </form>
                     </div>
                 </div>
@@ -283,53 +84,42 @@
             <div class="tab-pane fade" id="tracking" role="tabpanel">
                 <div class="card mt-3">
                     <div class="card-header">
-                        <h5 class="mb-0">Tracking Codes</h5>
+                        <h5 class="mb-0">Tracking Settings</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('admin.settings.update') }}">
+                        <form id="trackingForm">
                             @csrf
                             <div class="row">
-                                <div class="col-md-4 mb-3">
-                                    <label for="google_analytics_id" class="form-label">Google Analytics ID</label>
-                                    <input type="text" class="form-control" id="google_analytics_id" name="google_analytics_id" 
-                                           value="{{ $groups['tracking']->get('google_analytics_id')?->value ?? '' }}" 
-                                           placeholder="GA-XXXXXXXXX-X">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="google_analytics_id" class="form-label">Google Analytics ID</label>
+                                        <input type="text" class="form-control" id="google_analytics_id" name="google_analytics_id" 
+                                               value="{{ $groups['tracking']->get('google_analytics_id')?->value ?? '' }}" 
+                                               placeholder="G-XXXXXXXXXX">
+                                    </div>
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="google_tag_manager_id" class="form-label">Google Tag Manager ID</label>
-                                    <input type="text" class="form-control" id="google_tag_manager_id" name="google_tag_manager_id" 
-                                           value="{{ $groups['tracking']->get('google_tag_manager_id')?->value ?? '' }}" 
-                                           placeholder="GTM-XXXXXXX">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="google_tag_manager_id" class="form-label">Google Tag Manager ID</label>
+                                        <input type="text" class="form-control" id="google_tag_manager_id" name="google_tag_manager_id" 
+                                               value="{{ $groups['tracking']->get('google_tag_manager_id')?->value ?? '' }}" 
+                                               placeholder="GTM-XXXXXXX">
+                                    </div>
                                 </div>
-                                <div class="col-md-4 mb-3">
-                                    <label for="meta_pixel_id" class="form-label">Meta Pixel ID</label>
-                                    <input type="text" class="form-control" id="meta_pixel_id" name="meta_pixel_id" 
-                                           value="{{ $groups['tracking']->get('meta_pixel_id')?->value ?? '' }}" 
-                                           placeholder="123456789012345">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="meta_pixel_id" class="form-label">Meta Pixel ID</label>
+                                        <input type="text" class="form-control" id="meta_pixel_id" name="meta_pixel_id" 
+                                               value="{{ $groups['tracking']->get('meta_pixel_id')?->value ?? '' }}" 
+                                               placeholder="Enter Meta Pixel ID">
+                                    </div>
                                 </div>
                             </div>
-                            
-                            <div class="mb-3">
-                                <label for="google_analytics_code" class="form-label">Google Analytics Code</label>
-                                <textarea class="form-control" id="google_analytics_code" name="google_analytics_code" rows="4" 
-                                          placeholder="<!-- Google Analytics Code -->">{{ $groups['tracking']->get('google_analytics_code')?->value ?? '' }}</textarea>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-lg me-1"></i>Save Tracking Settings
+                                </button>
                             </div>
-
-                            <div class="mb-3">
-                                <label for="google_tag_manager_code" class="form-label">Google Tag Manager Code</label>
-                                <textarea class="form-control" id="google_tag_manager_code" name="google_tag_manager_code" rows="4" 
-                                          placeholder="<!-- Google Tag Manager Code -->">{{ $groups['tracking']->get('google_tag_manager_code')?->value ?? '' }}</textarea>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="meta_pixel_code" class="form-label">Meta Pixel Code</label>
-                                <textarea class="form-control" id="meta_pixel_code" name="meta_pixel_code" rows="4" 
-                                          placeholder="<!-- Meta Pixel Code -->">{{ $groups['tracking']->get('meta_pixel_code')?->value ?? '' }}</textarea>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle me-2"></i>Save Tracking Settings
-                            </button>
                         </form>
                     </div>
                 </div>
@@ -342,47 +132,40 @@
                         <h5 class="mb-0">reCAPTCHA Settings</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('admin.settings.update') }}">
+                        <form id="recaptchaForm">
                             @csrf
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="recaptcha_enabled" name="recaptcha_enabled" 
-                                           {{ $groups['recaptcha']->get('recaptcha_enabled')?->value ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="recaptcha_enabled">
-                                        Enable reCAPTCHA
-                                    </label>
-                                </div>
-                            </div>
-                            
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="recaptcha_site_key" class="form-label">Site Key</label>
-                                    <input type="text" class="form-control" id="recaptcha_site_key" name="recaptcha_site_key" 
-                                           value="{{ $groups['recaptcha']->get('recaptcha_site_key')?->value ?? '' }}" 
-                                           placeholder="6LcXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="recaptcha_site_key" class="form-label">Site Key</label>
+                                        <input type="text" class="form-control" id="recaptcha_site_key" name="recaptcha_site_key" 
+                                               value="{{ $groups['recaptcha']->get('recaptcha_site_key')?->value ?? '' }}" 
+                                               placeholder="Enter reCAPTCHA site key">
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="recaptcha_secret_key" class="form-label">Secret Key</label>
-                                    <input type="password" class="form-control" id="recaptcha_secret_key" name="recaptcha_secret_key" 
-                                           value="{{ $groups['recaptcha']->get('recaptcha_secret_key')?->value ?? '' }}" 
-                                           placeholder="6LcXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="recaptcha_secret_key" class="form-label">Secret Key</label>
+                                        <input type="text" class="form-control" id="recaptcha_secret_key" name="recaptcha_secret_key" 
+                                               value="{{ $groups['recaptcha']->get('recaptcha_secret_key')?->value ?? '' }}" 
+                                               placeholder="Enter reCAPTCHA secret key">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="recaptcha_enabled" name="recaptcha_enabled" 
+                                               {{ ($groups['recaptcha']->get('recaptcha_enabled')?->value ?? '0') == '1' ? 'checked' : '' }}>
+                                        <label class="form-check-label" for="recaptcha_enabled">
+                                            Enable reCAPTCHA
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="alert alert-info">
-                                <i class="bi bi-info-circle me-2"></i>
-                                <strong>How to get reCAPTCHA keys:</strong>
-                                <ol class="mb-0 mt-2">
-                                    <li>Go to <a href="https://www.google.com/recaptcha/admin" target="_blank">Google reCAPTCHA Admin</a></li>
-                                    <li>Create a new site or select existing one</li>
-                                    <li>Choose reCAPTCHA v2 "I'm not a robot" Checkbox</li>
-                                    <li>Add your domain and get the keys</li>
-                                </ol>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-lg me-1"></i>Save reCAPTCHA Settings
+                                </button>
                             </div>
-
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle me-2"></i>Save reCAPTCHA Settings
-                            </button>
                         </form>
                     </div>
                 </div>
@@ -395,53 +178,55 @@
                         <h5 class="mb-0">Financial Settings</h5>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ route('admin.settings.update') }}">
+                        <form id="financialForm">
                             @csrf
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="withdrawal_days" class="form-label">Withdrawal Days</label>
-                                    <input type="text" class="form-control" id="withdrawal_days" name="withdrawal_days" 
-                                           value="{{ $groups['financial']->get('withdrawal_days')?->value ?? '1,2,3,4,5' }}" 
-                                           placeholder="1,2,3,4,5">
-                                    <small class="form-text text-muted">Comma-separated days (1=Monday, 7=Sunday)</small>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="withdrawal_days" class="form-label">Withdrawal Days</label>
+                                        <input type="text" class="form-control" id="withdrawal_days" name="withdrawal_days" 
+                                               value="{{ $groups['financial']->get('withdrawal_days')?->value ?? '' }}" 
+                                               placeholder="1,2,3,4,5">
+                                        <small class="form-text text-muted">Comma-separated days of the week (1=Monday, 7=Sunday)</small>
+                                    </div>
                                 </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="withdrawal_start_time" class="form-label">Start Time</label>
-                                    <input type="time" class="form-control" id="withdrawal_start_time" name="withdrawal_start_time" 
-                                           value="{{ $groups['financial']->get('withdrawal_start_time')?->value ?? '09:00' }}">
+                                <div class="col-md-3">
+                                    <div class="form-group mb-3">
+                                        <label for="withdrawal_start_time" class="form-label">Start Time</label>
+                                        <input type="time" class="form-control" id="withdrawal_start_time" name="withdrawal_start_time" 
+                                               value="{{ $groups['financial']->get('withdrawal_start_time')?->value ?? '' }}">
+                                    </div>
                                 </div>
-                                <div class="col-md-3 mb-3">
-                                    <label for="withdrawal_end_time" class="form-label">End Time</label>
-                                    <input type="time" class="form-control" id="withdrawal_end_time" name="withdrawal_end_time" 
-                                           value="{{ $groups['financial']->get('withdrawal_end_time')?->value ?? '18:00' }}">
+                                <div class="col-md-3">
+                                    <div class="form-group mb-3">
+                                        <label for="withdrawal_end_time" class="form-label">End Time</label>
+                                        <input type="time" class="form-control" id="withdrawal_end_time" name="withdrawal_end_time" 
+                                               value="{{ $groups['financial']->get('withdrawal_end_time')?->value ?? '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="withdrawal_fee_type" class="form-label">Fee Type</label>
+                                        <select class="form-control" id="withdrawal_fee_type" name="withdrawal_fee_type">
+                                            <option value="percentage" {{ ($groups['financial']->get('withdrawal_fee_type')?->value ?? '') == 'percentage' ? 'selected' : '' }}>Percentage</option>
+                                            <option value="fixed" {{ ($groups['financial']->get('withdrawal_fee_type')?->value ?? '') == 'fixed' ? 'selected' : '' }}>Fixed Amount</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="withdrawal_fee_value" class="form-label">Fee Value</label>
+                                        <input type="number" step="0.01" class="form-control" id="withdrawal_fee_value" name="withdrawal_fee_value" 
+                                               value="{{ $groups['financial']->get('withdrawal_fee_value')?->value ?? '' }}" 
+                                               placeholder="5.00">
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="withdrawal_fee_type" class="form-label">Fee Type</label>
-                                    <select class="form-select" id="withdrawal_fee_type" name="withdrawal_fee_type">
-                                        <option value="percentage" {{ ($groups['financial']->get('withdrawal_fee_type')?->value ?? 'percentage') === 'percentage' ? 'selected' : '' }}>
-                                            Percentage
-                                        </option>
-                                        <option value="fixed" {{ ($groups['financial']->get('withdrawal_fee_type')?->value) === 'fixed' ? 'selected' : '' }}>
-                                            Fixed Amount
-                                        </option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="withdrawal_fee_value" class="form-label">Fee Value</label>
-                                    <input type="number" step="0.01" class="form-control" id="withdrawal_fee_value" name="withdrawal_fee_value" 
-                                           value="{{ $groups['financial']->get('withdrawal_fee_value')?->value ?? '5.00' }}">
-                                    <small class="form-text text-muted">
-                                        <span id="feeHelp">Percentage value (e.g., 5 for 5%)</span>
-                                    </small>
-                                </div>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-lg me-1"></i>Save Financial Settings
+                                </button>
                             </div>
-
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle me-2"></i>Save Financial Settings
-                            </button>
                         </form>
                     </div>
                 </div>
@@ -451,66 +236,68 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
 <script>
-$(document).ready(function() {
-    // File upload handlers
-    $('#logo, #logoDark, #favicon, #background').on('change', function() {
-        const file = this.files[0];
-        const type = this.id;
-        
-        if (file) {
-            uploadFile(file, type);
-        }
-    });
-
-    // Fee type change handler
-    $('#withdrawal_fee_type').on('change', function() {
-        const type = $(this).val();
-        const helpText = $('#feeHelp');
-        
-        if (type === 'percentage') {
-            helpText.text('Percentage value (e.g., 5 for 5%)');
-        } else {
-            helpText.text('Fixed amount in currency');
-        }
-    });
-
-    function uploadFile(file, type) {
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('type', type);
-        formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
-
-        // Show loading
-        const container = $(`#current${type.charAt(0).toUpperCase() + type.slice(1)}`);
-        container.html('<div class="text-center"><i class="bi bi-hourglass-split text-primary"></i><br>Uploading...</div>');
-
-        $.ajax({
-            url: `/admin/settings/upload-${type === 'logoDark' ? 'logo' : type}`,
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                if (response.success) {
-                    if (type === 'logo' || type === 'logoDark') {
-                        container.html(`<img src="${response.url}" alt="Current Logo" class="img-fluid" style="max-height: 100px;">`);
-                    } else if (type === 'favicon') {
-                        container.html(`<img src="${response.url}" alt="Current Favicon" style="width: 32px; height: 32px;">`);
-                    } else if (type === 'background') {
-                        container.html(`<img src="${response.url}" alt="Current Background" class="img-fluid" style="max-height: 100px; border-radius: 0.5rem;">`);
-                    }
-                } else {
-                    container.html('<div class="alert alert-danger">Upload failed</div>');
-                }
-            },
-            error: function(xhr) {
-                container.html('<div class="alert alert-danger">Upload failed: ' + xhr.responseJSON.message + '</div>');
-            }
-        });
-    }
+// Form submission handlers
+document.getElementById('seoForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveSettings('seo', this);
 });
-</script>
-@endpush
 
+document.getElementById('trackingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveSettings('tracking', this);
+});
+
+document.getElementById('recaptchaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveSettings('recaptcha', this);
+});
+
+document.getElementById('financialForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveSettings('financial', this);
+});
+
+function saveSettings(group, form) {
+    const formData = new FormData(form);
+    
+    fetch('{{ route("admin.settings.update") }}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Settings saved successfully!', 'success');
+        } else {
+            showAlert('Error saving settings: ' + (data.message || 'Unknown error'), 'danger');
+        }
+    })
+    .catch(error => {
+        showAlert('Error saving settings: ' + error.message, 'danger');
+    });
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.tab-content');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+@endsection
