@@ -283,33 +283,88 @@
                         <h5 class="mb-0">SEO Settings</h5>
                     </div>
                     <div class="card-body">
-                        <form id="seoForm">
+                        <form id="seoForm" action="<?php echo e(route('admin.settings.seo.update')); ?>" method="POST">
                             <?php echo csrf_field(); ?>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label for="site_title" class="form-label">Site Title</label>
-                                        <input type="text" class="form-control" id="site_title" name="site_title" 
-                                               value="<?php echo e($groups['seo']->get('site_title')?->value ?? ''); ?>" 
-                                               placeholder="Enter site title">
+                                        <label for="seo_title" class="form-label">
+                                            <i class="bi bi-heading me-1"></i>
+                                            Site Title
+                                            <span class="text-muted">(Max 60 characters)</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="seo_title" name="seo_title" 
+                                               value="<?php echo e($groups['seo']->get('seo_title')?->value ?? ''); ?>" 
+                                               placeholder="Enter site title"
+                                               maxlength="60">
+                                        <div class="form-text">
+                                            <span id="title-count" class="text-muted">0/60 characters</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label for="site_description" class="form-label">Site Description</label>
-                                        <textarea class="form-control" id="site_description" name="site_description" rows="3"
-                                                  placeholder="Enter site description"><?php echo e($groups['seo']->get('site_description')?->value ?? ''); ?></textarea>
+                                        <label for="seo_description" class="form-label">
+                                            <i class="bi bi-align-left me-1"></i>
+                                            Meta Description
+                                            <span class="text-muted">(Max 160 characters)</span>
+                                        </label>
+                                        <textarea class="form-control" id="seo_description" name="seo_description" rows="3"
+                                                  placeholder="Enter site description"
+                                                  maxlength="160"><?php echo e($groups['seo']->get('seo_description')?->value ?? ''); ?></textarea>
+                                        <div class="form-text">
+                                            <span id="description-count" class="text-muted">0/160 characters</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="form-group mb-3">
-                                        <label for="site_keywords" class="form-label">Site Keywords</label>
-                                        <input type="text" class="form-control" id="site_keywords" name="site_keywords" 
-                                               value="<?php echo e($groups['seo']->get('site_keywords')?->value ?? ''); ?>" 
-                                               placeholder="Enter keywords separated by commas">
+                                        <label for="seo_keywords" class="form-label">
+                                            <i class="bi bi-tags me-1"></i>
+                                            Meta Keywords
+                                            <span class="text-muted">(Max 255 characters)</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="seo_keywords" name="seo_keywords" 
+                                               value="<?php echo e($groups['seo']->get('seo_keywords')?->value ?? ''); ?>" 
+                                               placeholder="Enter keywords separated by commas (e.g., affiliate, marketing, courses)"
+                                               maxlength="255">
+                                        <div class="form-text">
+                                            <span id="keywords-count" class="text-muted">0/255 characters</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- SEO Preview -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="bi bi-eye me-2"></i>
+                                        Search Engine Preview
+                                    </h6>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="search-preview">
+                                                <div class="search-result">
+                                                    <h4 class="search-title" id="preview-title">
+                                                        <?php echo e($groups['seo']->get('seo_title')?->value ?? 'Affiliate & Course Platform'); ?>
+
+                                                    </h4>
+                                                    <div class="search-url text-success" id="preview-url">
+                                                        <?php echo e(url('/')); ?>
+
+                                                    </div>
+                                                    <p class="search-description" id="preview-description">
+                                                        <?php echo e($groups['seo']->get('seo_description')?->value ?? 'Your description will appear here...'); ?>
+
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="text-end">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-check-lg me-1"></i>Save SEO Settings
@@ -744,7 +799,144 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+
+    // SEO Form submission
+    const seoForm = document.getElementById('seoForm');
+    if (seoForm) {
+        seoForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            
+            // Update button state
+            submitButton.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Saving...';
+            submitButton.disabled = true;
+            
+            fetch('<?php echo e(route("admin.settings.seo.update")); ?>', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('SEO settings updated successfully!', 'success');
+                } else {
+                    showAlert(data.message || 'Error saving SEO settings', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Error saving SEO settings: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                // Restore button state
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            });
+        });
+    }
+
+    // SEO Character counters and live preview
+    const titleInput = document.getElementById('seo_title');
+    const descriptionInput = document.getElementById('seo_description');
+    const keywordsInput = document.getElementById('seo_keywords');
+    
+    const titleCount = document.getElementById('title-count');
+    const descriptionCount = document.getElementById('description-count');
+    const keywordsCount = document.getElementById('keywords-count');
+
+    // Update character counts
+    function updateCount(input, counter, max) {
+        const count = input.value.length;
+        counter.textContent = `${count}/${max} characters`;
+        
+        // Add warning/danger classes
+        counter.className = 'text-muted';
+        if (count > max * 0.9) {
+            counter.classList.add('text-danger');
+        } else if (count > max * 0.8) {
+            counter.classList.add('text-warning');
+        }
+    }
+
+    // Live preview updates
+    function updatePreview() {
+        const title = titleInput.value || 'Affiliate & Course Platform';
+        const description = descriptionInput.value || 'Your description will appear here...';
+        
+        document.getElementById('preview-title').textContent = title;
+        document.getElementById('preview-description').textContent = description;
+    }
+
+    // Event listeners for SEO fields
+    if (titleInput) {
+        titleInput.addEventListener('input', function() {
+            updateCount(this, titleCount, 60);
+            updatePreview();
+        });
+    }
+
+    if (descriptionInput) {
+        descriptionInput.addEventListener('input', function() {
+            updateCount(this, descriptionCount, 160);
+            updatePreview();
+        });
+    }
+
+    if (keywordsInput) {
+        keywordsInput.addEventListener('input', function() {
+            updateCount(this, keywordsCount, 255);
+        });
+    }
+
+    // Initialize counts
+    if (titleInput && titleCount) updateCount(titleInput, titleCount, 60);
+    if (descriptionInput && descriptionCount) updateCount(descriptionInput, descriptionCount, 160);
+    if (keywordsInput && keywordsCount) updateCount(keywordsInput, keywordsCount, 255);
 });
 </script>
+
+<style>
+.search-preview {
+    max-width: 600px;
+}
+
+.search-result {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    background: #fff;
+}
+
+.search-title {
+    color: #1a0dab;
+    font-size: 18px;
+    font-weight: 400;
+    margin: 0 0 4px 0;
+    line-height: 1.3;
+}
+
+.search-title:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.search-url {
+    font-size: 14px;
+    margin: 0 0 4px 0;
+}
+
+.search-description {
+    color: #545454;
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 0;
+}
+</style>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.admin', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\WORK-Station\freelance\workana\12\resources\views/admin/settings/index.blade.php ENDPATH**/ ?>

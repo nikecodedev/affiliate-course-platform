@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Client Area') - {{ \App\Models\SystemCustomization::getCompanyName() }}</title>
+    <title>{{ setting('seo_title', 'Affiliate & Course Platform') }}</title>
+    <meta name="description" content="{{ setting('seo_description', '') }}">
+    <meta name="keywords" content="{{ setting('seo_keywords', '') }}">
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ \App\Models\SystemCustomization::getFaviconUrl() }}">

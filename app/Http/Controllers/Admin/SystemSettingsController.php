@@ -59,6 +59,61 @@ class SystemSettingsController extends Controller
     }
 
     /**
+     * Update SEO settings
+     */
+    public function updateSeo(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'seo_title' => 'nullable|string|max:60',
+            'seo_description' => 'nullable|string|max:160',
+            'seo_keywords' => 'nullable|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
+        try {
+            // Update SEO settings
+            SystemSetting::set('seo_title', $request->input('seo_title'), 'string', 'seo', 'SEO Title for the website');
+            SystemSetting::set('seo_description', $request->input('seo_description'), 'text', 'seo', 'Meta description for SEO');
+            SystemSetting::set('seo_keywords', $request->input('seo_keywords'), 'text', 'seo', 'Meta keywords for SEO');
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'SEO settings updated successfully!'
+                ]);
+            }
+
+            return redirect()->back()
+                ->with('success', 'SEO settings updated successfully!');
+
+        } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update SEO settings: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->withErrors(['error' => 'Failed to update SEO settings: ' . $e->getMessage()])
+                ->withInput();
+        }
+    }
+
+    /**
      * Upload logo
      */
     public function uploadLogo(Request $request)

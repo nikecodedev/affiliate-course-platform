@@ -68,6 +68,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/', [SystemSettingsController::class, 'index'])->name('index');
             Route::get('/customization', [SystemSettingsController::class, 'customization'])->name('customization');
             Route::post('/', [SystemSettingsController::class, 'update'])->name('update');
+            Route::post('/seo', [SystemSettingsController::class, 'updateSeo'])->name('seo.update');
             Route::post('/upload-logo', [SystemSettingsController::class, 'uploadLogo'])->name('upload-logo');
         });
 
@@ -137,6 +138,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/reset', [SystemCustomizationController::class, 'reset'])->name('reset');
             Route::post('/preview', [SystemCustomizationController::class, 'preview'])->name('preview');
         });
+
 
         // Audit Logs (with audit middleware)
         Route::middleware(AuditMiddleware::class)->group(function () {

@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
 
-    <title><?php echo $__env->yieldContent('title', 'Admin Panel'); ?> - <?php echo e(\App\Models\SystemCustomization::getCompanyName()); ?></title>
+    <title><?php echo e(setting('seo_title', 'Affiliate & Course Platform')); ?></title>
+    <meta name="description" content="<?php echo e(setting('seo_description', '')); ?>">
+    <meta name="keywords" content="<?php echo e(setting('seo_keywords', '')); ?>">
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="<?php echo e(\App\Models\SystemCustomization::getFaviconUrl()); ?>">
