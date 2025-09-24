@@ -57,27 +57,47 @@ class SystemCustomizationController extends Controller
                 }
             }
 
+            $responseData = ['success' => true, 'message' => 'Customization settings updated successfully!'];
+
             // Handle logo upload
             if ($request->hasFile('logo')) {
-                $this->handleImageUpload($request->file('logo'), 'logo', 'customization');
+                $logoPath = $this->handleImageUpload($request->file('logo'), 'logo', 'customization');
+                $responseData['logo_url'] = Storage::url($logoPath);
             }
 
             // Handle favicon upload
             if ($request->hasFile('favicon')) {
-                $this->handleImageUpload($request->file('favicon'), 'favicon', 'customization', 32, 32);
+                $faviconPath = $this->handleImageUpload($request->file('favicon'), 'favicon', 'customization', 32, 32);
+                $responseData['favicon_url'] = Storage::url($faviconPath);
             }
 
             // Handle background upload
             if ($request->hasFile('background')) {
-                $this->handleImageUpload($request->file('background'), 'background', 'customization');
+                $backgroundPath = $this->handleImageUpload($request->file('background'), 'background', 'customization');
+                $responseData['background_url'] = Storage::url($backgroundPath);
+            }
+
+            // Check if this is an AJAX request
+            if ($request->ajax() || $request->has('stay_on_page')) {
+                return response()->json($responseData);
             }
 
             return redirect()->route('admin.customization.index')
                 ->with('success', 'Customization settings updated successfully!');
 
         } catch (\Exception $e) {
+            $errorMessage = 'Failed to update settings: ' . $e->getMessage();
+            
+            // Check if this is an AJAX request
+            if ($request->ajax() || $request->has('stay_on_page')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage
+                ], 422);
+            }
+
             return redirect()->back()
-                ->withErrors(['error' => 'Failed to update settings: ' . $e->getMessage()])
+                ->withErrors(['error' => $errorMessage])
                 ->withInput();
         }
     }
@@ -113,6 +133,8 @@ class SystemCustomizationController extends Controller
 
         // Save the new path
         SystemCustomization::setValue($type . '_path', $path, 'image');
+        
+        return $path;
     }
 
     /**

@@ -9,12 +9,12 @@
         <!-- Settings Tabs -->
         <ul class="nav nav-tabs" id="settingsTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <a class="nav-link" href="<?php echo e(route('admin.settings.customization')); ?>" target="_blank">
+                <button class="nav-link active" id="customization-tab" data-bs-toggle="tab" data-bs-target="#customization" type="button" role="tab">
                     <i class="bi bi-palette me-2"></i>Customization
-                </a>
+                </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="seo-tab" data-bs-toggle="tab" data-bs-target="#seo" type="button" role="tab">
+                <button class="nav-link" id="seo-tab" data-bs-toggle="tab" data-bs-target="#seo" type="button" role="tab">
                     <i class="bi bi-search me-2"></i>SEO
                 </button>
             </li>
@@ -36,8 +36,250 @@
         </ul>
 
         <div class="tab-content" id="settingsTabsContent">
+            <!-- Customization Settings -->
+            <div class="tab-pane fade show active" id="customization" role="tabpanel">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-palette me-2"></i>
+                            Appearance & Customization
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Success/Error Messages -->
+                        <?php if(session('success')): ?>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <?php echo e(session('success')); ?>
+
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if($errors->any()): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                <ul class="mb-0">
+                                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+
+                        <form action="<?php echo e(route('admin.customization.update')); ?>" method="POST" enctype="multipart/form-data" id="customizationForm">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="stay_on_page" value="1">
+                            
+                            <!-- Company Information -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="bi bi-building me-2"></i>
+                                        Company Information
+                                    </h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="company_name" class="form-label">Company Name</label>
+                                        <input type="text" class="form-control" id="company_name" name="company_name" 
+                                               value="<?php echo e(old('company_name', \App\Models\SystemCustomization::getCompanyName())); ?>"
+                                               placeholder="Enter company name">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="company_email" class="form-label">Company Email</label>
+                                        <input type="email" class="form-control" id="company_email" name="company_email" 
+                                               value="<?php echo e(old('company_email', \App\Models\SystemCustomization::getCompanyEmail())); ?>"
+                                               placeholder="Enter company email">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="company_phone" class="form-label">Company Phone</label>
+                                        <input type="text" class="form-control" id="company_phone" name="company_phone" 
+                                               value="<?php echo e(old('company_phone', \App\Models\SystemCustomization::getCompanyPhone())); ?>"
+                                               placeholder="Enter company phone">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="company_address" class="form-label">Company Address</label>
+                                        <textarea class="form-control" id="company_address" name="company_address" rows="2"
+                                                  placeholder="Enter company address"><?php echo e(old('company_address', \App\Models\SystemCustomization::getCompanyAddress())); ?></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Brand Colors -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="bi bi-paint-brush me-2"></i>
+                                        Brand Colors
+                                    </h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="primary_color" class="form-label">Primary Color</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" id="primary_color" name="primary_color" 
+                                                   value="<?php echo e(old('primary_color', \App\Models\SystemCustomization::getPrimaryColor())); ?>">
+                                            <input type="text" class="form-control" id="primary_color_text" 
+                                                   value="<?php echo e(old('primary_color', \App\Models\SystemCustomization::getPrimaryColor())); ?>"
+                                                   placeholder="#007bff">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="secondary_color" class="form-label">Secondary Color</label>
+                                        <div class="input-group">
+                                            <input type="color" class="form-control form-control-color" id="secondary_color" name="secondary_color" 
+                                                   value="<?php echo e(old('secondary_color', \App\Models\SystemCustomization::getSecondaryColor())); ?>">
+                                            <input type="text" class="form-control" id="secondary_color_text" 
+                                                   value="<?php echo e(old('secondary_color', \App\Models\SystemCustomization::getSecondaryColor())); ?>"
+                                                   placeholder="#6c757d">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Brand Assets -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="bi bi-images me-2"></i>
+                                        Brand Assets
+                                    </h6>
+                                </div>
+                                
+                                <!-- Logo Upload -->
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="card-title mb-0">
+                                                <i class="bi bi-image me-2"></i>
+                                                Logo
+                                            </h6>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <img id="logo-preview" src="<?php echo e(\App\Models\SystemCustomization::getLogoUrl()); ?>" 
+                                                     alt="Logo Preview" class="img-fluid" style="max-height: 80px;">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="logo" class="form-label">Upload Logo</label>
+                                                <input type="file" class="form-control" id="logo" name="logo" accept="image/*" onchange="previewImage(this, 'logo-preview')">
+                                                <small class="text-muted">Recommended: 200x60px, PNG/JPG format</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Favicon Upload -->
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="card-title mb-0">
+                                                <i class="bi bi-star me-2"></i>
+                                                Favicon
+                                            </h6>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <img id="favicon-preview" src="<?php echo e(\App\Models\SystemCustomization::getFaviconUrl()); ?>" 
+                                                     alt="Favicon Preview" class="img-fluid" style="width: 32px; height: 32px;">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="favicon" class="form-label">Upload Favicon</label>
+                                                <input type="file" class="form-control" id="favicon" name="favicon" accept="image/*" onchange="previewImage(this, 'favicon-preview')">
+                                                <small class="text-muted">Recommended: 32x32px, ICO/PNG format</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Background Upload -->
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="card-title mb-0">
+                                                <i class="bi bi-landscape me-2"></i>
+                                                Background
+                                            </h6>
+                                        </div>
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <img id="background-preview" src="<?php echo e(\App\Models\SystemCustomization::getBackgroundUrl() ?? asset('images/default-bg.jpg')); ?>" 
+                                                     alt="Background Preview" class="img-fluid" style="max-height: 80px;">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="background" class="form-label">Upload Background</label>
+                                                <input type="file" class="form-control" id="background" name="background" accept="image/*" onchange="previewImage(this, 'background-preview')">
+                                                <small class="text-muted">Recommended: 1920x1080px, JPG/PNG format</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Live Preview -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="bi bi-eye me-2"></i>
+                                        Live Preview
+                                    </h6>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6>Login Page Preview</h6>
+                                                    <div class="border rounded p-3" style="background: linear-gradient(135deg, <?php echo e(\App\Models\SystemCustomization::getPrimaryColor()); ?> 0%, <?php echo e(\App\Models\SystemCustomization::getSecondaryColor()); ?> 100%); color: white; min-height: 150px;">
+                                                        <div class="text-center">
+                                                            <img id="preview-logo" src="<?php echo e(\App\Models\SystemCustomization::getLogoUrl()); ?>" alt="Logo" style="max-height: 30px; margin-bottom: 15px;">
+                                                            <h5 id="preview-company"><?php echo e(\App\Models\SystemCustomization::getCompanyName()); ?></h5>
+                                                            <p class="mb-0">Welcome to your platform</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6>Header Preview</h6>
+                                                    <div class="border rounded p-3">
+                                                        <nav class="navbar navbar-expand-lg" style="background-color: <?php echo e(\App\Models\SystemCustomization::getPrimaryColor()); ?>;">
+                                                            <div class="container-fluid">
+                                                                <img id="preview-header-logo" src="<?php echo e(\App\Models\SystemCustomization::getLogoUrl()); ?>" alt="Logo" style="max-height: 25px;">
+                                                                <span class="navbar-brand text-white ms-2" id="preview-header-company"><?php echo e(\App\Models\SystemCustomization::getCompanyName()); ?></span>
+                                                            </div>
+                                                        </nav>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-end">
+                                <button type="button" class="btn btn-warning me-2" onclick="resetCustomization()">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>
+                                    Reset to Default
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-lg me-1"></i>
+                                    Save Customizations
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
             <!-- SEO Settings -->
-            <div class="tab-pane fade show active" id="seo" role="tabpanel">
+            <div class="tab-pane fade" id="seo" role="tabpanel">
                 <div class="card mt-3">
                     <div class="card-header">
                         <h5 class="mb-0">SEO Settings</h5>
@@ -238,6 +480,74 @@
 
 <?php $__env->startSection('scripts'); ?>
 <script>
+// Customization form functionality
+function previewImage(input, previewId) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById(previewId).src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function previewChanges() {
+    // Update preview elements with current form values
+    const companyName = document.getElementById('company_name').value;
+    const primaryColor = document.getElementById('primary_color').value;
+    const secondaryColor = document.getElementById('secondary_color').value;
+    const logoFile = document.getElementById('logo').files[0];
+    const faviconFile = document.getElementById('favicon').files[0];
+    const backgroundFile = document.getElementById('background').files[0];
+
+    // Update company name in previews
+    document.getElementById('preview-company').textContent = companyName || 'Your Platform';
+    document.getElementById('preview-header-company').textContent = companyName || 'Your Platform';
+
+    // Update colors in previews
+    document.querySelector('.border.rounded.p-3').style.background = `linear-gradient(135deg, ${primaryColor || '#007bff'} 0%, ${secondaryColor || '#6c757d'} 100%)`;
+    document.querySelector('.navbar').style.backgroundColor = primaryColor || '#007bff';
+
+    // Update logo if new file is selected
+    if (logoFile) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('preview-logo').src = e.target.result;
+            document.getElementById('preview-header-logo').src = e.target.result;
+        };
+        reader.readAsDataURL(logoFile);
+    }
+
+    // Update background if new file is selected
+    if (backgroundFile) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.querySelector('.border.rounded.p-3').style.backgroundImage = `url(${e.target.result})`;
+            document.querySelector('.border.rounded.p-3').style.backgroundSize = 'cover';
+            document.querySelector('.border.rounded.p-3').style.backgroundPosition = 'center';
+        };
+        reader.readAsDataURL(backgroundFile);
+    }
+}
+
+function resetCustomization() {
+    if (confirm('Are you sure you want to reset all customizations to default values? This action cannot be undone.')) {
+        // Create a form and submit it to the reset route
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '<?php echo e(route("admin.customization.reset")); ?>';
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        form.appendChild(csrfToken);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
 // Form submission handlers
 document.getElementById('seoForm').addEventListener('submit', function(e) {
     e.preventDefault();
@@ -299,6 +609,106 @@ function showAlert(message, type) {
         alertDiv.remove();
     }, 5000);
 }
+
+// Initialize customization form event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Color picker synchronization
+    const primaryColor = document.getElementById('primary_color');
+    const primaryColorText = document.getElementById('primary_color_text');
+    const secondaryColor = document.getElementById('secondary_color');
+    const secondaryColorText = document.getElementById('secondary_color_text');
+
+    if (primaryColor && primaryColorText) {
+        primaryColor.addEventListener('input', function() {
+            primaryColorText.value = this.value;
+            previewChanges();
+        });
+        primaryColorText.addEventListener('input', function() {
+            if (this.value.match(/^#[0-9A-Fa-f]{6}$/)) {
+                primaryColor.value = this.value;
+                previewChanges();
+            }
+        });
+    }
+
+    if (secondaryColor && secondaryColorText) {
+        secondaryColor.addEventListener('input', function() {
+            secondaryColorText.value = this.value;
+            previewChanges();
+        });
+        secondaryColorText.addEventListener('input', function() {
+            if (this.value.match(/^#[0-9A-Fa-f]{6}$/)) {
+                secondaryColor.value = this.value;
+                previewChanges();
+            }
+        });
+    }
+
+    // Company name live preview
+    const companyName = document.getElementById('company_name');
+    if (companyName) {
+        companyName.addEventListener('input', previewChanges);
+    }
+
+    // Customization form submission
+    const customizationForm = document.getElementById('customizationForm');
+    if (customizationForm) {
+        customizationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            
+            // Show loading state
+            submitButton.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Saving...';
+            submitButton.disabled = true;
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert(data.message || 'Customization saved successfully!', 'success');
+                    
+                    // Update preview elements with new values if images were uploaded
+                    if (data.logo_url) {
+                        document.getElementById('logo-preview').src = data.logo_url;
+                        document.getElementById('preview-logo').src = data.logo_url;
+                        document.getElementById('preview-header-logo').src = data.logo_url;
+                    }
+                    if (data.favicon_url) {
+                        document.getElementById('favicon-preview').src = data.favicon_url;
+                    }
+                    if (data.background_url) {
+                        document.getElementById('background-preview').src = data.background_url;
+                    }
+                    
+                    // Clear file inputs
+                    document.getElementById('logo').value = '';
+                    document.getElementById('favicon').value = '';
+                    document.getElementById('background').value = '';
+                } else {
+                    showAlert(data.message || 'Error saving customization', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Error saving customization: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                // Restore button state
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            });
+        });
+    }
+});
 </script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.admin', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\WORK-Station\freelance\workana\12\resources\views/admin/settings/index.blade.php ENDPATH**/ ?>
