@@ -57,7 +57,16 @@ class SystemCustomizationController extends Controller
                 }
             }
 
-            $responseData = ['success' => true, 'message' => 'Customization settings updated successfully!'];
+            $responseData = [
+                'success' => true, 
+                'message' => 'Customization settings updated successfully!',
+                'company_name' => $request->input('company_name'),
+                'company_email' => $request->input('company_email'),
+                'company_phone' => $request->input('company_phone'),
+                'company_address' => $request->input('company_address'),
+                'primary_color' => $request->input('primary_color'),
+                'secondary_color' => $request->input('secondary_color')
+            ];
 
             // Handle logo upload
             if ($request->hasFile('logo')) {
@@ -78,10 +87,10 @@ class SystemCustomizationController extends Controller
             }
 
             // Check if this is an AJAX request
-            if ($request->ajax() || $request->has('stay_on_page')) {
+            if ($request->ajax()) {
                 return response()->json($responseData);
             }
-
+            
             return redirect()->route('admin.customization.index')
                 ->with('success', 'Customization settings updated successfully!');
 
@@ -89,7 +98,7 @@ class SystemCustomizationController extends Controller
             $errorMessage = 'Failed to update settings: ' . $e->getMessage();
             
             // Check if this is an AJAX request
-            if ($request->ajax() || $request->has('stay_on_page')) {
+            if ($request->ajax()) {
                 return response()->json([
                     'success' => false,
                     'message' => $errorMessage

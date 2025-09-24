@@ -688,6 +688,44 @@ document.addEventListener('DOMContentLoaded', function() {
                         document.getElementById('background-preview').src = data.background_url;
                     }
                     
+                    // Update form fields with new values
+                    if (data.company_name) {
+                        document.getElementById('company_name').value = data.company_name;
+                        document.getElementById('preview-company').textContent = data.company_name;
+                        document.getElementById('preview-header-company').textContent = data.company_name;
+                    }
+                    if (data.company_email) {
+                        document.getElementById('company_email').value = data.company_email;
+                    }
+                    if (data.company_phone) {
+                        document.getElementById('company_phone').value = data.company_phone;
+                    }
+                    if (data.company_address) {
+                        document.getElementById('company_address').value = data.company_address;
+                    }
+                    if (data.primary_color) {
+                        document.getElementById('primary_color').value = data.primary_color;
+                        document.getElementById('primary_color_text').value = data.primary_color;
+                        // Update preview colors
+                        const previewElement = document.querySelector('.border.rounded.p-3');
+                        if (previewElement) {
+                            previewElement.style.background = `linear-gradient(135deg, ${data.primary_color} 0%, ${data.secondary_color || '#6c757d'} 100%)`;
+                        }
+                        const navbarElement = document.querySelector('.navbar');
+                        if (navbarElement) {
+                            navbarElement.style.backgroundColor = data.primary_color;
+                        }
+                    }
+                    if (data.secondary_color) {
+                        document.getElementById('secondary_color').value = data.secondary_color;
+                        document.getElementById('secondary_color_text').value = data.secondary_color;
+                        // Update preview colors
+                        const previewElement = document.querySelector('.border.rounded.p-3');
+                        if (previewElement) {
+                            previewElement.style.background = `linear-gradient(135deg, ${data.primary_color || '#007bff'} 0%, ${data.secondary_color} 100%)`;
+                        }
+                    }
+                    
                     // Clear file inputs
                     document.getElementById('logo').value = '';
                     document.getElementById('favicon').value = '';
