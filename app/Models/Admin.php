@@ -16,6 +16,7 @@ class Admin extends Authenticatable
         'email',
         'password',
         'two_factor_enabled',
+        'two_factor_verified',
         'two_factor_secret',
         'is_active',
     ];

@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@example.com',
             'password' => Hash::make('password123'),
             'is_active' => true,
-            'two_factor_enabled' => false,
+            'two_factor_enabled' => true,
+            'two_factor_verified' => false,
         ]);
 
         // Create default system settings

@@ -49,20 +49,13 @@ Route::name('auth.')->group(function () {
 
 // Admin Routes
 Route::prefix('admin')->name('admin.')->group(function () {
+    // 2FA routes (accessible without full auth for verification)
+    Route::get('/2fa/verify', [AuthController::class, 'show2FAForm'])->name('2fa.verify');
+    Route::post('/2fa/verify', [AuthController::class, 'verify2FA']);
+
     // Authenticated admin routes
     Route::middleware(['auth:admin', AdminMiddleware::class])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-        // 2FA routes
-        Route::middleware(Admin2FAMiddleware::class)->group(function () {
-            Route::get('/2fa/verify', function () {
-                return view('admin.2fa.verify');
-            })->name('2fa.verify');
-            Route::post('/2fa/verify', function (Request $request) {
-                // Handle 2FA verification
-                return redirect()->route('admin.dashboard');
-            });
-        });
 
         // System Settings
         Route::prefix('settings')->name('settings.')->group(function () {
