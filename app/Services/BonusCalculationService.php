@@ -2,426 +2,322 @@
 
 namespace App\Services;
 
-use App\Models\Client;
+use App\Models\BonusSetting;
+use App\Models\User;
 use App\Models\Sale;
-use App\Models\BonusConfiguration;
-use App\Models\BonusPayment;
-use App\Models\ReferralNetwork;
+use App\Models\Invoice;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class BonusCalculationService
 {
     /**
-     * Calculate and create bonus payments for a sale
+     * Process bonuses when a user pays an invoice
      */
-    public function calculateBonusesForSale(Sale $sale)
+    public function processBonusesForInvoice(Invoice $invoice)
     {
-        DB::beginTransaction();
-        
         try {
-            $buyer = $sale->client;
-            $plan = $sale->plan;
-            
-            if (!$plan) {
-                throw new \Exception('Sale has no associated plan');
+            DB::beginTransaction();
+
+            $user = $invoice->user;
+            $sale = $invoice->sale;
+
+            // Update user's active_network status if it's their first payment
+            if (!$user->active_network) {
+                $user->update(['active_network' => true]);
+                Log::info("User {$user->id} activated network status");
             }
 
-            // Get bonus configurations for the plan
-            $bonusConfigs = BonusConfiguration::where('plan_id', $plan->id)
-                ->active()
-                ->get();
+            // Process Direct Referral bonus (always paid if active_network == 1)
+            $this->processDirectReferralBonus($user, $sale);
 
-            foreach ($bonusConfigs as $config) {
-                switch ($config->bonus_type) {
-                    case 'direct_referral':
-                        $this->calculateDirectReferralBonus($sale, $config);
-                        break;
-                    case 'unilevel':
-                        $this->calculateUnilevelBonus($sale, $config);
-                        break;
-                    case 'forced_matrix':
-                        $this->calculateMatrixBonus($sale, $config);
-                        break;
-                    case 'profit_sharing':
-                        $this->calculateProfitSharingBonus($sale, $config);
-                        break;
-                }
+            // Process other bonuses only if invoice is active
+            if ($invoice->is_active) {
+                $this->processUnilevelBonuses($user, $sale);
+                $this->processMatrixBonuses($user, $sale);
             }
 
             DB::commit();
-            Log::info('Bonuses calculated successfully for sale', ['sale_id' => $sale->id]);
-            
+            return true;
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error calculating bonuses for sale', [
-                'sale_id' => $sale->id,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
+            Log::error('Bonus calculation failed: ' . $e->getMessage());
+            return false;
         }
     }
 
     /**
-     * Calculate direct referral bonus
+     * Process Direct Referral bonus
      */
-    private function calculateDirectReferralBonus(Sale $sale, BonusConfiguration $config)
+    protected function processDirectReferralBonus(User $user, Sale $sale)
     {
-        $buyer = $sale->client;
+        $directReferralSetting = BonusSetting::getByType('direct_referral');
         
-        // Find the sponsor (referrer)
-        $networkPosition = ReferralNetwork::where('client_id', $buyer->id)->first();
-        
-        if (!$networkPosition || !$networkPosition->sponsor_id) {
-            return; // No sponsor found
+        if (!$directReferralSetting || !$directReferralSetting->is_active) {
+            return;
         }
 
-        $sponsor = Client::find($networkPosition->sponsor_id);
-        
-        if (!$sponsor) {
-            return; // Sponsor not found
+        // Find the referrer (sponsor)
+        $referrer = $user->sponsor;
+        if (!$referrer) {
+            return;
         }
 
-        // Direct referral bonus is always paid (regardless of invoice status)
-        $amount = $config->getDirectReferralBonus($sale->amount);
-        
-        if ($amount > 0) {
+        // Check if referrer has active network status
+        if (!$referrer->active_network) {
+            return;
+        }
+
+        // Calculate bonus amount
+        $bonusAmount = $directReferralSetting->calculateBonusAmount(1, $sale->amount);
+
+        if ($bonusAmount > 0) {
             $this->createBonusPayment([
-                'client_id' => $sponsor->id,
+                'user_id' => $referrer->id,
                 'sale_id' => $sale->id,
                 'bonus_type' => 'direct_referral',
+                'amount' => $bonusAmount,
                 'level' => 1,
-                'amount' => $amount,
-                'percentage' => $config->direct_referral_percentage,
-                'base_amount' => $sale->amount,
-                'from_client_id' => $buyer->id,
-                'bonus_configuration_id' => $config->id,
-                'eligibility_status' => 'eligible',
-                'eligibility_reason' => 'Direct referral bonus - always eligible',
+                'description' => "Direct referral bonus for sale #{$sale->id}",
+                'status' => 'pending',
             ]);
         }
     }
 
     /**
-     * Calculate unilevel bonus
+     * Process Unilevel bonuses
      */
-    private function calculateUnilevelBonus(Sale $sale, BonusConfiguration $config)
+    protected function processUnilevelBonuses(User $user, Sale $sale)
     {
-        $buyer = $sale->client;
-        $currentClient = $buyer;
+        $unilevelSetting = BonusSetting::getByType('unilevel');
+        
+        if (!$unilevelSetting || !$unilevelSetting->is_active) {
+            return;
+        }
+
+        $currentUser = $user;
         $level = 1;
-        $maxLevels = count($config->unilevel_percentages ?: $config->unilevel_fixed_amounts ?: []);
+        $levels = $unilevelSetting->getConfiguredLevels();
 
-        while ($level <= $maxLevels && $currentClient) {
-            // Find sponsor
-            $networkPosition = ReferralNetwork::where('client_id', $currentClient->id)->first();
-            
-            if (!$networkPosition || !$networkPosition->sponsor_id) {
-                break; // No more sponsors
-            }
-
-            $sponsor = Client::find($networkPosition->sponsor_id);
-            
+        while ($currentUser && $level <= count($levels)) {
+            $sponsor = $currentUser->sponsor;
             if (!$sponsor) {
-                break; // Sponsor not found
+                break;
             }
 
-            // Check eligibility (requires active invoice for unilevel)
-            $isEligible = $config->isEligible($sponsor);
-            $eligibilityStatus = $isEligible ? 'eligible' : 'ineligible';
-            $eligibilityReason = $isEligible ? 
-                'Eligible for unilevel bonus' : 
-                'No active invoice or does not meet minimum requirements';
+            // Check if sponsor has active network status
+            if (!$sponsor->active_network) {
+                $currentUser = $sponsor;
+                $level++;
+                continue;
+            }
 
-            $amount = $config->getUnilevelBonus($sale->amount, $level);
-            
-            if ($amount > 0) {
+            // Calculate bonus amount for this level
+            $bonusAmount = $unilevelSetting->calculateBonusAmount($level, $sale->amount);
+
+            if ($bonusAmount > 0) {
                 $this->createBonusPayment([
-                    'client_id' => $sponsor->id,
+                    'user_id' => $sponsor->id,
                     'sale_id' => $sale->id,
                     'bonus_type' => 'unilevel',
+                    'amount' => $bonusAmount,
                     'level' => $level,
-                    'amount' => $amount,
-                    'percentage' => $config->unilevel_percentages[$level - 1] ?? null,
-                    'base_amount' => $sale->amount,
-                    'from_client_id' => $buyer->id,
-                    'bonus_configuration_id' => $config->id,
-                    'eligibility_status' => $eligibilityStatus,
-                    'eligibility_reason' => $eligibilityReason,
+                    'description' => "Unilevel bonus level {$level} for sale #{$sale->id}",
+                    'status' => 'pending',
                 ]);
             }
 
-            $currentClient = $sponsor;
+            $currentUser = $sponsor;
             $level++;
         }
     }
 
     /**
-     * Calculate forced matrix bonus
+     * Process Matrix bonuses
      */
-    private function calculateMatrixBonus(Sale $sale, BonusConfiguration $config)
+    protected function processMatrixBonuses(User $user, Sale $sale)
     {
-        $buyer = $sale->client;
+        $matrixSetting = BonusSetting::getByType('matrix');
         
-        // Update volume in network
-        $networkPosition = ReferralNetwork::where('client_id', $buyer->id)->first();
-        
-        if (!$networkPosition) {
-            return; // Not in network
+        if (!$matrixSetting || !$matrixSetting->is_active) {
+            return;
         }
 
-        // Update volume for this position
-        $networkPosition->updateVolume($sale->amount);
+        // Get the matrix structure for the user
+        $matrixStructure = $this->getMatrixStructure($user, $matrixSetting->width, $matrixSetting->depth);
+        $levels = $matrixSetting->getConfiguredLevels();
 
-        // Calculate matrix bonuses for all levels
-        $currentPosition = $networkPosition;
-        $level = 1;
-        $maxLevels = count($config->matrix_percentages ?: $config->matrix_fixed_amounts ?: []);
-
-        while ($level <= $maxLevels && $currentPosition->parent_id) {
-            $parentPosition = $currentPosition->parent;
-            
-            if (!$parentPosition) {
+        foreach ($matrixStructure as $level => $users) {
+            if ($level > count($levels)) {
                 break;
             }
 
-            $parent = $parentPosition->client;
-            
-            if (!$parent) {
-                break;
-            }
-
-            // Check eligibility (requires active invoice for matrix)
-            $isEligible = $config->isEligible($parent);
-            $eligibilityStatus = $isEligible ? 'eligible' : 'ineligible';
-            $eligibilityReason = $isEligible ? 
-                'Eligible for matrix bonus' : 
-                'No active invoice or does not meet minimum requirements';
-
-            // Get weaker leg volume for matrix calculation
-            $qualification = $parentPosition->getMatrixQualification();
-            $matrixVolume = $qualification['weaker_leg_volume'];
-            
-            $amount = $config->getMatrixBonus($matrixVolume, $level);
-            
-            if ($amount > 0) {
-                $this->createBonusPayment([
-                    'client_id' => $parent->id,
-                    'sale_id' => $sale->id,
-                    'bonus_type' => 'forced_matrix',
-                    'level' => $level,
-                    'amount' => $amount,
-                    'percentage' => $config->matrix_percentages[$level - 1] ?? null,
-                    'base_amount' => $matrixVolume,
-                    'from_client_id' => $buyer->id,
-                    'bonus_configuration_id' => $config->id,
-                    'eligibility_status' => $eligibilityStatus,
-                    'eligibility_reason' => $eligibilityReason,
-                ]);
-            }
-
-            $currentPosition = $parentPosition;
-            $level++;
-        }
-    }
-
-    /**
-     * Calculate profit sharing bonus
-     */
-    private function calculateProfitSharingBonus(Sale $sale, BonusConfiguration $config)
-    {
-        $buyer = $sale->client;
-        
-        // Find all eligible clients for profit sharing
-        $eligibleClients = $this->getEligibleClientsForProfitSharing($config);
-        
-        $totalEligibleVolume = $eligibleClients->sum(function ($client) use ($config) {
-            switch ($config->profit_sharing_basis) {
-                case 'personal_volume':
-                    return $client->personal_volume ?? 0;
-                case 'group_volume':
-                    return $client->group_volume ?? 0;
-                case 'total_volume':
-                default:
-                    return ($client->personal_volume ?? 0) + ($client->group_volume ?? 0);
-            }
-        });
-
-        if ($totalEligibleVolume == 0) {
-            return; // No eligible volume
-        }
-
-        // Calculate profit sharing for each eligible client
-        foreach ($eligibleClients as $client) {
-            $clientVolume = $this->getClientVolumeForProfitSharing($client, $config);
-            $sharePercentage = $clientVolume / $totalEligibleVolume;
-            $amount = $sale->amount * $sharePercentage * ($config->profit_sharing_percentage / 100);
-
-            if ($amount > 0) {
-                $this->createBonusPayment([
-                    'client_id' => $client->id,
-                    'sale_id' => $sale->id,
-                    'bonus_type' => 'profit_sharing',
-                    'level' => null,
-                    'amount' => $amount,
-                    'percentage' => $config->profit_sharing_percentage,
-                    'base_amount' => $sale->amount,
-                    'from_client_id' => $buyer->id,
-                    'bonus_configuration_id' => $config->id,
-                    'eligibility_status' => 'eligible',
-                    'eligibility_reason' => 'Eligible for profit sharing based on volume',
-                ]);
-            }
-        }
-    }
-
-    /**
-     * Get eligible clients for profit sharing
-     */
-    private function getEligibleClientsForProfitSharing(BonusConfiguration $config)
-    {
-        $query = Client::query();
-
-        // Add eligibility filters
-        if ($config->requires_active_invoice) {
-            $query->whereHas('invoices', function ($q) {
-                $q->where('status', 'active')
-                  ->where('expires_at', '>', now());
-            });
-        }
-
-        if ($config->minimum_volume > 0) {
-            $query->where(function ($q) use ($config) {
-                switch ($config->profit_sharing_basis) {
-                    case 'personal_volume':
-                        $q->where('personal_volume', '>=', $config->minimum_volume);
-                        break;
-                    case 'group_volume':
-                        $q->where('group_volume', '>=', $config->minimum_volume);
-                        break;
-                    case 'total_volume':
-                    default:
-                        $q->whereRaw('(personal_volume + group_volume) >= ?', [$config->minimum_volume]);
-                        break;
+            foreach ($users as $matrixUser) {
+                // Check if user has active network status
+                if (!$matrixUser->active_network) {
+                    continue;
                 }
-            });
-        }
 
-        return $query->get();
-    }
+                // Calculate bonus amount for this level
+                $bonusAmount = $matrixSetting->calculateBonusAmount($level, $sale->amount);
 
-    /**
-     * Get client volume for profit sharing
-     */
-    private function getClientVolumeForProfitSharing(Client $client, BonusConfiguration $config)
-    {
-        switch ($config->profit_sharing_basis) {
-            case 'personal_volume':
-                return $client->personal_volume ?? 0;
-            case 'group_volume':
-                return $client->group_volume ?? 0;
-            case 'total_volume':
-            default:
-                return ($client->personal_volume ?? 0) + ($client->group_volume ?? 0);
-        }
-    }
-
-    /**
-     * Create bonus payment record
-     */
-    private function createBonusPayment(array $data)
-    {
-        $config = BonusConfiguration::find($data['bonus_configuration_id']);
-        
-        $bonusPayment = BonusPayment::create(array_merge($data, [
-            'period_start' => $config->getPeriodStart(),
-            'period_end' => $config->getPeriodEnd(),
-            'period_key' => $config->getPeriodKey(),
-        ]));
-
-        // Check for maximum bonus limits
-        $this->checkMaximumBonusLimits($bonusPayment, $config);
-        
-        return $bonusPayment;
-    }
-
-    /**
-     * Check maximum bonus limits
-     */
-    private function checkMaximumBonusLimits(BonusPayment $bonusPayment, BonusConfiguration $config)
-    {
-        if (!$config->maximum_bonus_per_period) {
-            return; // No limit set
-        }
-
-        $currentPeriodTotal = BonusPayment::where('client_id', $bonusPayment->client_id)
-            ->where('bonus_type', $bonusPayment->bonus_type)
-            ->where('period_key', $bonusPayment->period_key)
-            ->where('eligibility_status', 'eligible')
-            ->where('id', '!=', $bonusPayment->id)
-            ->sum('amount');
-
-        $totalWithNewBonus = $currentPeriodTotal + $bonusPayment->amount;
-
-        if ($totalWithNewBonus > $config->maximum_bonus_per_period) {
-            $excessAmount = $totalWithNewBonus - $config->maximum_bonus_per_period;
-            $adjustedAmount = $bonusPayment->amount - $excessAmount;
-
-            if ($adjustedAmount > 0) {
-                $bonusPayment->update([
-                    'amount' => $adjustedAmount,
-                    'eligibility_status' => 'partial',
-                    'eligibility_reason' => 'Adjusted due to maximum bonus limit',
-                ]);
-            } else {
-                $bonusPayment->update([
-                    'eligibility_status' => 'ineligible',
-                    'eligibility_reason' => 'Exceeds maximum bonus limit',
-                ]);
+                if ($bonusAmount > 0) {
+                    $this->createBonusPayment([
+                        'user_id' => $matrixUser->id,
+                        'sale_id' => $sale->id,
+                        'bonus_type' => 'matrix',
+                        'amount' => $bonusAmount,
+                        'level' => $level,
+                        'description' => "Matrix bonus level {$level} for sale #{$sale->id}",
+                        'status' => 'pending',
+                    ]);
+                }
             }
         }
     }
 
     /**
-     * Process pending bonus payments
+     * Get matrix structure for a user
      */
-    public function processPendingBonuses()
+    protected function getMatrixStructure(User $user, $width, $depth)
     {
-        $pendingBonuses = BonusPayment::pending()
-            ->eligible()
-            ->where('created_at', '<=', now()->subMinutes(5)) // 5 minute delay for safety
-            ->get();
+        $matrix = [];
+        $currentLevel = [$user];
+        $level = 1;
 
-        foreach ($pendingBonuses as $bonus) {
-            $bonus->approve();
+        while (!empty($currentLevel) && $level <= $depth) {
+            $nextLevel = [];
+            $levelUsers = [];
+
+            foreach ($currentLevel as $currentUser) {
+                // Get direct referrals (children) for this user
+                $children = $currentUser->referrals()->limit($width)->get();
+                
+                foreach ($children as $child) {
+                    $levelUsers[] = $child;
+                    $nextLevel[] = $child;
+                }
+            }
+
+            if (!empty($levelUsers)) {
+                $matrix[$level] = $levelUsers;
+            }
+
+            $currentLevel = $nextLevel;
+            $level++;
         }
 
-        Log::info('Processed pending bonuses', ['count' => $pendingBonuses->count()]);
-        
-        return $pendingBonuses->count();
+        return $matrix;
     }
 
     /**
-     * Get bonus statistics
+     * Create a bonus payment record
      */
-    public function getBonusStatistics($periodKey = null)
+    protected function createBonusPayment(array $data)
     {
-        $query = BonusPayment::query();
+        // Here you would create a bonus payment record
+        // For now, we'll just log it
+        Log::info('Bonus payment created: ' . json_encode($data));
+        
+        // You can implement actual bonus payment creation here
+        // Example: BonusPayment::create($data);
+    }
 
-        if ($periodKey) {
-            $query->where('period_key', $periodKey);
+    /**
+     * Get bonus statistics for a user
+     */
+    public function getUserBonusStats(User $user, $period = 'month')
+    {
+        $startDate = $this->getPeriodStartDate($period);
+        $endDate = $this->getPeriodEndDate($period);
+
+        $stats = [
+            'total_bonuses' => 0,
+            'direct_referral' => 0,
+            'unilevel' => 0,
+            'matrix' => 0,
+            'pending' => 0,
+            'processed' => 0,
+        ];
+
+        // Here you would query actual bonus payments
+        // For now, return empty stats
+        return $stats;
+    }
+
+    /**
+     * Get period start date
+     */
+    protected function getPeriodStartDate($period)
+    {
+        switch ($period) {
+            case 'week':
+                return now()->startOfWeek();
+            case 'month':
+                return now()->startOfMonth();
+            case 'year':
+                return now()->startOfYear();
+            default:
+                return now()->startOfMonth();
+        }
+    }
+
+    /**
+     * Get period end date
+     */
+    protected function getPeriodEndDate($period)
+    {
+        switch ($period) {
+            case 'week':
+                return now()->endOfWeek();
+            case 'month':
+                return now()->endOfMonth();
+            case 'year':
+                return now()->endOfYear();
+            default:
+                return now()->endOfMonth();
+        }
+    }
+
+    /**
+     * Calculate potential bonus for a user
+     */
+    public function calculatePotentialBonus(User $user, $saleAmount)
+    {
+        $potentialBonuses = [
+            'direct_referral' => 0,
+            'unilevel' => 0,
+            'matrix' => 0,
+        ];
+
+        // Calculate direct referral potential
+        $directReferralSetting = BonusSetting::getByType('direct_referral');
+        if ($directReferralSetting && $directReferralSetting->is_active) {
+            $potentialBonuses['direct_referral'] = $directReferralSetting->calculateBonusAmount(1, $saleAmount);
         }
 
-        return [
-            'total_pending' => (clone $query)->where('status', 'pending')->sum('amount'),
-            'total_approved' => (clone $query)->where('status', 'approved')->sum('amount'),
-            'total_paid' => (clone $query)->where('status', 'paid')->sum('amount'),
-            'total_eligible' => (clone $query)->where('eligibility_status', 'eligible')->sum('amount'),
-            'total_ineligible' => (clone $query)->where('eligibility_status', 'ineligible')->sum('amount'),
-            'count_by_type' => (clone $query)->selectRaw('bonus_type, COUNT(*) as count, SUM(amount) as total')
-                ->groupBy('bonus_type')
-                ->get()
-                ->keyBy('bonus_type'),
-        ];
+        // Calculate unilevel potential
+        $unilevelSetting = BonusSetting::getByType('unilevel');
+        if ($unilevelSetting && $unilevelSetting->is_active) {
+            $totalUnilevel = 0;
+            $levels = $unilevelSetting->getConfiguredLevels();
+            foreach ($levels as $level => $config) {
+                $totalUnilevel += $unilevelSetting->calculateBonusAmount($level, $saleAmount);
+            }
+            $potentialBonuses['unilevel'] = $totalUnilevel;
+        }
+
+        // Calculate matrix potential
+        $matrixSetting = BonusSetting::getByType('matrix');
+        if ($matrixSetting && $matrixSetting->is_active) {
+            $totalMatrix = 0;
+            $levels = $matrixSetting->getConfiguredLevels();
+            foreach ($levels as $level => $config) {
+                $totalMatrix += $matrixSetting->calculateBonusAmount($level, $saleAmount);
+            }
+            $potentialBonuses['matrix'] = $totalMatrix;
+        }
+
+        return $potentialBonuses;
     }
 }

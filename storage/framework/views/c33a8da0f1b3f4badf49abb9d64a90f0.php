@@ -134,6 +134,12 @@
                                 Financial
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link <?php echo e(request()->routeIs('admin.bonus*') ? 'active' : ''); ?>" href="<?php echo e(route('admin.bonus.index')); ?>">
+                                <i class="bi bi-gift me-2"></i>
+                                Bonus Settings
+                            </a>
+                        </li>
                     </ul>
 
                     <div class="mt-5 pt-3 border-top border-white-50">

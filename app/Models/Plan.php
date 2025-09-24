@@ -21,6 +21,9 @@ class Plan extends Model
         'commission_fixed',
         'is_active',
         'sort_order',
+        'has_direct_referral_bonus',
+        'direct_referral_is_percentage',
+        'direct_referral_amount',
     ];
 
     protected $casts = [
@@ -30,6 +33,9 @@ class Plan extends Model
         'commission_fixed' => 'decimal:2',
         'is_active' => 'boolean',
         'sort_order' => 'integer',
+        'has_direct_referral_bonus' => 'boolean',
+        'direct_referral_is_percentage' => 'boolean',
+        'direct_referral_amount' => 'decimal:2',
     ];
 
     /**
@@ -85,6 +91,38 @@ class Plan extends Model
         }
 
         return $this->commission_fixed ?? 0;
+    }
+
+    /**
+     * Calculate direct referral bonus
+     */
+    public function calculateDirectReferralBonus($saleAmount)
+    {
+        if (!$this->has_direct_referral_bonus) {
+            return 0;
+        }
+
+        if ($this->direct_referral_is_percentage) {
+            return ($saleAmount * $this->direct_referral_amount) / 100;
+        }
+
+        return $this->direct_referral_amount;
+    }
+
+    /**
+     * Get formatted direct referral bonus
+     */
+    public function getFormattedDirectReferralBonusAttribute()
+    {
+        if (!$this->has_direct_referral_bonus) {
+            return 'Not configured';
+        }
+
+        if ($this->direct_referral_is_percentage) {
+            return $this->direct_referral_amount . '%';
+        }
+
+        return 'R$ ' . number_format($this->direct_referral_amount, 2, ',', '.');
     }
 
     /**

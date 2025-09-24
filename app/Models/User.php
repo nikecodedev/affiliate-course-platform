@@ -27,6 +27,7 @@ class User extends Authenticatable
         'affiliate_code',
         'referral_code',
         'is_active',
+        'active_network',
         'email_verified_at',
     ];
 
@@ -41,6 +42,7 @@ class User extends Authenticatable
         'birth_date' => 'date',
         'is_affiliate' => 'boolean',
         'is_active' => 'boolean',
+        'active_network' => 'boolean',
     ];
 
     /**

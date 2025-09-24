@@ -15,6 +15,8 @@ use App\Http\Controllers\Admin\BonusConfigurationController;
 use App\Http\Controllers\Admin\BonusPaymentController;
 use App\Http\Controllers\Admin\PaymentGatewayController;
 use App\Http\Controllers\Admin\SystemCustomizationController;
+use App\Http\Controllers\Admin\GlobalBonusConfigurationController;
+use App\Http\Controllers\Admin\BonusController;
 use App\Http\Controllers\WebhookController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\Admin2FAMiddleware;
@@ -123,6 +125,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('configurations/statistics', [BonusConfigurationController::class, 'statistics'])->name('configurations.statistics');
                 
                 Route::resource('payments', BonusPaymentController::class);
+            });
+
+            // Global Bonus Configuration Management
+            Route::prefix('bonus-configurations')->name('bonus-configurations.')->group(function () {
+                Route::prefix('global')->name('global.')->group(function () {
+                    Route::get('/', [GlobalBonusConfigurationController::class, 'index'])->name('index');
+                    Route::get('/create', [GlobalBonusConfigurationController::class, 'create'])->name('create');
+                    Route::post('/', [GlobalBonusConfigurationController::class, 'store'])->name('store');
+                    Route::get('/{globalBonusConfiguration}', [GlobalBonusConfigurationController::class, 'show'])->name('show');
+                    Route::get('/{globalBonusConfiguration}/edit', [GlobalBonusConfigurationController::class, 'edit'])->name('edit');
+                    Route::put('/{globalBonusConfiguration}', [GlobalBonusConfigurationController::class, 'update'])->name('update');
+                    Route::delete('/{globalBonusConfiguration}', [GlobalBonusConfigurationController::class, 'destroy'])->name('destroy');
+                    Route::post('/{globalBonusConfiguration}/toggle', [GlobalBonusConfigurationController::class, 'toggle'])->name('toggle');
+                    Route::post('/{globalBonusConfiguration}/add-level', [GlobalBonusConfigurationController::class, 'addLevel'])->name('add-level');
+                    Route::delete('/levels/{bonusLevel}', [GlobalBonusConfigurationController::class, 'removeLevel'])->name('remove-level');
+                });
+            });
+
+            // Bonus Settings Management
+            Route::prefix('bonus')->name('bonus.')->group(function () {
+                Route::get('/', [BonusController::class, 'index'])->name('index');
+                Route::get('/{type}/edit', [BonusController::class, 'edit'])->name('edit');
+                Route::post('/{type}/update', [BonusController::class, 'update'])->name('update');
+                Route::post('/{type}/toggle', [BonusController::class, 'toggle'])->name('toggle');
+                Route::post('/{type}/add-level', [BonusController::class, 'addLevel'])->name('add-level');
+                Route::post('/{type}/remove-level', [BonusController::class, 'removeLevel'])->name('remove-level');
             });
 
             // Payment Gateway Management
