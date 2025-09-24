@@ -237,10 +237,10 @@
                             </a>
                         </li>
                         
-                        @if(auth('client')->user() && auth('client')->user()->hasCourseAccess())
+                        @if(auth()->user() && auth()->user()->hasActiveInvoice())
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('client.training.*') ? 'active' : '' }}" 
-                               href="{{ route('client.training.index') }}">
+                            <a class="nav-link {{ request()->routeIs('training.*') ? 'active' : '' }}" 
+                               href="{{ route('training.index') }}">
                                 <i class="bi bi-book"></i>
                                 Training
                             </a>

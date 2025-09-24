@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Create New Course')
+@section('title', 'Edit Module: ' . $module->title)
 
 @section('content')
 <div class="container-fluid">
@@ -9,19 +9,20 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="fas fa-plus me-2"></i>
-                        Create New Course
+                        <i class="fas fa-edit me-2"></i>
+                        Edit Module: {{ $module->title }}
                     </h3>
                     <div class="card-tools">
-                        <a href="{{ route('admin.courses.index') }}" class="btn btn-secondary btn-sm">
+                        <a href="{{ route('admin.courses.modules.index', $course) }}" class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left me-1"></i>
-                            Back to Courses
+                            Back to Modules
                         </a>
                     </div>
                 </div>
 
-                <form action="{{ route('admin.courses.store') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('admin.courses.modules.update', [$course, $module]) }}" method="POST">
                     @csrf
+                    @method('PUT')
                     <div class="card-body">
                         <!-- Success/Error Messages -->
                         @if($errors->any())
@@ -38,26 +39,26 @@
                         @endif
 
                         <div class="row">
-                            <!-- Basic Information -->
+                            <!-- Module Information -->
                             <div class="col-md-8">
                                 <div class="card">
                                     <div class="card-header">
                                         <h5 class="card-title mb-0">
                                             <i class="fas fa-info-circle me-2"></i>
-                                            Basic Information
+                                            Module Information
                                         </h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="mb-3">
                                             <label for="title" class="form-label">
-                                                Course Title <span class="text-danger">*</span>
+                                                Module Title <span class="text-danger">*</span>
                                             </label>
                                             <input type="text" 
                                                    class="form-control @error('title') is-invalid @enderror" 
                                                    id="title" 
                                                    name="title" 
-                                                   value="{{ old('title') }}" 
-                                                   placeholder="Enter course title"
+                                                   value="{{ old('title', $module->title) }}" 
+                                                   placeholder="Enter module title"
                                                    required>
                                             @error('title')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -65,26 +66,16 @@
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="description" class="form-label">Description</label>
-                                            <textarea class="form-control @error('description') is-invalid @enderror" 
-                                                      id="description" 
-                                                      name="description" 
-                                                      rows="4" 
-                                                      placeholder="Enter course description">{{ old('description') }}</textarea>
-                                            @error('description')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="image" class="form-label">Course Image</label>
-                                            <input type="file" 
-                                                   class="form-control @error('image') is-invalid @enderror" 
-                                                   id="image" 
-                                                   name="image" 
-                                                   accept="image/*">
-                                            <div class="form-text">Upload an image for the course (JPEG, PNG, JPG, GIF, SVG - Max 2MB)</div>
-                                            @error('image')
+                                            <label for="order" class="form-label">Order</label>
+                                            <input type="number" 
+                                                   class="form-control @error('order') is-invalid @enderror" 
+                                                   id="order" 
+                                                   name="order" 
+                                                   value="{{ old('order', $module->order) }}" 
+                                                   min="1"
+                                                   placeholder="Module order">
+                                            <div class="form-text">Lower numbers appear first</div>
+                                            @error('order')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
@@ -92,49 +83,71 @@
                                 </div>
                             </div>
 
-                            <!-- Settings -->
+                            <!-- Module Statistics -->
                             <div class="col-md-4">
                                 <div class="card">
                                     <div class="card-header">
                                         <h5 class="card-title mb-0">
-                                            <i class="fas fa-cog me-2"></i>
-                                            Settings
+                                            <i class="fas fa-chart-bar me-2"></i>
+                                            Module Statistics
                                         </h5>
                                     </div>
                                     <div class="card-body">
-                                        <div class="mb-3">
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" 
-                                                       type="checkbox" 
-                                                       id="status" 
-                                                       name="status" 
-                                                       value="1" 
-                                                       {{ old('status', true) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="status">
-                                                    Active Course
-                                                </label>
+                                        <div class="row text-center">
+                                            <div class="col-6">
+                                                <h5 class="text-primary">{{ $module->lessons->count() }}</h5>
+                                                <small class="text-muted">Lessons</small>
                                             </div>
-                                            <div class="form-text">Active courses are visible to users with active invoices</div>
+                                            <div class="col-6">
+                                                <h5 class="text-success">{{ $module->order }}</h5>
+                                                <small class="text-muted">Order</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-3">
+                                            <small class="text-muted">
+                                                <strong>Created:</strong> {{ $module->created_at->format('M d, Y') }}<br>
+                                                <strong>Updated:</strong> {{ $module->updated_at->format('M d, Y') }}
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Image Preview -->
+                                <!-- Course Information -->
                                 <div class="card">
                                     <div class="card-header">
                                         <h5 class="card-title mb-0">
-                                            <i class="fas fa-image me-2"></i>
-                                            Image Preview
+                                            <i class="fas fa-graduation-cap me-2"></i>
+                                            Course Information
                                         </h5>
                                     </div>
-                                    <div class="card-body text-center">
-                                        <div id="imagePreview" class="bg-light d-flex align-items-center justify-content-center" 
-                                             style="height: 200px; border: 2px dashed #dee2e6;">
-                                            <div>
-                                                <i class="fas fa-image fa-3x text-muted mb-2"></i>
-                                                <p class="text-muted mb-0">No image selected</p>
-                                            </div>
-                                        </div>
+                                    <div class="card-body">
+                                        <h6>{{ $course->title }}</h6>
+                                        @if($course->description)
+                                            <p class="text-muted small">{{ Str::limit($course->description, 100) }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <!-- Quick Actions -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-bolt me-2"></i>
+                                            Quick Actions
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <a href="{{ route('admin.courses.modules.lessons.index', [$course, $module]) }}" 
+                                           class="btn btn-outline-primary btn-sm w-100 mb-2">
+                                            <i class="fas fa-list me-1"></i>
+                                            Manage Lessons
+                                        </a>
+                                        <a href="{{ route('admin.courses.modules.lessons.create', [$course, $module]) }}" 
+                                           class="btn btn-outline-success btn-sm w-100">
+                                            <i class="fas fa-plus me-1"></i>
+                                            Add Lesson
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -144,7 +157,7 @@
                     <div class="card-footer">
                         <div class="row">
                             <div class="col-md-6">
-                                <a href="{{ route('admin.courses.index') }}" class="btn btn-secondary">
+                                <a href="{{ route('admin.courses.modules.index', $course) }}" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left me-1"></i>
                                     Cancel
                                 </a>
@@ -152,7 +165,7 @@
                             <div class="col-md-6 text-end">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-save me-1"></i>
-                                    Create Course
+                                    Update Module
                                 </button>
                             </div>
                         </div>
@@ -167,33 +180,6 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Image preview functionality
-    const imageInput = document.getElementById('image');
-    const imagePreview = document.getElementById('imagePreview');
-
-    imageInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.innerHTML = `
-                    <img src="${e.target.result}" 
-                         alt="Course Preview" 
-                         class="img-fluid rounded" 
-                         style="max-height: 200px; object-fit: cover;">
-                `;
-            };
-            reader.readAsDataURL(file);
-        } else {
-            imagePreview.innerHTML = `
-                <div>
-                    <i class="fas fa-image fa-3x text-muted mb-2"></i>
-                    <p class="text-muted mb-0">No image selected</p>
-                </div>
-            `;
-        }
-    });
-
     // Form validation
     const form = document.querySelector('form');
     form.addEventListener('submit', function(e) {
@@ -201,7 +187,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!title) {
             e.preventDefault();
-            showAlert('Please enter a course title.', 'danger');
+            showAlert('Please enter a module title.', 'danger');
             return;
         }
     });
@@ -229,3 +215,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+

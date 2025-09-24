@@ -88,7 +88,7 @@ class PlanController extends Controller
      */
     public function show(Plan $plan)
     {
-        $plan->load(['products', 'courses.modules.lessons']);
+        $plan->load(['course']);
         return view('admin.plans.show', compact('plan'));
     }
 
@@ -97,11 +97,8 @@ class PlanController extends Controller
      */
     public function edit(Plan $plan)
     {
-        $plan->load(['products', 'courses']);
         $courses = Course::active()->ordered()->get();
-        $selectedCourses = $plan->courses->pluck('id')->toArray();
-
-        return view('admin.plans.edit', compact('plan', 'courses', 'selectedCourses'));
+        return view('admin.plans.edit', compact('plan', 'courses'));
     }
 
     /**
@@ -161,10 +158,10 @@ class PlanController extends Controller
      */
     public function destroy(Plan $plan)
     {
-        // Check if plan has sales
-        if ($plan->sales()->exists()) {
+        // Check if plan has invoices
+        if ($plan->invoices()->exists()) {
             return redirect()->back()
-                ->with('error', 'Cannot delete plan with existing sales.');
+                ->with('error', 'Cannot delete plan with existing invoices.');
         }
 
         // Delete image
@@ -183,12 +180,12 @@ class PlanController extends Controller
      */
     public function toggleStatus(Plan $plan)
     {
-        $plan->is_active = !$plan->is_active;
+        $plan->status = !$plan->status;
         $plan->save();
 
         return response()->json([
             'success' => true,
-            'is_active' => $plan->is_active,
+            'status' => $plan->status,
         ]);
     }
 }

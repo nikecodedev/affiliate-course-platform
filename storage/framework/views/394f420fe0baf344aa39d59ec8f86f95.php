@@ -1,6 +1,6 @@
 
 
-<?php $__env->startSection('title', 'Create New Course'); ?>
+<?php $__env->startSection('title', 'Create New Module'); ?>
 
 <?php $__env->startSection('content'); ?>
 <div class="container-fluid">
@@ -10,17 +10,18 @@
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-plus me-2"></i>
-                        Create New Course
+                        Create New Module for: <?php echo e($course->title); ?>
+
                     </h3>
                     <div class="card-tools">
-                        <a href="<?php echo e(route('admin.courses.index')); ?>" class="btn btn-secondary btn-sm">
+                        <a href="<?php echo e(route('admin.courses.modules.index', $course)); ?>" class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left me-1"></i>
-                            Back to Courses
+                            Back to Modules
                         </a>
                     </div>
                 </div>
 
-                <form action="<?php echo e(route('admin.courses.store')); ?>" method="POST" enctype="multipart/form-data">
+                <form action="<?php echo e(route('admin.courses.modules.store', $course)); ?>" method="POST">
                     <?php echo csrf_field(); ?>
                     <div class="card-body">
                         <!-- Success/Error Messages -->
@@ -38,19 +39,19 @@
                         <?php endif; ?>
 
                         <div class="row">
-                            <!-- Basic Information -->
+                            <!-- Module Information -->
                             <div class="col-md-8">
                                 <div class="card">
                                     <div class="card-header">
                                         <h5 class="card-title mb-0">
                                             <i class="fas fa-info-circle me-2"></i>
-                                            Basic Information
+                                            Module Information
                                         </h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="mb-3">
                                             <label for="title" class="form-label">
-                                                Course Title <span class="text-danger">*</span>
+                                                Module Title <span class="text-danger">*</span>
                                             </label>
                                             <input type="text" 
                                                    class="form-control <?php $__errorArgs = ['title'];
@@ -64,7 +65,7 @@ unset($__errorArgs, $__bag); ?>"
                                                    id="title" 
                                                    name="title" 
                                                    value="<?php echo e(old('title')); ?>" 
-                                                   placeholder="Enter course title"
+                                                   placeholder="Enter module title"
                                                    required>
                                             <?php $__errorArgs = ['title'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -79,8 +80,9 @@ unset($__errorArgs, $__bag); ?>
                                         </div>
 
                                         <div class="mb-3">
-                                            <label for="description" class="form-label">Description</label>
-                                            <textarea class="form-control <?php $__errorArgs = ['description'];
+                                            <label for="order" class="form-label">Order</label>
+                                            <input type="number" 
+                                                   class="form-control <?php $__errorArgs = ['order'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -88,38 +90,13 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                                      id="description" 
-                                                      name="description" 
-                                                      rows="4" 
-                                                      placeholder="Enter course description"><?php echo e(old('description')); ?></textarea>
-                                            <?php $__errorArgs = ['description'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?>
-                                                <div class="invalid-feedback"><?php echo e($message); ?></div>
-                                            <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                                        </div>
-
-                                        <div class="mb-3">
-                                            <label for="image" class="form-label">Course Image</label>
-                                            <input type="file" 
-                                                   class="form-control <?php $__errorArgs = ['image'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" 
-                                                   id="image" 
-                                                   name="image" 
-                                                   accept="image/*">
-                                            <div class="form-text">Upload an image for the course (JPEG, PNG, JPG, GIF, SVG - Max 2MB)</div>
-                                            <?php $__errorArgs = ['image'];
+                                                   id="order" 
+                                                   name="order" 
+                                                   value="<?php echo e(old('order', $course->modules()->max('order') + 1)); ?>" 
+                                                   min="1"
+                                                   placeholder="Module order">
+                                            <div class="form-text">Leave empty to add at the end</div>
+                                            <?php $__errorArgs = ['order'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -134,49 +111,46 @@ unset($__errorArgs, $__bag); ?>
                                 </div>
                             </div>
 
-                            <!-- Settings -->
+                            <!-- Course Information -->
                             <div class="col-md-4">
                                 <div class="card">
                                     <div class="card-header">
                                         <h5 class="card-title mb-0">
-                                            <i class="fas fa-cog me-2"></i>
-                                            Settings
+                                            <i class="fas fa-graduation-cap me-2"></i>
+                                            Course Information
                                         </h5>
                                     </div>
                                     <div class="card-body">
-                                        <div class="mb-3">
-                                            <div class="form-check form-switch">
-                                                <input class="form-check-input" 
-                                                       type="checkbox" 
-                                                       id="status" 
-                                                       name="status" 
-                                                       value="1" 
-                                                       <?php echo e(old('status', true) ? 'checked' : ''); ?>>
-                                                <label class="form-check-label" for="status">
-                                                    Active Course
-                                                </label>
-                                            </div>
-                                            <div class="form-text">Active courses are visible to users with active invoices</div>
+                                        <h6><?php echo e($course->title); ?></h6>
+                                        <?php if($course->description): ?>
+                                            <p class="text-muted small"><?php echo e(Str::limit($course->description, 100)); ?></p>
+                                        <?php endif; ?>
+                                        
+                                        <div class="mt-3">
+                                            <small class="text-muted">
+                                                <strong>Current Modules:</strong> <?php echo e($course->modules->count()); ?><br>
+                                                <strong>Total Lessons:</strong> <?php echo e($course->modules->sum(function($module) { return $module->lessons->count(); })); ?>
+
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Image Preview -->
+                                <!-- Next Steps -->
                                 <div class="card">
                                     <div class="card-header">
                                         <h5 class="card-title mb-0">
-                                            <i class="fas fa-image me-2"></i>
-                                            Image Preview
+                                            <i class="fas fa-lightbulb me-2"></i>
+                                            Next Steps
                                         </h5>
                                     </div>
-                                    <div class="card-body text-center">
-                                        <div id="imagePreview" class="bg-light d-flex align-items-center justify-content-center" 
-                                             style="height: 200px; border: 2px dashed #dee2e6;">
-                                            <div>
-                                                <i class="fas fa-image fa-3x text-muted mb-2"></i>
-                                                <p class="text-muted mb-0">No image selected</p>
-                                            </div>
-                                        </div>
+                                    <div class="card-body">
+                                        <ol class="small">
+                                            <li>Create the module</li>
+                                            <li>Add lessons to the module</li>
+                                            <li>Organize lesson order</li>
+                                            <li>Add video content and attachments</li>
+                                        </ol>
                                     </div>
                                 </div>
                             </div>
@@ -186,7 +160,7 @@ unset($__errorArgs, $__bag); ?>
                     <div class="card-footer">
                         <div class="row">
                             <div class="col-md-6">
-                                <a href="<?php echo e(route('admin.courses.index')); ?>" class="btn btn-secondary">
+                                <a href="<?php echo e(route('admin.courses.modules.index', $course)); ?>" class="btn btn-secondary">
                                     <i class="fas fa-arrow-left me-1"></i>
                                     Cancel
                                 </a>
@@ -194,7 +168,7 @@ unset($__errorArgs, $__bag); ?>
                             <div class="col-md-6 text-end">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-save me-1"></i>
-                                    Create Course
+                                    Create Module
                                 </button>
                             </div>
                         </div>
@@ -209,33 +183,6 @@ unset($__errorArgs, $__bag); ?>
 <?php $__env->startSection('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Image preview functionality
-    const imageInput = document.getElementById('image');
-    const imagePreview = document.getElementById('imagePreview');
-
-    imageInput.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.innerHTML = `
-                    <img src="${e.target.result}" 
-                         alt="Course Preview" 
-                         class="img-fluid rounded" 
-                         style="max-height: 200px; object-fit: cover;">
-                `;
-            };
-            reader.readAsDataURL(file);
-        } else {
-            imagePreview.innerHTML = `
-                <div>
-                    <i class="fas fa-image fa-3x text-muted mb-2"></i>
-                    <p class="text-muted mb-0">No image selected</p>
-                </div>
-            `;
-        }
-    });
-
     // Form validation
     const form = document.querySelector('form');
     form.addEventListener('submit', function(e) {
@@ -243,7 +190,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!title) {
             e.preventDefault();
-            showAlert('Please enter a course title.', 'danger');
+            showAlert('Please enter a module title.', 'danger');
             return;
         }
     });
@@ -271,4 +218,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <?php $__env->stopSection(); ?>
-<?php echo $__env->make('layouts.admin', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\WORK-Station\freelance\workana\12\resources\views/admin/courses/create.blade.php ENDPATH**/ ?>
+
+
+<?php echo $__env->make('layouts.admin', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\WORK-Station\freelance\workana\12\resources\views/admin/modules/create.blade.php ENDPATH**/ ?>

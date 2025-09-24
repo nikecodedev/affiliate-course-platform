@@ -9,6 +9,9 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SaleController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\ModuleController;
+use App\Http\Controllers\Admin\LessonController;
+use App\Http\Controllers\Client\TrainingController;
 use App\Http\Controllers\Admin\FinancialController;
 use App\Http\Controllers\Admin\ReferralNetworkController;
 use App\Http\Controllers\Admin\BonusConfigurationController;
@@ -155,6 +158,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             // Plan Management
             Route::resource('plans', PlanController::class);
+            Route::post('plans/{plan}/toggle-status', [PlanController::class, 'toggleStatus'])->name('plans.toggle-status');
+
+            // Course Management
+            Route::resource('courses', CourseController::class);
+            Route::post('courses/{course}/toggle-status', [CourseController::class, 'toggleStatus'])->name('courses.toggle-status');
+            
+            // Module Management (nested under courses)
+            Route::resource('courses.modules', ModuleController::class)->except(['show']);
+            Route::post('courses/{course}/modules/update-order', [ModuleController::class, 'updateOrder'])->name('modules.update-order');
+            
+            // Lesson Management (nested under courses and modules)
+            Route::resource('courses.modules.lessons', LessonController::class)->except(['show']);
+            Route::post('courses/{course}/modules/{module}/lessons/update-order', [LessonController::class, 'updateOrder'])->name('lessons.update-order');
+            Route::get('courses/{course}/modules/{module}/lessons/{lesson}/download', [LessonController::class, 'downloadAttachment'])->name('lessons.download');
 
             // Payment Gateway Management
             Route::prefix('gateways')->name('gateways.')->group(function () {
@@ -178,6 +195,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 return view('admin.audit-logs.index');
             })->name('audit-logs');
         });
+    });
+});
+
+// Client routes (authenticated users)
+Route::middleware(['auth'])->group(function () {
+    // Training routes
+    Route::prefix('training')->name('training.')->group(function () {
+        Route::get('/', [TrainingController::class, 'index'])->name('index');
+        Route::get('/courses/{course}', [TrainingController::class, 'showCourse'])->name('course');
+        Route::get('/courses/{course}/modules/{module}/lessons/{lesson}', [TrainingController::class, 'showLesson'])->name('lesson');
+        Route::post('/courses/{course}/modules/{module}/lessons/{lesson}/complete', [TrainingController::class, 'completeLesson'])->name('complete');
+        Route::get('/courses/{course}/modules/{module}/lessons/{lesson}/download', [TrainingController::class, 'downloadAttachment'])->name('download');
+        Route::get('/courses/{course}/progress', [TrainingController::class, 'getProgress'])->name('progress');
     });
 });
 

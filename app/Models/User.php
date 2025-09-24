@@ -176,5 +176,55 @@ class User extends Authenticatable
     {
         return $this->pending_commission > 0;
     }
+
+    /**
+     * Get the lessons the user has access to
+     */
+    public function lessons()
+    {
+        return $this->belongsToMany(Lesson::class, 'lesson_user')
+                    ->withPivot(['completed', 'completed_at'])
+                    ->withTimestamps();
+    }
+
+    /**
+     * Check if user has active invoice
+     */
+    public function hasActiveInvoice()
+    {
+        return $this->invoices()
+            ->where('status', 'paid')
+            ->where('is_active', true)
+            ->exists();
+    }
+
+    /**
+     * Get user's course progress
+     */
+    public function getCourseProgress($courseId)
+    {
+        $course = Course::find($courseId);
+        if (!$course) {
+            return 0;
+        }
+
+        $totalLessons = $course->modules()
+            ->withCount('lessons')
+            ->get()
+            ->sum('lessons_count');
+
+        if ($totalLessons === 0) {
+            return 0;
+        }
+
+        $completedLessons = $this->lessons()
+            ->whereHas('module', function ($query) use ($courseId) {
+                $query->where('course_id', $courseId);
+            })
+            ->where('completed', true)
+            ->count();
+
+        return round(($completedLessons / $totalLessons) * 100, 2);
+    }
 }
 

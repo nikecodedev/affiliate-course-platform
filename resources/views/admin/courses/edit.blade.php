@@ -1,145 +1,165 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Course')
-@section('page-title', 'Edit Course')
+@section('title', 'Edit Course: ' . $course->title)
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-pencil me-2"></i>Edit Course: {{ $course->title }}
-                    </h5>
-                    <a href="{{ route('admin.courses.show', $course) }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-eye me-2"></i>View Course
-                    </a>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-edit me-2"></i>
+                        Edit Course: {{ $course->title }}
+                    </h3>
+                    <div class="card-tools">
+                        <a href="{{ route('admin.courses.index') }}" class="btn btn-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to Courses
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div class="card-body">
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
 
-                @if($errors->any())
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="bi bi-exclamation-triangle me-2"></i>
-                        <ul class="mb-0">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                @endif
-
-                <form method="POST" action="{{ route('admin.courses.update', $course) }}" enctype="multipart/form-data">
+                <form action="{{ route('admin.courses.update', $course) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
-                    
-                    <div class="row">
-                        <div class="col-md-8">
-                            <div class="mb-3">
-                                <label for="title" class="form-label">Course Title <span class="text-danger">*</span></label>
-                                <input type="text" 
-                                       class="form-control @error('title') is-invalid @enderror" 
-                                       id="title" 
-                                       name="title" 
-                                       value="{{ old('title', $course->title) }}" 
-                                       required>
-                                @error('title')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                    <div class="card-body">
+                        <!-- Success/Error Messages -->
+                        @if($errors->any())
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Please fix the following errors:</strong>
+                                <ul class="mb-0 mt-2">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
+                        @endif
 
-                            <div class="mb-3">
-                                <label for="description" class="form-label">Description</label>
-                                <textarea class="form-control @error('description') is-invalid @enderror" 
-                                          id="description" 
-                                          name="description" 
-                                          rows="6">{{ old('description', $course->description) }}</textarea>
-                                @error('description')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <div class="col-md-4">
-                            <div class="mb-3">
-                                <label for="image" class="form-label">Course Image</label>
-                                
-                                @if($course->image)
-                                    <div class="mb-2">
-                                        <img src="{{ asset('storage/' . $course->image) }}" 
-                                             class="img-thumbnail" 
-                                             alt="{{ $course->title }}"
-                                             style="max-width: 200px; max-height: 200px;">
+                        <div class="row">
+                            <!-- Basic Information -->
+                            <div class="col-md-8">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Basic Information
+                                        </h5>
                                     </div>
-                                @endif
-                                
-                                <input type="file" 
-                                       class="form-control @error('image') is-invalid @enderror" 
-                                       id="image" 
-                                       name="image" 
-                                       accept="image/*">
-                                <div class="form-text">Upload a new image to replace the current one (max 2MB)</div>
-                                @error('image')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" 
-                                           type="checkbox" 
-                                           id="is_active" 
-                                           name="is_active" 
-                                           value="1" 
-                                           {{ old('is_active', $course->is_active) ? 'checked' : '' }}>
-                                    <label class="form-check-label" for="is_active">
-                                        Active Course
-                                    </label>
-                                </div>
-                                <div class="form-text">Make this course available to students</div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="sort_order" class="form-label">Sort Order</label>
-                                <input type="number" 
-                                       class="form-control @error('sort_order') is-invalid @enderror" 
-                                       id="sort_order" 
-                                       name="sort_order" 
-                                       value="{{ old('sort_order', $course->sort_order ?? 0) }}" 
-                                       min="0">
-                                <div class="form-text">Lower numbers appear first</div>
-                                @error('sort_order')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <!-- Course Statistics -->
-                            <div class="card bg-light">
-                                <div class="card-body">
-                                    <h6 class="card-title">
-                                        <i class="bi bi-graph-up me-2"></i>Course Statistics
-                                    </h6>
-                                    <div class="row text-center">
-                                        <div class="col-6">
-                                            <div class="text-primary">
-                                                <i class="bi bi-list-ol"></i>
-                                                <div class="fw-semibold">{{ $course->modules->count() }}</div>
-                                                <small>Modules</small>
-                                            </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label for="title" class="form-label">
+                                                Course Title <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-control @error('title') is-invalid @enderror" 
+                                                   id="title" 
+                                                   name="title" 
+                                                   value="{{ old('title', $course->title) }}" 
+                                                   placeholder="Enter course title"
+                                                   required>
+                                            @error('title')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
                                         </div>
-                                        <div class="col-6">
-                                            <div class="text-success">
-                                                <i class="bi bi-play-circle"></i>
-                                                <div class="fw-semibold">{{ $course->modules->sum('lessons_count') }}</div>
-                                                <small>Lessons</small>
+
+                                        <div class="mb-3">
+                                            <label for="description" class="form-label">Description</label>
+                                            <textarea class="form-control @error('description') is-invalid @enderror" 
+                                                      id="description" 
+                                                      name="description" 
+                                                      rows="4" 
+                                                      placeholder="Enter course description">{{ old('description', $course->description) }}</textarea>
+                                            @error('description')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="image" class="form-label">Course Image</label>
+                                            <input type="file" 
+                                                   class="form-control @error('image') is-invalid @enderror" 
+                                                   id="image" 
+                                                   name="image" 
+                                                   accept="image/*">
+                                            <div class="form-text">Upload a new image to replace the current one (JPEG, PNG, JPG, GIF, SVG - Max 2MB)</div>
+                                            @error('image')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Settings -->
+                            <div class="col-md-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-cog me-2"></i>
+                                            Settings
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" 
+                                                       type="checkbox" 
+                                                       id="status" 
+                                                       name="status" 
+                                                       value="1" 
+                                                       {{ old('status', $course->status) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="status">
+                                                    Active Course
+                                                </label>
+                                            </div>
+                                            <div class="form-text">Active courses are visible to users with active invoices</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Current Image -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-image me-2"></i>
+                                            Current Image
+                                        </h5>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        @if($course->image)
+                                            <img src="{{ asset('storage/' . $course->image) }}" 
+                                                 alt="{{ $course->title }}" 
+                                                 class="img-fluid rounded" 
+                                                 style="max-height: 200px; object-fit: cover;">
+                                        @else
+                                            <div class="bg-light d-flex align-items-center justify-content-center" 
+                                                 style="height: 200px; border: 2px dashed #dee2e6;">
+                                                <div>
+                                                    <i class="fas fa-image fa-3x text-muted mb-2"></i>
+                                                    <p class="text-muted mb-0">No image</p>
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <!-- New Image Preview -->
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title mb-0">
+                                            <i class="fas fa-eye me-2"></i>
+                                            New Image Preview
+                                        </h5>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <div id="imagePreview" class="bg-light d-flex align-items-center justify-content-center" 
+                                             style="height: 200px; border: 2px dashed #dee2e6;">
+                                            <div>
+                                                <i class="fas fa-image fa-3x text-muted mb-2"></i>
+                                                <p class="text-muted mb-0">No new image selected</p>
                                             </div>
                                         </div>
                                     </div>
@@ -148,60 +168,22 @@
                         </div>
                     </div>
 
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <a href="{{ route('admin.courses.index') }}" class="btn btn-secondary me-2">
-                                        <i class="bi bi-arrow-left me-2"></i>Back to Courses
-                                    </a>
-                                    <a href="{{ route('admin.courses.show', $course) }}" class="btn btn-outline-info">
-                                        <i class="bi bi-eye me-2"></i>View Course
-                                    </a>
-                                </div>
-                                <div>
-                                    <button type="button" class="btn btn-outline-danger me-2" 
-                                            onclick="deleteCourse()">
-                                        <i class="bi bi-trash me-2"></i>Delete Course
-                                    </button>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="bi bi-save me-2"></i>Update Course
-                                    </button>
-                                </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <a href="{{ route('admin.courses.index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i>
+                                    Cancel
+                                </a>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>
+                                    Update Course
+                                </button>
                             </div>
                         </div>
                     </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-exclamation-triangle text-danger me-2"></i>Delete Course
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Are you sure you want to delete the course <strong>"{{ $course->title }}"</strong>?</p>
-                <p class="text-danger">
-                    <i class="bi bi-warning me-2"></i>
-                    This action cannot be undone. All modules and lessons in this course will also be deleted.
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form method="POST" action="{{ route('admin.courses.destroy', $course) }}" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">
-                        <i class="bi bi-trash me-2"></i>Delete Course
-                    </button>
                 </form>
             </div>
         </div>
@@ -211,31 +193,66 @@
 
 @section('scripts')
 <script>
-// Image preview functionality
-document.getElementById('image').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            // Create or update image preview
-            let preview = document.getElementById('image-preview');
-            if (!preview) {
-                preview = document.createElement('img');
-                preview.id = 'image-preview';
-                preview.className = 'img-thumbnail mt-2';
-                preview.style.maxWidth = '200px';
-                preview.style.maxHeight = '200px';
-                e.target.parentNode.appendChild(preview);
+document.addEventListener('DOMContentLoaded', function() {
+    // Image preview functionality
+    const imageInput = document.getElementById('image');
+    const imagePreview = document.getElementById('imagePreview');
+
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.innerHTML = `
+                    <img src="${e.target.result}" 
+                         alt="Course Preview" 
+                         class="img-fluid rounded" 
+                         style="max-height: 200px; object-fit: cover;">
+                `;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            imagePreview.innerHTML = `
+                <div>
+                    <i class="fas fa-image fa-3x text-muted mb-2"></i>
+                    <p class="text-muted mb-0">No new image selected</p>
+                </div>
+            `;
+        }
+    });
+
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const title = document.getElementById('title').value.trim();
+        
+        if (!title) {
+            e.preventDefault();
+            showAlert('Please enter a course title.', 'danger');
+            return;
+        }
+    });
+
+    // Alert function
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const container = document.querySelector('.card-body');
+        container.insertBefore(alertDiv, container.firstChild);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
             }
-            preview.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
+        }, 5000);
     }
 });
-
-function deleteCourse() {
-    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    modal.show();
-}
 </script>
 @endsection

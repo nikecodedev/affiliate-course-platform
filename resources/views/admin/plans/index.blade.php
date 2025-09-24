@@ -122,17 +122,30 @@
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">
+                                                    <a href="{{ route('admin.plans.show', $plan) }}" 
+                                                       class="btn btn-outline-info btn-sm" 
+                                                       title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
                                                     <a href="{{ route('admin.plans.edit', $plan) }}" 
-                                                       class="btn btn-outline-primary btn-sm">
+                                                       class="btn btn-outline-primary btn-sm"
+                                                       title="Edit Plan">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
+                                                    <button type="button" 
+                                                            class="btn btn-outline-{{ $plan->status ? 'warning' : 'success' }} btn-sm toggle-status"
+                                                            data-plan-id="{{ $plan->id }}"
+                                                            title="{{ $plan->status ? 'Deactivate' : 'Activate' }} Plan">
+                                                        <i class="fas fa-{{ $plan->status ? 'pause' : 'play' }}"></i>
+                                                    </button>
                                                     <form action="{{ route('admin.plans.destroy', $plan) }}" 
                                                           method="POST" 
                                                           style="display: inline;"
                                                           onsubmit="return confirm('Are you sure you want to delete this plan?')">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                                title="Delete Plan">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </form>
@@ -164,4 +177,90 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle status functionality
+    document.querySelectorAll('.toggle-status').forEach(button => {
+        button.addEventListener('click', function() {
+            const planId = this.getAttribute('data-plan-id');
+            const originalIcon = this.querySelector('i');
+            const originalClass = this.className;
+            
+            // Show loading state
+            this.disabled = true;
+            originalIcon.className = 'fas fa-spinner fa-spin';
+            
+            fetch(`/admin/plans/${planId}/toggle-status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update button appearance
+                    if (data.status) {
+                        this.className = originalClass.replace('outline-success', 'outline-warning');
+                        this.title = 'Deactivate Plan';
+                        originalIcon.className = 'fas fa-pause';
+                    } else {
+                        this.className = originalClass.replace('outline-warning', 'outline-success');
+                        this.title = 'Activate Plan';
+                        originalIcon.className = 'fas fa-play';
+                    }
+                    
+                    // Update status badge in the same row
+                    const row = this.closest('tr');
+                    const statusBadge = row.querySelector('.badge');
+                    if (data.status) {
+                        statusBadge.className = 'badge bg-success';
+                        statusBadge.textContent = 'Active';
+                    } else {
+                        statusBadge.className = 'badge bg-danger';
+                        statusBadge.textContent = 'Inactive';
+                    }
+                    
+                    // Show success message
+                    showAlert('Plan status updated successfully!', 'success');
+                } else {
+                    showAlert('Failed to update plan status', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Error updating plan status', 'danger');
+            })
+            .finally(() => {
+                this.disabled = false;
+            });
+        });
+    });
+    
+    // Alert function
+    function showAlert(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const container = document.querySelector('.card-body');
+        container.insertBefore(alertDiv, container.firstChild);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+});
+</script>
 @endsection

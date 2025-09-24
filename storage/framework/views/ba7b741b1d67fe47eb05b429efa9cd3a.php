@@ -1,8 +1,6 @@
-@extends('layouts.admin')
+<?php $__env->startSection('title', 'Course Details: ' . $course->title); ?>
 
-@section('title', 'Course Details: ' . $course->title)
-
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
@@ -10,14 +8,15 @@
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-graduation-cap me-2"></i>
-                        Course Details: {{ $course->title }}
+                        Course Details: <?php echo e($course->title); ?>
+
                     </h3>
                     <div class="card-tools">
-                        <a href="{{ route('admin.courses.edit', $course) }}" class="btn btn-primary btn-sm">
+                        <a href="<?php echo e(route('admin.courses.edit', $course)); ?>" class="btn btn-primary btn-sm">
                             <i class="fas fa-edit me-1"></i>
                             Edit Course
                         </a>
-                        <a href="{{ route('admin.courses.index') }}" class="btn btn-secondary btn-sm">
+                        <a href="<?php echo e(route('admin.courses.index')); ?>" class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left me-1"></i>
                             Back to Courses
                         </a>
@@ -29,17 +28,17 @@
                         <!-- Course Image -->
                         <div class="col-md-4">
                             <div class="text-center mb-4">
-                                @if($course->image)
-                                    <img src="{{ asset('storage/' . $course->image) }}" 
-                                         alt="{{ $course->title }}" 
+                                <?php if($course->image): ?>
+                                    <img src="<?php echo e(asset('storage/' . $course->image)); ?>" 
+                                         alt="<?php echo e($course->title); ?>" 
                                          class="img-fluid rounded" 
                                          style="max-height: 300px; object-fit: cover;">
-                                @else
+                                <?php else: ?>
                                     <div class="bg-light d-flex align-items-center justify-content-center rounded" 
                                          style="height: 300px;">
                                         <i class="fas fa-image fa-3x text-muted"></i>
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
 
@@ -51,46 +50,47 @@
                                     <table class="table table-borderless">
                                         <tr>
                                             <td><strong>Title:</strong></td>
-                                            <td>{{ $course->title }}</td>
+                                            <td><?php echo e($course->title); ?></td>
                                         </tr>
                                         <tr>
                                             <td><strong>Status:</strong></td>
                                             <td>
-                                                <span class="badge {{ $course->status ? 'bg-success' : 'bg-danger' }}">
-                                                    {{ $course->status ? 'Active' : 'Inactive' }}
+                                                <span class="badge <?php echo e($course->status ? 'bg-success' : 'bg-danger'); ?>">
+                                                    <?php echo e($course->status ? 'Active' : 'Inactive'); ?>
+
                                                 </span>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td><strong>Modules:</strong></td>
                                             <td>
-                                                <span class="badge bg-info">{{ $course->modules->count() }}</span>
+                                                <span class="badge bg-info"><?php echo e($course->modules->count()); ?></span>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td><strong>Total Lessons:</strong></td>
                                             <td>
-                                                <span class="badge bg-primary">{{ $course->modules->sum(function($module) { return $module->lessons->count(); }) }}</span>
+                                                <span class="badge bg-primary"><?php echo e($course->modules->sum(function($module) { return $module->lessons->count(); })); ?></span>
                                             </td>
                                         </tr>
                                         <tr>
                                             <td><strong>Created:</strong></td>
-                                            <td>{{ $course->created_at->format('M d, Y H:i') }}</td>
+                                            <td><?php echo e($course->created_at->format('M d, Y H:i')); ?></td>
                                         </tr>
                                         <tr>
                                             <td><strong>Updated:</strong></td>
-                                            <td>{{ $course->updated_at->format('M d, Y H:i') }}</td>
+                                            <td><?php echo e($course->updated_at->format('M d, Y H:i')); ?></td>
                                         </tr>
                                     </table>
                                 </div>
 
                                 <div class="col-md-6">
                                     <h5 class="text-primary mb-3">Description</h5>
-                                    @if($course->description)
-                                        <p class="text-muted">{{ $course->description }}</p>
-                                    @else
+                                    <?php if($course->description): ?>
+                                        <p class="text-muted"><?php echo e($course->description); ?></p>
+                                    <?php else: ?>
                                         <p class="text-muted fst-italic">No description provided</p>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -105,79 +105,80 @@
                             </h5>
                         </div>
 
-                        @if($course->modules->count() > 0)
+                        <?php if($course->modules->count() > 0): ?>
                             <div class="col-12">
                                 <div class="accordion" id="modulesAccordion">
-                                    @foreach($course->modules as $module)
+                                    <?php $__currentLoopData = $course->modules; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $module): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <div class="accordion-item">
-                                            <h2 class="accordion-header" id="module{{ $module->id }}">
-                                                <button class="accordion-button {{ $loop->first ? '' : 'collapsed' }}" 
+                                            <h2 class="accordion-header" id="module<?php echo e($module->id); ?>">
+                                                <button class="accordion-button <?php echo e($loop->first ? '' : 'collapsed'); ?>" 
                                                         type="button" 
                                                         data-bs-toggle="collapse" 
-                                                        data-bs-target="#collapse{{ $module->id }}" 
-                                                        aria-expanded="{{ $loop->first ? 'true' : 'false' }}" 
-                                                        aria-controls="collapse{{ $module->id }}">
+                                                        data-bs-target="#collapse<?php echo e($module->id); ?>" 
+                                                        aria-expanded="<?php echo e($loop->first ? 'true' : 'false'); ?>" 
+                                                        aria-controls="collapse<?php echo e($module->id); ?>">
                                                     <div class="d-flex justify-content-between align-items-center w-100 me-3">
                                                         <span>
                                                             <i class="fas fa-folder me-2"></i>
-                                                            {{ $module->title }}
+                                                            <?php echo e($module->title); ?>
+
                                                         </span>
-                                                        <span class="badge bg-primary">{{ $module->lessons->count() }} lessons</span>
+                                                        <span class="badge bg-primary"><?php echo e($module->lessons->count()); ?> lessons</span>
                                                     </div>
                                                 </button>
                                             </h2>
-                                            <div id="collapse{{ $module->id }}" 
-                                                 class="accordion-collapse collapse {{ $loop->first ? 'show' : '' }}" 
-                                                 aria-labelledby="module{{ $module->id }}" 
+                                            <div id="collapse<?php echo e($module->id); ?>" 
+                                                 class="accordion-collapse collapse <?php echo e($loop->first ? 'show' : ''); ?>" 
+                                                 aria-labelledby="module<?php echo e($module->id); ?>" 
                                                  data-bs-parent="#modulesAccordion">
                                                 <div class="accordion-body">
-                                                    @if($module->lessons->count() > 0)
+                                                    <?php if($module->lessons->count() > 0): ?>
                                                         <div class="list-group">
-                                                            @foreach($module->lessons as $lesson)
+                                                            <?php $__currentLoopData = $module->lessons; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lesson): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                                 <div class="list-group-item d-flex justify-content-between align-items-center">
                                                                     <div>
                                                                         <i class="fas fa-play-circle me-2 text-primary"></i>
-                                                                        <strong>{{ $lesson->title }}</strong>
-                                                                        @if($lesson->video_url)
+                                                                        <strong><?php echo e($lesson->title); ?></strong>
+                                                                        <?php if($lesson->video_url): ?>
                                                                             <span class="badge bg-success ms-2">Video</span>
-                                                                        @endif
-                                                                        @if($lesson->attachment)
+                                                                        <?php endif; ?>
+                                                                        <?php if($lesson->attachment): ?>
                                                                             <span class="badge bg-info ms-2">Attachment</span>
-                                                                        @endif
+                                                                        <?php endif; ?>
                                                                     </div>
                                                                     <div>
-                                                                        <a href="{{ route('admin.courses.modules.lessons.edit', [$course, $module, $lesson]) }}" 
+                                                                        <a href="<?php echo e(route('admin.courses.modules.lessons.edit', [$course, $module, $lesson])); ?>" 
                                                                            class="btn btn-outline-primary btn-sm me-1">
                                                                             <i class="fas fa-edit"></i>
                                                                         </a>
-                                                                        <form action="{{ route('admin.courses.modules.lessons.destroy', [$course, $module, $lesson]) }}" 
+                                                                        <form action="<?php echo e(route('admin.courses.modules.lessons.destroy', [$course, $module, $lesson])); ?>" 
                                                                               method="POST" 
                                                                               style="display: inline;"
                                                                               onsubmit="return confirm('Are you sure you want to delete this lesson?')">
-                                                                            @csrf
-                                                                            @method('DELETE')
+                                                                            <?php echo csrf_field(); ?>
+                                                                            <?php echo method_field('DELETE'); ?>
                                                                             <button type="submit" class="btn btn-outline-danger btn-sm">
                                                                                 <i class="fas fa-trash"></i>
                                                                             </button>
                                                                         </form>
                                                                     </div>
                                                                 </div>
-                                                            @endforeach
+                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                         </div>
-                                                    @else
+                                                    <?php else: ?>
                                                         <div class="text-center py-3">
                                                             <i class="fas fa-book-open fa-2x text-muted mb-2"></i>
                                                             <p class="text-muted mb-0">No lessons in this module</p>
                                                         </div>
-                                                    @endif
+                                                    <?php endif; ?>
                                                     
                                                     <div class="mt-3">
-                                                        <a href="{{ route('admin.courses.modules.lessons.create', [$course, $module]) }}" 
+                                                        <a href="<?php echo e(route('admin.courses.modules.lessons.create', [$course, $module])); ?>" 
                                                            class="btn btn-success btn-sm">
                                                             <i class="fas fa-plus me-1"></i>
                                                             Add Lesson
                                                         </a>
-                                                        <a href="{{ route('admin.courses.modules.edit', [$course, $module]) }}" 
+                                                        <a href="<?php echo e(route('admin.courses.modules.edit', [$course, $module])); ?>" 
                                                            class="btn btn-outline-primary btn-sm ms-2">
                                                             <i class="fas fa-edit me-1"></i>
                                                             Edit Module
@@ -186,39 +187,39 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </div>
-                        @else
+                        <?php else: ?>
                             <div class="col-12">
                                 <div class="text-center py-5">
                                     <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
                                     <h5 class="text-muted">No modules found</h5>
                                     <p class="text-muted">Create modules to organize your course content.</p>
-                                    <a href="{{ route('admin.courses.modules.create', $course) }}" class="btn btn-primary">
+                                    <a href="<?php echo e(route('admin.courses.modules.create', $course)); ?>" class="btn btn-primary">
                                         <i class="fas fa-plus me-1"></i>
                                         Create First Module
                                     </a>
                                 </div>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
 
                 <div class="card-footer">
                     <div class="row">
                         <div class="col-md-6">
-                            <a href="{{ route('admin.courses.index') }}" class="btn btn-secondary">
+                            <a href="<?php echo e(route('admin.courses.index')); ?>" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-1"></i>
                                 Back to Courses
                             </a>
                         </div>
                         <div class="col-md-6 text-end">
-                            <a href="{{ route('admin.courses.modules.create', $course) }}" class="btn btn-success me-2">
+                            <a href="<?php echo e(route('admin.courses.modules.create', $course)); ?>" class="btn btn-success me-2">
                                 <i class="fas fa-plus me-1"></i>
                                 Add Module
                             </a>
-                            <a href="{{ route('admin.courses.edit', $course) }}" class="btn btn-primary">
+                            <a href="<?php echo e(route('admin.courses.edit', $course)); ?>" class="btn btn-primary">
                                 <i class="fas fa-edit me-1"></i>
                                 Edit Course
                             </a>
@@ -229,4 +230,5 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.admin', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\WORK-Station\freelance\workana\12\resources\views/admin/courses/show.blade.php ENDPATH**/ ?>
