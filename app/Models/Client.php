@@ -116,6 +116,14 @@ class Client extends Authenticatable
     }
 
     /**
+     * Client's referral network entry
+     */
+    public function referralNetwork()
+    {
+        return $this->hasOne(ReferralNetwork::class);
+    }
+
+    /**
      * Get active invoice
      */
     public function activeInvoice()

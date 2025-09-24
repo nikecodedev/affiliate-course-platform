@@ -71,6 +71,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Plans and Products
         Route::resource('plans', PlanController::class);
+        Route::post('plans/{plan}/toggle', [PlanController::class, 'toggleStatus'])->name('plans.toggle.status');
         Route::resource('products', ProductController::class);
 
         // Sales Management
