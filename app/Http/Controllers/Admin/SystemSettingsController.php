@@ -199,29 +199,65 @@ class SystemSettingsController extends Controller
     public function updateTracking(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'google_analytics_id' => 'nullable|string',
-            'google_tag_manager_id' => 'nullable|string',
-            'meta_pixel_id' => 'nullable|string',
+            'google_analytics_id' => 'nullable|string|regex:/^G-[A-Z0-9]{10}$/',
+            'google_tag_manager_id' => 'nullable|string|regex:/^GTM-[A-Z0-9]{7}$/',
+            'meta_pixel_id' => 'nullable|string|numeric',
             'google_analytics_code' => 'nullable|string',
             'google_tag_manager_code' => 'nullable|string',
             'meta_pixel_code' => 'nullable|string',
+            'facebook_pixel_id' => 'nullable|string|numeric',
+            'tiktok_pixel_id' => 'nullable|string|numeric',
+            'custom_tracking_code' => 'nullable|string',
         ]);
 
         if ($validator->fails()) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
 
-        SystemSetting::set('google_analytics_id', $request->google_analytics_id);
-        SystemSetting::set('google_tag_manager_id', $request->google_tag_manager_id);
-        SystemSetting::set('meta_pixel_id', $request->meta_pixel_id);
-        SystemSetting::set('google_analytics_code', $request->google_analytics_code);
-        SystemSetting::set('google_tag_manager_code', $request->google_tag_manager_code);
-        SystemSetting::set('meta_pixel_code', $request->meta_pixel_code);
+        try {
+            // Update tracking settings
+            SystemSetting::set('google_analytics_id', $request->input('google_analytics_id'), 'string', 'tracking', 'Google Analytics tracking ID');
+            SystemSetting::set('google_tag_manager_id', $request->input('google_tag_manager_id'), 'string', 'tracking', 'Google Tag Manager ID');
+            SystemSetting::set('meta_pixel_id', $request->input('meta_pixel_id'), 'string', 'tracking', 'Meta (Facebook) Pixel ID');
+            SystemSetting::set('google_analytics_code', $request->input('google_analytics_code'), 'text', 'tracking', 'Google Analytics tracking code');
+            SystemSetting::set('google_tag_manager_code', $request->input('google_tag_manager_code'), 'text', 'tracking', 'Google Tag Manager code');
+            SystemSetting::set('meta_pixel_code', $request->input('meta_pixel_code'), 'text', 'tracking', 'Meta Pixel tracking code');
+            SystemSetting::set('facebook_pixel_id', $request->input('facebook_pixel_id'), 'string', 'tracking', 'Facebook Pixel ID');
+            SystemSetting::set('tiktok_pixel_id', $request->input('tiktok_pixel_id'), 'string', 'tracking', 'TikTok Pixel ID');
+            SystemSetting::set('custom_tracking_code', $request->input('custom_tracking_code'), 'text', 'tracking', 'Custom tracking code');
 
-        return redirect()->back()
-            ->with('success', 'Tracking codes updated successfully.');
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Tracking settings updated successfully!'
+                ]);
+            }
+
+            return redirect()->back()
+                ->with('success', 'Tracking settings updated successfully!');
+
+        } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to update tracking settings: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->withErrors(['error' => 'Failed to update tracking settings: ' . $e->getMessage()])
+                ->withInput();
+        }
     }
 
     /**

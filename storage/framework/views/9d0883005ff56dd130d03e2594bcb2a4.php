@@ -379,37 +379,164 @@
             <div class="tab-pane fade" id="tracking" role="tabpanel">
                 <div class="card mt-3">
                     <div class="card-header">
-                        <h5 class="mb-0">Tracking Settings</h5>
+                        <h5 class="mb-0">
+                            <i class="bi bi-graph-up me-2"></i>
+                            Tracking & Analytics Settings
+                        </h5>
                     </div>
                     <div class="card-body">
-                        <form id="trackingForm">
+                        <form id="trackingForm" action="<?php echo e(route('admin.settings.tracking.update')); ?>" method="POST">
                             <?php echo csrf_field(); ?>
-                            <div class="row">
+                            
+                            <!-- Google Analytics Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="bi bi-google me-2"></i>
+                                        Google Analytics
+                                    </h6>
+                                </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label for="google_analytics_id" class="form-label">Google Analytics ID</label>
+                                        <label for="google_analytics_id" class="form-label">
+                                            <i class="bi bi-bar-chart me-1"></i>
+                                            Google Analytics ID
+                                        </label>
                                         <input type="text" class="form-control" id="google_analytics_id" name="google_analytics_id" 
                                                value="<?php echo e($groups['tracking']->get('google_analytics_id')?->value ?? ''); ?>" 
-                                               placeholder="G-XXXXXXXXXX">
+                                               placeholder="G-XXXXXXXXXX"
+                                               pattern="G-[A-Z0-9]{10}">
+                                        <div class="form-text">Format: G-XXXXXXXXXX (10 characters after G-)</div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group mb-3">
-                                        <label for="google_tag_manager_id" class="form-label">Google Tag Manager ID</label>
+                                        <label for="google_tag_manager_id" class="form-label">
+                                            <i class="bi bi-tags me-1"></i>
+                                            Google Tag Manager ID
+                                        </label>
                                         <input type="text" class="form-control" id="google_tag_manager_id" name="google_tag_manager_id" 
                                                value="<?php echo e($groups['tracking']->get('google_tag_manager_id')?->value ?? ''); ?>" 
-                                               placeholder="GTM-XXXXXXX">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group mb-3">
-                                        <label for="meta_pixel_id" class="form-label">Meta Pixel ID</label>
-                                        <input type="text" class="form-control" id="meta_pixel_id" name="meta_pixel_id" 
-                                               value="<?php echo e($groups['tracking']->get('meta_pixel_id')?->value ?? ''); ?>" 
-                                               placeholder="Enter Meta Pixel ID">
+                                               placeholder="GTM-XXXXXXX"
+                                               pattern="GTM-[A-Z0-9]{7}">
+                                        <div class="form-text">Format: GTM-XXXXXXX (7 characters after GTM-)</div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Social Media Pixels Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="bi bi-share me-2"></i>
+                                        Social Media Pixels
+                                    </h6>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="meta_pixel_id" class="form-label">
+                                            <i class="bi bi-facebook me-1"></i>
+                                            Meta (Facebook) Pixel ID
+                                        </label>
+                                        <input type="text" class="form-control" id="meta_pixel_id" name="meta_pixel_id" 
+                                               value="<?php echo e($groups['tracking']->get('meta_pixel_id')?->value ?? ''); ?>" 
+                                               placeholder="Enter Meta Pixel ID">
+                                        <div class="form-text">Your Facebook/Meta Pixel ID for conversion tracking</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="facebook_pixel_id" class="form-label">
+                                            <i class="bi bi-facebook me-1"></i>
+                                            Facebook Pixel ID
+                                        </label>
+                                        <input type="text" class="form-control" id="facebook_pixel_id" name="facebook_pixel_id" 
+                                               value="<?php echo e($groups['tracking']->get('facebook_pixel_id')?->value ?? ''); ?>" 
+                                               placeholder="Enter Facebook Pixel ID">
+                                        <div class="form-text">Alternative Facebook Pixel ID</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="tiktok_pixel_id" class="form-label">
+                                            <i class="bi bi-tiktok me-1"></i>
+                                            TikTok Pixel ID
+                                        </label>
+                                        <input type="text" class="form-control" id="tiktok_pixel_id" name="tiktok_pixel_id" 
+                                               value="<?php echo e($groups['tracking']->get('tiktok_pixel_id')?->value ?? ''); ?>" 
+                                               placeholder="Enter TikTok Pixel ID">
+                                        <div class="form-text">TikTok Pixel ID for TikTok Ads tracking</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Custom Tracking Code Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="bi bi-code-slash me-2"></i>
+                                        Custom Tracking Code
+                                    </h6>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group mb-3">
+                                        <label for="custom_tracking_code" class="form-label">
+                                            <i class="bi bi-terminal me-1"></i>
+                                            Custom Tracking Code
+                                        </label>
+                                        <textarea class="form-control" id="custom_tracking_code" name="custom_tracking_code" rows="4"
+                                                  placeholder="Enter custom tracking code (JavaScript, HTML, etc.)"><?php echo e($groups['tracking']->get('custom_tracking_code')?->value ?? ''); ?></textarea>
+                                        <div class="form-text">Add any custom tracking code, scripts, or HTML snippets</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tracking Status Section -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h6 class="text-primary mb-3">
+                                        <i class="bi bi-activity me-2"></i>
+                                        Tracking Status
+                                    </h6>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-google text-primary me-2"></i>
+                                                        <span>Google Analytics:</span>
+                                                        <span class="ms-2 badge <?php echo e($groups['tracking']->get('google_analytics_id')?->value ? 'bg-success' : 'bg-secondary'); ?>">
+                                                            <?php echo e($groups['tracking']->get('google_analytics_id')?->value ? 'Active' : 'Inactive'); ?>
+
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-tags text-info me-2"></i>
+                                                        <span>Tag Manager:</span>
+                                                        <span class="ms-2 badge <?php echo e($groups['tracking']->get('google_tag_manager_id')?->value ? 'bg-success' : 'bg-secondary'); ?>">
+                                                            <?php echo e($groups['tracking']->get('google_tag_manager_id')?->value ? 'Active' : 'Inactive'); ?>
+
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="bi bi-facebook text-primary me-2"></i>
+                                                        <span>Meta Pixel:</span>
+                                                        <span class="ms-2 badge <?php echo e($groups['tracking']->get('meta_pixel_id')?->value ? 'bg-success' : 'bg-secondary'); ?>">
+                                                            <?php echo e($groups['tracking']->get('meta_pixel_id')?->value ? 'Active' : 'Inactive'); ?>
+
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="text-end">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bi bi-check-lg me-1"></i>Save Tracking Settings
@@ -898,6 +1025,101 @@ document.addEventListener('DOMContentLoaded', function() {
     if (titleInput && titleCount) updateCount(titleInput, titleCount, 60);
     if (descriptionInput && descriptionCount) updateCount(descriptionInput, descriptionCount, 160);
     if (keywordsInput && keywordsCount) updateCount(keywordsInput, keywordsCount, 255);
+
+    // Tracking Form submission
+    const trackingForm = document.getElementById('trackingForm');
+    if (trackingForm) {
+        trackingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitButton = this.querySelector('button[type="submit"]');
+            const originalText = submitButton.innerHTML;
+            
+            // Update button state
+            submitButton.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Saving...';
+            submitButton.disabled = true;
+            
+            fetch('<?php echo e(route("admin.settings.tracking.update")); ?>', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('Tracking settings updated successfully!', 'success');
+                    // Reload page to update status badges
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showAlert(data.message || 'Error saving tracking settings', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Error saving tracking settings: ' + error.message, 'danger');
+            })
+            .finally(() => {
+                // Restore button state
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            });
+        });
+    }
+
+    // Tracking ID validation
+    const googleAnalyticsInput = document.getElementById('google_analytics_id');
+    const googleTagManagerInput = document.getElementById('google_tag_manager_id');
+
+    if (googleAnalyticsInput) {
+        googleAnalyticsInput.addEventListener('input', function() {
+            const value = this.value;
+            const pattern = /^G-[A-Z0-9]{10}$/;
+            
+            if (value && !pattern.test(value)) {
+                this.classList.add('is-invalid');
+                if (!this.nextElementSibling.classList.contains('invalid-feedback')) {
+                    const feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    feedback.textContent = 'Please enter a valid Google Analytics ID (G-XXXXXXXXXX)';
+                    this.parentNode.appendChild(feedback);
+                }
+            } else {
+                this.classList.remove('is-invalid');
+                const feedback = this.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.remove();
+                }
+            }
+        });
+    }
+
+    if (googleTagManagerInput) {
+        googleTagManagerInput.addEventListener('input', function() {
+            const value = this.value;
+            const pattern = /^GTM-[A-Z0-9]{7}$/;
+            
+            if (value && !pattern.test(value)) {
+                this.classList.add('is-invalid');
+                if (!this.nextElementSibling.classList.contains('invalid-feedback')) {
+                    const feedback = document.createElement('div');
+                    feedback.className = 'invalid-feedback';
+                    feedback.textContent = 'Please enter a valid Google Tag Manager ID (GTM-XXXXXXX)';
+                    this.parentNode.appendChild(feedback);
+                }
+            } else {
+                this.classList.remove('is-invalid');
+                const feedback = this.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.remove();
+                }
+            }
+        });
+    }
 });
 </script>
 

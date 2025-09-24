@@ -69,6 +69,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('/customization', [SystemSettingsController::class, 'customization'])->name('customization');
             Route::post('/', [SystemSettingsController::class, 'update'])->name('update');
             Route::post('/seo', [SystemSettingsController::class, 'updateSeo'])->name('seo.update');
+            Route::post('/tracking', [SystemSettingsController::class, 'updateTracking'])->name('tracking.update');
             Route::post('/upload-logo', [SystemSettingsController::class, 'uploadLogo'])->name('upload-logo');
         });
 
