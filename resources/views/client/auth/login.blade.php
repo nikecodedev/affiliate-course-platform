@@ -255,7 +255,7 @@
                         <div class="text-center mt-4 pt-3 border-top">
                             <small class="text-muted">
                                 É administrador? 
-                                <a href="{{ route('admin.login') }}" class="text-decoration-none">
+                                <a href="{{ route('auth.login') }}" class="text-decoration-none">
                                     Acesse aqui
                                 </a>
                             </small>

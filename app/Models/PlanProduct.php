@@ -17,11 +17,18 @@ class PlanProduct extends Model
         'file_size',
         'file_type',
         'is_active',
+        'direct_referral_enabled',
+        'direct_referral_amount',
+        'direct_referral_percentage',
+        'direct_referral_type',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'file_size' => 'integer',
+        'direct_referral_enabled' => 'boolean',
+        'direct_referral_amount' => 'decimal:2',
+        'direct_referral_percentage' => 'decimal:2',
     ];
 
     /**
@@ -57,6 +64,30 @@ class PlanProduct extends Model
         }
 
         return round($bytes, 2) . ' ' . $units[$i];
+    }
+
+    /**
+     * Get direct referral bonus amount for a sale
+     */
+    public function getDirectReferralBonusAmount($saleAmount)
+    {
+        if (!$this->direct_referral_enabled) {
+            return 0;
+        }
+
+        if ($this->direct_referral_type === 'percentage') {
+            return ($saleAmount * $this->direct_referral_percentage) / 100;
+        }
+
+        return $this->direct_referral_amount;
+    }
+
+    /**
+     * Check if direct referral bonus is enabled
+     */
+    public function hasDirectReferralBonus()
+    {
+        return $this->direct_referral_enabled;
     }
 }
 

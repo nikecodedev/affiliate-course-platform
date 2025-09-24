@@ -18,10 +18,14 @@ class BonusConfiguration extends Model
         'direct_referral_fixed',
         'unilevel_percentages',
         'unilevel_fixed_amounts',
+        'unilevel_levels',
+        'unilevel_payment_type',
         'matrix_width',
         'matrix_depth',
         'matrix_percentages',
         'matrix_fixed_amounts',
+        'matrix_levels',
+        'matrix_payment_type',
         'profit_sharing_percentage',
         'profit_sharing_basis',
         'requires_active_invoice',
@@ -29,6 +33,8 @@ class BonusConfiguration extends Model
         'maximum_bonus_per_period',
         'period',
         'is_active',
+        'direct_referral_enabled',
+        'direct_referral_payment_type',
     ];
 
     protected $casts = [
@@ -36,13 +42,16 @@ class BonusConfiguration extends Model
         'direct_referral_fixed' => 'decimal:2',
         'unilevel_percentages' => 'array',
         'unilevel_fixed_amounts' => 'array',
+        'unilevel_levels' => 'array',
         'matrix_percentages' => 'array',
         'matrix_fixed_amounts' => 'array',
+        'matrix_levels' => 'array',
         'profit_sharing_percentage' => 'decimal:2',
         'minimum_volume' => 'decimal:2',
         'maximum_bonus_per_period' => 'decimal:2',
         'is_active' => 'boolean',
         'requires_active_invoice' => 'boolean',
+        'direct_referral_enabled' => 'boolean',
     ];
 
     /**

@@ -17,14 +17,14 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         if (!Auth::guard('admin')->check()) {
-            return redirect()->route('admin.login');
+            return redirect()->route('auth.login');
         }
 
         $admin = Auth::guard('admin')->user();
 
         if (!$admin->is_active) {
             Auth::guard('admin')->logout();
-            return redirect()->route('admin.login')
+            return redirect()->route('auth.login')
                 ->withErrors(['email' => 'Your account has been deactivated.']);
         }
 

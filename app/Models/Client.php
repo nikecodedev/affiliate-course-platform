@@ -37,6 +37,8 @@ class Client extends Authenticatable
         'google_analytics_id',
         'custom_tracking_code',
         'is_active',
+        'active_network',
+        'activated_at',
         'email_verified_at',
         'last_login_at',
         'login_attempts',
@@ -263,5 +265,35 @@ class Client extends Authenticatable
             'login_attempts' => 0,
             'last_login_at' => now()
         ]);
+    }
+
+    /**
+     * Activate client in the network
+     */
+    public function activateInNetwork()
+    {
+        if (!$this->active_network) {
+            $this->update([
+                'active_network' => true,
+                'activated_at' => now(),
+            ]);
+        }
+    }
+
+    /**
+     * Check if client is eligible for direct referral bonus
+     * Direct referral bonus is always paid if they have purchased at least one invoice
+     */
+    public function isEligibleForDirectReferralBonus()
+    {
+        return $this->active_network;
+    }
+
+    /**
+     * Check if client is eligible for other bonuses (requires active invoice)
+     */
+    public function isEligibleForBonuses()
+    {
+        return $this->activeInvoices()->exists();
     }
 }
