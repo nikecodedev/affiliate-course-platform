@@ -143,7 +143,6 @@
                                                       style="display: inline-block;" 
                                                       onsubmit="return confirm('Are you sure you want to confirm this sale?')">
                                                     <?php echo csrf_field(); ?>
-                                                    <?php echo method_field('PATCH'); ?>
                                                     <button type="submit" class="btn btn-sm btn-outline-success" 
                                                             title="Confirm Sale">
                                                         <i class="bi bi-check-circle"></i>
@@ -156,7 +155,6 @@
                                                       style="display: inline-block;" 
                                                       onsubmit="return confirm('Are you sure you want to refund this sale?')">
                                                     <?php echo csrf_field(); ?>
-                                                    <?php echo method_field('PATCH'); ?>
                                                     <button type="submit" class="btn btn-sm btn-outline-danger" 
                                                             title="Refund Sale">
                                                         <i class="bi bi-arrow-counterclockwise"></i>

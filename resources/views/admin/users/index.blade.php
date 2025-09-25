@@ -17,16 +17,19 @@
                             <i class="bi bi-funnel me-1"></i>Filters
                         </button>
                         <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-success" onclick="quickFilter('affiliates')">
+                            <button type="button" class="btn {{ !request()->hasAny(['type', 'status']) ? 'btn-primary' : 'btn-outline-primary' }}" onclick="quickFilter('all')">
+                                <i class="bi bi-people me-1"></i>All Users
+                            </button>
+                            <button type="button" class="btn {{ request('type') == 'affiliates' ? 'btn-success' : 'btn-outline-success' }}" onclick="quickFilter('affiliates')">
                                 <i class="bi bi-person-check me-1"></i>Affiliates
                             </button>
-                            <button type="button" class="btn btn-outline-info" onclick="quickFilter('customers')">
+                            <button type="button" class="btn {{ request('type') == 'customers' ? 'btn-info' : 'btn-outline-info' }}" onclick="quickFilter('customers')">
                                 <i class="bi bi-person me-1"></i>Customers
                             </button>
-                            <button type="button" class="btn btn-outline-success" onclick="quickFilter('active')">
+                            <button type="button" class="btn {{ request('status') == 'active' ? 'btn-success' : 'btn-outline-success' }}" onclick="quickFilter('active')">
                                 <i class="bi bi-check-circle me-1"></i>Active
                             </button>
-                            <button type="button" class="btn btn-outline-warning" onclick="quickFilter('inactive')">
+                            <button type="button" class="btn {{ request('status') == 'inactive' ? 'btn-warning' : 'btn-outline-warning' }}" onclick="quickFilter('inactive')">
                                 <i class="bi bi-x-circle me-1"></i>Inactive
                             </button>
                         </div>
@@ -464,23 +467,31 @@ function viewUser(userId) {
 
 // Quick filter buttons for common searches
 function quickFilter(type) {
-    const form = document.getElementById('filterForm');
+    // Add loading state to the clicked button
+    const clickedButton = event.target.closest('button');
+    const originalContent = clickedButton.innerHTML;
+    clickedButton.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Loading...';
+    clickedButton.disabled = true;
     
-    // Clear existing filters
-    form.reset();
+    const baseUrl = '{{ route("admin.users.index") }}';
+    let filterUrl = baseUrl;
     
-    // Set the specific filter
-    if (type === 'affiliates') {
-        document.getElementById('type').value = 'affiliates';
+    // Build URL with specific filter
+    if (type === 'all') {
+        // No additional parameters needed - show all users
+        filterUrl = baseUrl;
+    } else if (type === 'affiliates') {
+        filterUrl += '?type=affiliates';
     } else if (type === 'customers') {
-        document.getElementById('type').value = 'customers';
+        filterUrl += '?type=customers';
     } else if (type === 'active') {
-        document.getElementById('status').value = 'active';
+        filterUrl += '?status=active';
     } else if (type === 'inactive') {
-        document.getElementById('status').value = 'inactive';
+        filterUrl += '?status=inactive';
     }
     
-    form.submit();
+    // Redirect to filtered URL
+    window.location.href = filterUrl;
 }
 </script>
 @endsection
