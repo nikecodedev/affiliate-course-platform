@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\ModuleController;
 use App\Http\Controllers\Admin\LessonController;
+use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Client\TrainingController;
 use App\Http\Controllers\Admin\FinancialController;
 use App\Http\Controllers\Admin\ReferralNetworkController;
@@ -172,6 +173,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('courses.modules.lessons', LessonController::class)->except(['show']);
             Route::post('courses/{course}/modules/{module}/lessons/update-order', [LessonController::class, 'updateOrder'])->name('lessons.update-order');
             Route::get('courses/{course}/modules/{module}/lessons/{lesson}/download', [LessonController::class, 'downloadAttachment'])->name('lessons.download');
+
+            // Invoice Management
+            Route::resource('invoices', InvoiceController::class);
+            Route::post('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid'])->name('invoices.mark-paid');
+            Route::post('invoices/{invoice}/mark-confirmed', [InvoiceController::class, 'markAsConfirmed'])->name('invoices.mark-confirmed');
+            Route::post('invoices/{invoice}/mark-refunded', [InvoiceController::class, 'markAsRefunded'])->name('invoices.mark-refunded');
+            Route::get('invoices/{invoice}/download-payment-proof', [InvoiceController::class, 'downloadPaymentProof'])->name('invoices.download-payment-proof');
 
             // Payment Gateway Management
             Route::prefix('gateways')->name('gateways.')->group(function () {

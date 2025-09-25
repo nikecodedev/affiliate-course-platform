@@ -148,8 +148,8 @@ unset($__errorArgs, $__bag); ?>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label for="course_id" class="form-label">Course</label>
-                                    <select class="form-control <?php $__errorArgs = ['course_id'];
+                                    <label for="external_product_url" class="form-label">External Product URL</label>
+                                    <input type="url" class="form-control <?php $__errorArgs = ['external_product_url'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -157,16 +157,41 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
-                                            id="course_id" name="course_id">
-                                        <option value="">Select Course (Optional)</option>
+                                           id="external_product_url" name="external_product_url" 
+                                           value="<?php echo e(old('external_product_url')); ?>" 
+                                           placeholder="https://downloads.example.com/product.zip">
+                                    <?php $__errorArgs = ['external_product_url'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="course_ids" class="form-label">Courses (Multi-select)</label>
+                                    <select multiple class="form-control <?php $__errorArgs = ['course_ids'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                                            id="course_ids" name="course_ids[]">
                                         <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                            <option value="<?php echo e($course->id); ?>" <?php echo e(old('course_id') == $course->id ? 'selected' : ''); ?>>
+                                            <option value="<?php echo e($course->id); ?>" <?php echo e(collect(old('course_ids', []))->contains($course->id) ? 'selected' : ''); ?>>
                                                 <?php echo e($course->title); ?>
 
                                             </option>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </select>
-                                    <?php $__errorArgs = ['course_id'];
+                                    <?php $__errorArgs = ['course_ids'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }

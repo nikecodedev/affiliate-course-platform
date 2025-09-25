@@ -97,11 +97,11 @@
                                                 <div class="btn-group" role="group">
                                                     <a href="{{ route('admin.bonus-configurations.global.show', $configuration) }}" 
                                                        class="btn btn-sm btn-outline-info" title="View">
-                                                        <i class="fas fa-eye"></i>
+                                                        <i class="bi bi-eye"></i>
                                                     </a>
                                                     <a href="{{ route('admin.bonus-configurations.global.edit', $configuration) }}" 
                                                        class="btn btn-sm btn-outline-primary" title="Edit">
-                                                        <i class="fas fa-edit"></i>
+                                                        <i class="bi bi-pencil"></i>
                                                     </a>
                                                     <form action="{{ route('admin.bonus-configurations.global.destroy', $configuration) }}" 
                                                           method="POST" style="display: inline;" 
@@ -109,7 +109,7 @@
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
-                                                            <i class="fas fa-trash"></i>
+                                                            <i class="bi bi-trash"></i>
                                                         </button>
                                                     </form>
                                                 </div>

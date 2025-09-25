@@ -125,18 +125,18 @@
                                                     <a href="{{ route('admin.plans.show', $plan) }}" 
                                                        class="btn btn-outline-info btn-sm" 
                                                        title="View Details">
-                                                        <i class="fas fa-eye"></i>
+                                                        <i class="bi bi-eye"></i>
                                                     </a>
                                                     <a href="{{ route('admin.plans.edit', $plan) }}" 
                                                        class="btn btn-outline-primary btn-sm"
                                                        title="Edit Plan">
-                                                        <i class="fas fa-edit"></i>
+                                                        <i class="bi bi-pencil"></i>
                                                     </a>
                                                     <button type="button" 
                                                             class="btn btn-outline-{{ $plan->status ? 'warning' : 'success' }} btn-sm toggle-status"
                                                             data-plan-id="{{ $plan->id }}"
                                                             title="{{ $plan->status ? 'Deactivate' : 'Activate' }} Plan">
-                                                        <i class="fas fa-{{ $plan->status ? 'pause' : 'play' }}"></i>
+                                                        <i class="bi bi-{{ $plan->status ? 'pause-circle' : 'play-circle' }}"></i>
                                                     </button>
                                                     <form action="{{ route('admin.plans.destroy', $plan) }}" 
                                                           method="POST" 
@@ -146,7 +146,7 @@
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-outline-danger btn-sm"
                                                                 title="Delete Plan">
-                                                            <i class="fas fa-trash"></i>
+                                                            <i class="bi bi-trash"></i>
                                                         </button>
                                                     </form>
                                                 </div>

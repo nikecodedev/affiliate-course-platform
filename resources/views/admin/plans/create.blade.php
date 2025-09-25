@@ -92,17 +92,28 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
-                                    <label for="course_id" class="form-label">Course</label>
-                                    <select class="form-control @error('course_id') is-invalid @enderror" 
-                                            id="course_id" name="course_id">
-                                        <option value="">Select Course (Optional)</option>
+                                    <label for="external_product_url" class="form-label">External Product URL</label>
+                                    <input type="url" class="form-control @error('external_product_url') is-invalid @enderror" 
+                                           id="external_product_url" name="external_product_url" 
+                                           value="{{ old('external_product_url') }}" 
+                                           placeholder="https://downloads.example.com/product.zip">
+                                    @error('external_product_url')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="course_ids" class="form-label">Courses (Multi-select)</label>
+                                    <select multiple class="form-control @error('course_ids') is-invalid @enderror" 
+                                            id="course_ids" name="course_ids[]">
                                         @foreach($courses as $course)
-                                            <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
+                                            <option value="{{ $course->id }}" {{ collect(old('course_ids', []))->contains($course->id) ? 'selected' : '' }}>
                                                 {{ $course->title }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    @error('course_id')
+                                    @error('course_ids')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

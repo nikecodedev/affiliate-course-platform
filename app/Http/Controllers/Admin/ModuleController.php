@@ -53,7 +53,7 @@ class ModuleController extends Controller
 
         Module::create($moduleData);
 
-        return redirect()->route('admin.modules.index', $course)
+        return redirect()->route('admin.courses.modules.index', $course)
             ->with('success', 'Module created successfully.');
     }
 
@@ -92,7 +92,7 @@ class ModuleController extends Controller
 
         $module->update($request->all());
 
-        return redirect()->route('admin.modules.index', $course)
+        return redirect()->route('admin.courses.modules.index', $course)
             ->with('success', 'Module updated successfully.');
     }
 
@@ -109,7 +109,7 @@ class ModuleController extends Controller
 
         $module->delete();
 
-        return redirect()->route('admin.modules.index', $course)
+        return redirect()->route('admin.courses.modules.index', $course)
             ->with('success', 'Module deleted successfully.');
     }
 

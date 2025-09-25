@@ -65,7 +65,7 @@ class LessonController extends Controller
 
         Lesson::create($lessonData);
 
-        return redirect()->route('admin.lessons.index', [$course, $module])
+        return redirect()->route('admin.courses.modules.lessons.index', [$course, $module])
             ->with('success', 'Lesson created successfully.');
     }
 
@@ -119,7 +119,7 @@ class LessonController extends Controller
 
         $lesson->update($lessonData);
 
-        return redirect()->route('admin.lessons.index', [$course, $module])
+        return redirect()->route('admin.courses.modules.lessons.index', [$course, $module])
             ->with('success', 'Lesson updated successfully.');
     }
 
@@ -135,7 +135,7 @@ class LessonController extends Controller
 
         $lesson->delete();
 
-        return redirect()->route('admin.lessons.index', [$course, $module])
+        return redirect()->route('admin.courses.modules.lessons.index', [$course, $module])
             ->with('success', 'Lesson deleted successfully.');
     }
 

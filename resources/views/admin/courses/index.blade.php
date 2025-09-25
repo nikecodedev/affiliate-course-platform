@@ -95,23 +95,23 @@
                                                     <a href="{{ route('admin.courses.show', $course) }}" 
                                                        class="btn btn-outline-info btn-sm" 
                                                        title="View Details">
-                                                        <i class="fas fa-eye"></i>
+                                                        <i class="bi bi-eye"></i>
                                                     </a>
                                                     <a href="{{ route('admin.courses.edit', $course) }}" 
                                                        class="btn btn-outline-primary btn-sm"
                                                        title="Edit Course">
-                                                        <i class="fas fa-edit"></i>
+                                                        <i class="bi bi-pencil"></i>
                                                     </a>
                                                     <a href="{{ route('admin.courses.modules.index', $course) }}" 
                                                        class="btn btn-outline-success btn-sm"
                                                        title="Manage Modules">
-                                                        <i class="fas fa-list"></i>
+                                                        <i class="bi bi-list-ul"></i>
                                                     </a>
                                                     <button type="button" 
                                                             class="btn btn-outline-{{ $course->status ? 'warning' : 'success' }} btn-sm toggle-status"
                                                             data-course-id="{{ $course->id }}"
                                                             title="{{ $course->status ? 'Deactivate' : 'Activate' }} Course">
-                                                        <i class="fas fa-{{ $course->status ? 'pause' : 'play' }}"></i>
+                                                        <i class="bi bi-{{ $course->status ? 'pause-circle' : 'play-circle' }}"></i>
                                                     </button>
                                                     <form action="{{ route('admin.courses.destroy', $course) }}" 
                                                           method="POST" 
@@ -121,7 +121,7 @@
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-outline-danger btn-sm"
                                                                 title="Delete Course">
-                                                            <i class="fas fa-trash"></i>
+                                                            <i class="bi bi-trash"></i>
                                                         </button>
                                                     </form>
                                                 </div>

@@ -129,18 +129,18 @@
                                                     <a href="<?php echo e(route('admin.plans.show', $plan)); ?>" 
                                                        class="btn btn-outline-info btn-sm" 
                                                        title="View Details">
-                                                        <i class="fas fa-eye"></i>
+                                                        <i class="bi bi-eye"></i>
                                                     </a>
                                                     <a href="<?php echo e(route('admin.plans.edit', $plan)); ?>" 
                                                        class="btn btn-outline-primary btn-sm"
                                                        title="Edit Plan">
-                                                        <i class="fas fa-edit"></i>
+                                                        <i class="bi bi-pencil"></i>
                                                     </a>
                                                     <button type="button" 
                                                             class="btn btn-outline-<?php echo e($plan->status ? 'warning' : 'success'); ?> btn-sm toggle-status"
                                                             data-plan-id="<?php echo e($plan->id); ?>"
                                                             title="<?php echo e($plan->status ? 'Deactivate' : 'Activate'); ?> Plan">
-                                                        <i class="fas fa-<?php echo e($plan->status ? 'pause' : 'play'); ?>"></i>
+                                                        <i class="bi bi-<?php echo e($plan->status ? 'pause-circle' : 'play-circle'); ?>"></i>
                                                     </button>
                                                     <form action="<?php echo e(route('admin.plans.destroy', $plan)); ?>" 
                                                           method="POST" 
@@ -150,7 +150,7 @@
                                                         <?php echo method_field('DELETE'); ?>
                                                         <button type="submit" class="btn btn-outline-danger btn-sm"
                                                                 title="Delete Plan">
-                                                            <i class="fas fa-trash"></i>
+                                                            <i class="bi bi-trash"></i>
                                                         </button>
                                                     </form>
                                                 </div>
