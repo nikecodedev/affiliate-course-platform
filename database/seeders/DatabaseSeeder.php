@@ -14,15 +14,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create default admin user
-        Admin::create([
-            'name' => 'Administrator',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('password123'),
-            'is_active' => true,
-            'two_factor_enabled' => true,
-            'two_factor_verified' => false,
-        ]);
+        // Create default admin user if not exists
+        if (!Admin::where('email', 'admin@example.com')->exists()) {
+            Admin::create([
+                'name' => 'Administrator',
+                'email' => 'admin@example.com',
+                'password' => Hash::make('password123'),
+                'is_active' => true,
+                'two_factor_enabled' => true,
+                'two_factor_verified' => false,
+            ]);
+        }
 
         // Create default system settings
         $this->createDefaultSettings();
@@ -38,6 +40,9 @@ class DatabaseSeeder extends Seeder
         
         // Create system customizations
         $this->call(SystemCustomizationSeeder::class);
+
+        // Sample data for core tables
+        $this->call(SampleDataSeeder::class);
     }
 
     /**

@@ -286,7 +286,6 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="closeTicketForm" method="POST" style="display: inline;">
                     @csrf
-                    @method('PATCH')
                     <button type="submit" class="btn btn-success">
                         <i class="bi bi-check me-2"></i>
                         Close Ticket

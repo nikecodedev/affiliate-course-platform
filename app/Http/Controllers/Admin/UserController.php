@@ -35,18 +35,59 @@ class UserController extends Controller
             }
         }
 
-        // Search by name or email
+        // Filter by date range
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Filter by country
+        if ($request->filled('country')) {
+            $query->where('country', 'like', "%{$request->country}%");
+        }
+
+        // Filter by city
+        if ($request->filled('city')) {
+            $query->where('city', 'like', "%{$request->city}%");
+        }
+
+        // Filter by affiliate code
+        if ($request->filled('affiliate_code')) {
+            $query->where('affiliate_code', 'like', "%{$request->affiliate_code}%");
+        }
+
+        // Search by name, email, phone, or document
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('document', 'like', "%{$search}%");
             });
         }
 
-        $users = $query->orderBy('created_at', 'desc')->paginate(15);
+        // Sort options
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        
+        // Validate sort fields
+        $allowedSortFields = ['name', 'email', 'created_at', 'is_active', 'is_affiliate'];
+        if (in_array($sortBy, $allowedSortFields)) {
+            $query->orderBy($sortBy, $sortOrder);
+        } else {
+            $query->orderBy('created_at', 'desc');
+        }
 
-        return view('admin.users.index', compact('users'));
+        $users = $query->paginate(15)->withQueryString();
+
+        // Get filter options for the view
+        $countries = User::select('country')->whereNotNull('country')->distinct()->pluck('country');
+        $cities = User::select('city')->whereNotNull('city')->distinct()->pluck('city');
+
+        return view('admin.users.index', compact('users', 'countries', 'cities'));
     }
 
     /**

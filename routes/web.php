@@ -14,6 +14,9 @@ use App\Http\Controllers\Admin\LessonController;
 use App\Http\Controllers\Admin\InvoiceController;
 use App\Http\Controllers\Client\TrainingController;
 use App\Http\Controllers\Admin\FinancialController;
+use App\Http\Controllers\Admin\WithdrawalSettingController;
+use App\Http\Controllers\Admin\ExpenseController as AdminExpenseController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\ReferralNetworkController;
 use App\Http\Controllers\Admin\BonusConfigurationController;
 use App\Http\Controllers\Admin\BonusPaymentController;
@@ -88,11 +91,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('sales', SaleController::class);
         Route::post('sales/{sale}/confirm', [SaleController::class, 'confirm'])->name('sales.confirm');
         Route::post('sales/{sale}/cancel', [SaleController::class, 'cancel'])->name('sales.cancel');
+        Route::post('sales/{sale}/refund', [SaleController::class, 'refund'])->name('sales.refund');
 
         // User Management
         Route::resource('users', UserController::class);
         Route::post('users/{user}/activate', [UserController::class, 'activate'])->name('users.activate');
         Route::post('users/{user}/deactivate', [UserController::class, 'deactivate'])->name('users.deactivate');
+        Route::post('users/{user}/toggle-affiliate', [UserController::class, 'toggleAffiliate'])->name('users.toggle.affiliate');
+        Route::post('users/{user}/generate-affiliate-code', [UserController::class, 'generateAffiliateCode'])->name('users.generate.affiliate.code');
 
         // Course Management
         Route::resource('courses', CourseController::class);
@@ -102,13 +108,30 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Financial Management
             Route::prefix('financial')->name('financial.')->group(function () {
                 Route::get('/', [FinancialController::class, 'index'])->name('index');
+                // Withdrawal settings (admin only)
+                Route::get('/withdrawal-settings', [WithdrawalSettingController::class, 'index'])->name('withdrawal-settings.index');
+                Route::post('/withdrawal-settings', [WithdrawalSettingController::class, 'update'])->name('withdrawal-settings.update');
                 Route::get('/withdrawals', [FinancialController::class, 'withdrawals'])->name('withdrawals');
                 Route::post('/withdrawals/{withdrawal}/approve', [FinancialController::class, 'approveWithdrawal'])->name('withdrawals.approve');
                 Route::post('/withdrawals/{withdrawal}/reject', [FinancialController::class, 'rejectWithdrawal'])->name('withdrawals.reject');
-                Route::get('/reports', [FinancialController::class, 'reports'])->name('reports');
-                Route::resource('expenses', FinancialController::class)->except(['index', 'show']);
+                
+                // Expenses
+                Route::get('/expenses', [AdminExpenseController::class, 'index'])->name('expenses.index');
+                Route::get('/expenses/create', [AdminExpenseController::class, 'create'])->name('expenses.create');
+                Route::post('/expenses', [AdminExpenseController::class, 'store'])->name('expenses.store');
+                Route::get('/expenses/{expense}', [AdminExpenseController::class, 'show'])->name('expenses.show');
+                Route::get('/expenses/{expense}/download', [AdminExpenseController::class, 'downloadReceipt'])->name('expenses.download');
+
+                // Reports
+                Route::get('/reports', [ReportController::class, 'index'])->name('reports');
+                Route::get('/reports/revenue', [ReportController::class, 'revenueReport'])->name('reports.revenue');
+                Route::get('/reports/refunds', [ReportController::class, 'refundReport'])->name('reports.refunds');
+                Route::get('/reports/commissions', [ReportController::class, 'commissionReport'])->name('reports.commissions');
+                Route::get('/reports/top-salespeople', [ReportController::class, 'topSalespeopleReport'])->name('reports.top-salespeople');
                 Route::get('/commission-payments', [FinancialController::class, 'commissionPaymentsIndex'])->name('commission-payments.index');
                 Route::resource('commission-payments', FinancialController::class)->except(['index', 'show']);
+                Route::post('/commission-payments/{commissionPayment}/mark-paid', [FinancialController::class, 'markPaid'])->name('commission-payments.mark-paid');
+                Route::post('/commission-payments/{commissionPayment}/mark-failed', [FinancialController::class, 'markFailed'])->name('commission-payments.mark-failed');
             });
 
             // Referral Network Management

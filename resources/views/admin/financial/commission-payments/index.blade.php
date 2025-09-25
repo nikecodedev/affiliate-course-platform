@@ -194,7 +194,6 @@
             </div>
             <form id="markPaidForm" method="POST">
                 @csrf
-                @method('PATCH')
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="payment_reference" class="form-label">Payment Reference</label>

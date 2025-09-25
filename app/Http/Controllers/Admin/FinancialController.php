@@ -452,6 +452,66 @@ class FinancialController extends Controller
     }
 
     /**
+     * Mark commission payment as paid
+     */
+    public function markPaid(Request $request, CommissionPayment $commissionPayment)
+    {
+        if ($commissionPayment->status !== 'pending') {
+            return redirect()->back()
+                ->with('error', 'Only pending payments can be marked as paid.');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'payment_reference' => 'required|string|max:255',
+            'notes' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator);
+        }
+
+        $commissionPayment->update([
+            'status' => 'paid',
+            'payment_reference' => $request->payment_reference,
+            'notes' => $request->notes,
+            'paid_at' => now(),
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Commission payment marked as paid successfully.');
+    }
+
+    /**
+     * Mark commission payment as failed
+     */
+    public function markFailed(Request $request, CommissionPayment $commissionPayment)
+    {
+        if ($commissionPayment->status !== 'pending') {
+            return redirect()->back()
+                ->with('error', 'Only pending payments can be marked as failed.');
+        }
+
+        $validator = Validator::make($request->all(), [
+            'failure_reason' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator);
+        }
+
+        $commissionPayment->update([
+            'status' => 'failed',
+            'failure_reason' => $request->failure_reason,
+            'failed_at' => now(),
+        ]);
+
+        return redirect()->back()
+            ->with('success', 'Commission payment marked as failed successfully.');
+    }
+
+    /**
      * Get monthly financial data for charts
      */
     private function getMonthlyFinancialData()

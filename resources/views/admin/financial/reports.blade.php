@@ -5,6 +5,111 @@
 
 @section('content')
 <div class="row">
+    <div class="col-12 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0"><i class="bi bi-graph-up me-2"></i>Revenue vs Refunds</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header"><h6 class="mb-0">Commissions</h6></div>
+            <div class="card-body">
+                <div class="d-flex justify-content-around">
+                    <div class="text-center">
+                        <div class="display-6 text-warning" id="outstandingCommissions">0</div>
+                        <div class="text-muted">Outstanding</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="display-6 text-success" id="paidCommissions">0</div>
+                        <div class="text-muted">Paid</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header"><h6 class="mb-0">Top Salespeople (Month)</h6></div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead><tr><th>User</th><th class="text-end">Total</th></tr></thead>
+                        <tbody id="topSalesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+async function fetchJson(url){
+    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    return await res.json();
+}
+
+async function loadRevenueRefunds(){
+    const [revenue, refunds] = await Promise.all([
+        fetchJson("{{ route('admin.financial.reports.revenue') }}"),
+        fetchJson("{{ route('admin.financial.reports.refunds') }}")
+    ]);
+    const labels = [...new Set([...revenue.map(r=>r.date), ...refunds.map(r=>r.date)])].sort();
+    const revMap = Object.fromEntries(revenue.map(r=>[r.date, Number(r.total)]));
+    const refMap = Object.fromEntries(refunds.map(r=>[r.date, Number(r.total)]));
+    const revData = labels.map(d => revMap[d] || 0);
+    const refData = labels.map(d => refMap[d] || 0);
+    new Chart(document.getElementById('revenueChart').getContext('2d'), {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                { label: 'Revenue', data: revData, borderColor: '#28a745', backgroundColor: 'rgba(40,167,69,.1)', tension: .4 },
+                { label: 'Refunds', data: refData, borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,.1)', tension: .4 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+}
+
+async function loadCommissions(){
+    const { outstanding, paid } = await fetchJson("{{ route('admin.financial.reports.commissions') }}");
+    document.getElementById('outstandingCommissions').textContent = outstanding.toFixed(2);
+    document.getElementById('paidCommissions').textContent = paid.toFixed(2);
+}
+
+async function loadTopSales(){
+    const data = await fetchJson("{{ route('admin.financial.reports.top-salespeople') }}?period=month");
+    const tbody = document.getElementById('topSalesTable');
+    tbody.innerHTML = '';
+    data.slice(0, 10).forEach(row => {
+        const tr = document.createElement('tr');
+        const user = row.user?.name || ('User #' + row.user_id);
+        tr.innerHTML = `<td>${user}</td><td class="text-end">${Number(row.total).toFixed(2)}</td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    await Promise.all([loadRevenueRefunds(), loadCommissions(), loadTopSales()]);
+});
+</script>
+@endsection
+
+@extends('layouts.admin')
+
+@section('title', 'Financial Reports')
+@section('page-title', 'Financial Reports')
+
+@section('content')
+<div class="row">
     <!-- Period Selection -->
     <div class="col-12 mb-4">
         <div class="card">

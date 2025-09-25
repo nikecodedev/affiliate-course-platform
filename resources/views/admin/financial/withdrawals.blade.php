@@ -229,7 +229,6 @@
             </div>
             <form id="processForm" method="POST">
                 @csrf
-                @method('PATCH')
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="process_status" class="form-label">Status</label>

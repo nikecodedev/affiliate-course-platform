@@ -258,7 +258,6 @@
             </div>
             <form method="POST" action="{{ route('admin.financial.commission-payments.mark-paid', $commissionPayment) }}">
                 @csrf
-                @method('PATCH')
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="payment_reference" class="form-label">Payment Reference</label>
@@ -291,7 +290,6 @@
             </div>
             <form method="POST" action="{{ route('admin.financial.commission-payments.mark-failed', $commissionPayment) }}">
                 @csrf
-                @method('PATCH')
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="failure_reason" class="form-label">Failure Reason</label>
