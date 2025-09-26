@@ -119,7 +119,7 @@
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('admin.sales*') ? 'active' : '' }}" href="{{ route('admin.sales.index') }}">
                                 <i class="bi bi-cart-check me-2"></i>
-                                Sales & Invoices
+                                Sales
                             </a>
                         </li>
                         <li class="nav-item">

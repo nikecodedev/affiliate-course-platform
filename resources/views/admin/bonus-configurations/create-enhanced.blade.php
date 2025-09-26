@@ -351,6 +351,7 @@ document.getElementById('add_matrix_level').addEventListener('click', function()
     
     if (matrixLevelCount > maxDepth) {
         alert('Maximum depth reached');
+        matrixLevelCount--; // Decrement since we didn't actually add a level
         return;
     }
     
@@ -370,21 +371,69 @@ document.getElementById('add_matrix_level').addEventListener('click', function()
                    placeholder="Description (optional)">
         </div>
         <div class="col-md-2">
-            <button type="button" class="btn btn-danger btn-sm remove-level">
+            <button type="button" class="btn btn-danger btn-sm remove-level" title="Remove Level">
                 <i class="bi bi-trash"></i>
             </button>
         </div>
     `;
     
     levelsContainer.appendChild(levelDiv);
+    
+    // Add animation
+    levelDiv.style.opacity = '0';
+    levelDiv.style.transform = 'translateY(-20px)';
+    setTimeout(() => {
+        levelDiv.style.transition = 'all 0.3s ease';
+        levelDiv.style.opacity = '1';
+        levelDiv.style.transform = 'translateY(0)';
+    }, 10);
 });
 
-// Remove level functionality
+// Remove level functionality with improved event delegation
 document.addEventListener('click', function(e) {
-    if (e.target.classList.contains('remove-level')) {
-        e.target.closest('.level-row').remove();
+    if (e.target.classList.contains('remove-level') || e.target.closest('.remove-level')) {
+        const removeBtn = e.target.classList.contains('remove-level') ? e.target : e.target.closest('.remove-level');
+        const levelRow = removeBtn.closest('.level-row');
+        
+        if (levelRow) {
+            // Add removal animation
+            levelRow.style.transition = 'all 0.3s ease';
+            levelRow.style.opacity = '0';
+            levelRow.style.transform = 'translateX(-100%)';
+            
+            setTimeout(() => {
+                levelRow.remove();
+                // Update level labels after removal
+                updateMatrixLevelLabels();
+            }, 300);
+        }
     }
 });
+
+// Function to update level labels after removal
+function updateMatrixLevelLabels() {
+    const levelRows = document.querySelectorAll('#matrix_levels .level-row');
+    levelRows.forEach((row, index) => {
+        const label = row.querySelector('label');
+        if (label) {
+            label.textContent = `Level ${index + 1}`;
+        }
+        
+        // Update input names to maintain sequential numbering
+        const valueInput = row.querySelector('input[name*="[value]"]');
+        const descInput = row.querySelector('input[name*="[description]"]');
+        
+        if (valueInput) {
+            valueInput.name = `matrix_levels[${index + 1}][value]`;
+        }
+        if (descInput) {
+            descInput.name = `matrix_levels[${index + 1}][description]`;
+        }
+    });
+    
+    // Update the counter to match actual levels
+    matrixLevelCount = levelRows.length;
+}
 
 // Form submission
 document.getElementById('bonusConfigForm').addEventListener('submit', function(e) {
