@@ -70,7 +70,7 @@
                                         <tr>
                                             <td><strong>Total Lessons:</strong></td>
                                             <td>
-                                                <span class="badge bg-primary">{{ $course->modules->sum(function($module) { return $module->lessons->count(); }) }}</span>
+                                                <span class="badge bg-primary">{{ $course->total_lessons }}</span>
                                             </td>
                                         </tr>
                                         <tr>

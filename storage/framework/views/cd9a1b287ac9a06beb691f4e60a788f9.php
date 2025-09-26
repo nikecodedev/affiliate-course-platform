@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Edit Invoice - ' . $invoice->invoice_number); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -406,8 +404,12 @@ unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success">Mark as Paid</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-check-circle me-1"></i>Mark as Paid
+                    </button>
                 </div>
             </form>
         </div>
@@ -436,8 +438,12 @@ unset($__errorArgs, $__bag); ?>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger">Refund Invoice</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>Refund Invoice
+                    </button>
                 </div>
             </form>
         </div>

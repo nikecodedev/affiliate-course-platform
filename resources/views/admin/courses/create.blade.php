@@ -106,11 +106,11 @@
                                             <div class="form-check form-switch">
                                                 <input class="form-check-input" 
                                                        type="checkbox" 
-                                                       id="status" 
-                                                       name="status" 
+                                                       id="is_active" 
+                                                       name="is_active" 
                                                        value="1" 
-                                                       {{ old('status', true) ? 'checked' : '' }}>
-                                                <label class="form-check-label" for="status">
+                                                       {{ old('is_active', true) ? 'checked' : '' }}>
+                                                <label class="form-check-label" for="is_active">
                                                     Active Course
                                                 </label>
                                             </div>

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Carbon\Carbon;
 
 class Invoice extends Model
@@ -20,12 +21,14 @@ class Invoice extends Model
         'discount_amount',
         'final_amount',
         'status',
+        'due_date',
         'payment_method',
         'payment_reference',
         'payment_proof_url',
         'notes',
         'paid_at',
         'confirmed_at',
+        'irreversible',
         'refunded_at',
         'confirmed_by',
         'refunded_by',
@@ -36,9 +39,11 @@ class Invoice extends Model
         'cost_price' => 'decimal:2',
         'discount_amount' => 'decimal:2',
         'final_amount' => 'decimal:2',
+        'due_date' => 'date',
         'paid_at' => 'datetime',
         'confirmed_at' => 'datetime',
         'refunded_at' => 'datetime',
+        'irreversible' => 'boolean',
     ];
 
     // Relationships
@@ -50,6 +55,16 @@ class Invoice extends Model
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    public function commissions(): HasMany
+    {
+        return $this->hasMany(Commission::class);
+    }
+
+    public function sale(): BelongsTo
+    {
+        return $this->belongsTo(Sale::class);
     }
 
     public function confirmedBy(): BelongsTo

@@ -215,12 +215,28 @@ class BonusCalculationService
      */
     protected function createBonusPayment(array $data)
     {
-        // Here you would create a bonus payment record
-        // For now, we'll just log it
-        Log::info('Bonus payment created: ' . json_encode($data));
-        
-        // You can implement actual bonus payment creation here
-        // Example: BonusPayment::create($data);
+        try {
+            $bonusPayment = \App\Models\BonusPayment::create([
+                'client_id' => $data['user_id'],
+                'sale_id' => $data['sale_id'],
+                'bonus_type' => $data['bonus_type'],
+                'level' => $data['level'],
+                'amount' => $data['amount'],
+                'status' => $data['status'],
+                'eligibility_status' => 'eligible',
+                'from_client_id' => $data['user_id'],
+                'notes' => $data['description'],
+                'period_start' => now()->startOfMonth(),
+                'period_end' => now()->endOfMonth(),
+                'period_key' => now()->format('Y-m'),
+            ]);
+
+            Log::info('Bonus payment created: ' . $bonusPayment->id);
+            return $bonusPayment;
+        } catch (\Exception $e) {
+            Log::error('Failed to create bonus payment: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
@@ -231,17 +247,23 @@ class BonusCalculationService
         $startDate = $this->getPeriodStartDate($period);
         $endDate = $this->getPeriodEndDate($period);
 
+        $bonusPayments = \App\Models\BonusPayment::where('client_id', $user->id)
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->get();
+
         $stats = [
-            'total_bonuses' => 0,
-            'direct_referral' => 0,
-            'unilevel' => 0,
-            'matrix' => 0,
-            'pending' => 0,
-            'processed' => 0,
+            'total_bonuses' => $bonusPayments->sum('amount'),
+            'direct_referral' => $bonusPayments->where('bonus_type', 'direct_referral')->sum('amount'),
+            'unilevel' => $bonusPayments->where('bonus_type', 'unilevel')->sum('amount'),
+            'matrix' => $bonusPayments->where('bonus_type', 'matrix')->sum('amount'),
+            'pending' => $bonusPayments->where('status', 'pending')->sum('amount'),
+            'processed' => $bonusPayments->whereIn('status', ['approved', 'paid'])->sum('amount'),
+            'count_total' => $bonusPayments->count(),
+            'count_pending' => $bonusPayments->where('status', 'pending')->count(),
+            'count_approved' => $bonusPayments->where('status', 'approved')->count(),
+            'count_paid' => $bonusPayments->where('status', 'paid')->count(),
         ];
 
-        // Here you would query actual bonus payments
-        // For now, return empty stats
         return $stats;
     }
 

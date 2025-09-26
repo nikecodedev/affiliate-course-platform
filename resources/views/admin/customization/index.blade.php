@@ -274,7 +274,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Cancel
+                </button>
                 <form action="{{ route('admin.customization.reset') }}" method="POST" style="display: inline;">
                     @csrf
                     <button type="submit" class="btn btn-danger">

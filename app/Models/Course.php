@@ -73,5 +73,21 @@ class Course extends Model
             return $module->lessons->sum('duration');
         });
     }
+
+    /**
+     * Get status attribute (alias for is_active)
+     */
+    public function getStatusAttribute()
+    {
+        return $this->is_active;
+    }
+
+    /**
+     * Set status attribute (alias for is_active)
+     */
+    public function setStatusAttribute($value)
+    {
+        $this->attributes['is_active'] = $value;
+    }
 }
 

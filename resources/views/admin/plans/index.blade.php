@@ -33,7 +33,7 @@
                     @if(session('error'))
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
                             <i class="fas fa-exclamation-triangle me-2"></i>
-                            {{ session('error') }}
+                            {!! session('error') !!}
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     @endif
@@ -138,17 +138,34 @@
                                                             title="{{ $plan->status ? 'Deactivate' : 'Activate' }} Plan">
                                                         <i class="bi bi-{{ $plan->status ? 'pause-circle' : 'play-circle' }}"></i>
                                                     </button>
-                                                    <form action="{{ route('admin.plans.destroy', $plan) }}" 
-                                                          method="POST" 
-                                                          style="display: inline;"
-                                                          onsubmit="return confirm('Are you sure you want to delete this plan?')">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-outline-danger btn-sm"
-                                                                title="Delete Plan">
+                                                    
+                                                    <!-- Delete Options -->
+                                                    <div class="btn-group" role="group">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm dropdown-toggle" 
+                                                                data-bs-toggle="dropdown" title="Delete Options">
                                                             <i class="bi bi-trash"></i>
                                                         </button>
-                                                    </form>
+                                                        <ul class="dropdown-menu">
+                                                            <li>
+                                                                <a class="dropdown-item" href="#" 
+                                                                   onclick="deletePlan({{ $plan->id }}, '{{ $plan->title }}')">
+                                                                    <i class="bi bi-trash me-2"></i>Delete Plan
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item text-warning" href="#" 
+                                                                   onclick="confirmDelete({{ $plan->id }}, '{{ $plan->title }}')">
+                                                                    <i class="bi bi-exclamation-triangle me-2"></i>Delete with Options
+                                                                </a>
+                                                            </li>
+                                                            <li>
+                                                                <a class="dropdown-item text-danger" href="#" 
+                                                                   onclick="forceDelete({{ $plan->id }}, '{{ $plan->title }}')">
+                                                                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Force Delete All
+                                                                </a>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
@@ -262,5 +279,56 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 });
+
+// Delete functions
+function deletePlan(planId, planTitle) {
+    if (confirm(`Are you sure you want to delete the plan "${planTitle}"?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/plans/${planId}`;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        const methodField = document.createElement('input');
+        methodField.type = 'hidden';
+        methodField.name = '_method';
+        methodField.value = 'DELETE';
+        
+        form.appendChild(csrfToken);
+        form.appendChild(methodField);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function confirmDelete(planId, planTitle) {
+    window.location.href = `/admin/plans/${planId}/confirm-delete`;
+}
+
+function forceDelete(planId, planTitle) {
+    if (confirm(`⚠️ WARNING: This will permanently delete the plan "${planTitle}" and ALL related records (invoices, sales, products). This action cannot be undone!\n\nAre you absolutely sure you want to continue?`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/plans/${planId}/force-delete`;
+        
+        const csrfToken = document.createElement('input');
+        csrfToken.type = 'hidden';
+        csrfToken.name = '_token';
+        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        
+        const methodField = document.createElement('input');
+        methodField.type = 'hidden';
+        methodField.name = '_method';
+        methodField.value = 'DELETE';
+        
+        form.appendChild(csrfToken);
+        form.appendChild(methodField);
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
 </script>
 @endsection

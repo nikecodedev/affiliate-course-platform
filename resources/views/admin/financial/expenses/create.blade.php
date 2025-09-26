@@ -159,10 +159,18 @@
                             <div class="mb-3">
                                 <label class="form-label">Quick Amount</label>
                                 <div class="btn-group w-100" role="group">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(10)">$10</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(25)">$25</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(50)">$50</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(100)">$100</button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(10)">
+                                        <i class="bi bi-currency-dollar me-1"></i>$10
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(25)">
+                                        <i class="bi bi-currency-dollar me-1"></i>$25
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(50)">
+                                        <i class="bi bi-currency-dollar me-1"></i>$50
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(100)">
+                                        <i class="bi bi-currency-dollar me-1"></i>$100
+                                    </button>
                                 </div>
                             </div>
                         </div>

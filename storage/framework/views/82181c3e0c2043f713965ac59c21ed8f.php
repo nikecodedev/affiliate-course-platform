@@ -80,7 +80,7 @@
                                                 <span class="badge bg-info"><?php echo e($course->modules->count()); ?></span>
                                             </td>
                                             <td>
-                                                <span class="badge bg-primary"><?php echo e($course->modules->sum(function($module) { return $module->lessons->count(); })); ?></span>
+                                                <span class="badge bg-primary"><?php echo e($course->total_lessons); ?></span>
                                             </td>
                                             <td>
                                                 <span class="badge <?php echo e($course->status ? 'bg-success' : 'bg-danger'); ?>">
@@ -96,23 +96,23 @@
                                                     <a href="<?php echo e(route('admin.courses.show', $course)); ?>" 
                                                        class="btn btn-outline-info btn-sm" 
                                                        title="View Details">
-                                                        <i class="bi bi-eye"></i>
+                                                        <i class="fas fa-eye"></i>
                                                     </a>
                                                     <a href="<?php echo e(route('admin.courses.edit', $course)); ?>" 
                                                        class="btn btn-outline-primary btn-sm"
                                                        title="Edit Course">
-                                                        <i class="bi bi-pencil"></i>
+                                                        <i class="fas fa-edit"></i>
                                                     </a>
                                                     <a href="<?php echo e(route('admin.courses.modules.index', $course)); ?>" 
                                                        class="btn btn-outline-success btn-sm"
                                                        title="Manage Modules">
-                                                        <i class="bi bi-list-ul"></i>
+                                                        <i class="fas fa-list"></i>
                                                     </a>
                                                     <button type="button" 
                                                             class="btn btn-outline-<?php echo e($course->status ? 'warning' : 'success'); ?> btn-sm toggle-status"
                                                             data-course-id="<?php echo e($course->id); ?>"
                                                             title="<?php echo e($course->status ? 'Deactivate' : 'Activate'); ?> Course">
-                                                        <i class="bi bi-<?php echo e($course->status ? 'pause-circle' : 'play-circle'); ?>"></i>
+                                                        <i class="fas fa-<?php echo e($course->status ? 'pause-circle' : 'play-circle'); ?>"></i>
                                                     </button>
                                                     <form action="<?php echo e(route('admin.courses.destroy', $course)); ?>" 
                                                           method="POST" 
@@ -122,7 +122,7 @@
                                                         <?php echo method_field('DELETE'); ?>
                                                         <button type="submit" class="btn btn-outline-danger btn-sm"
                                                                 title="Delete Course">
-                                                            <i class="bi bi-trash"></i>
+                                                            <i class="fas fa-trash"></i>
                                                         </button>
                                                     </form>
                                                 </div>
@@ -184,11 +184,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.status) {
                         this.className = originalClass.replace('outline-success', 'outline-warning');
                         this.title = 'Deactivate Course';
-                        originalIcon.className = 'fas fa-pause';
+                        originalIcon.className = 'fas fa-pause-circle';
                     } else {
                         this.className = originalClass.replace('outline-warning', 'outline-success');
                         this.title = 'Activate Course';
-                        originalIcon.className = 'fas fa-play';
+                        originalIcon.className = 'fas fa-play-circle';
                     }
                     
                     // Update status badge in the same row

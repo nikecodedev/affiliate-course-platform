@@ -155,14 +155,26 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="btn-group w-100 mb-2" role="group">
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(25)">$25</button>
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(50)">$50</button>
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(100)">$100</button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(25)">
+                                            <i class="bi bi-currency-dollar me-1"></i>$25
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(50)">
+                                            <i class="bi bi-currency-dollar me-1"></i>$50
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(100)">
+                                            <i class="bi bi-currency-dollar me-1"></i>$100
+                                        </button>
                                     </div>
                                     <div class="btn-group w-100" role="group">
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(250)">$250</button>
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(500)">$500</button>
-                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setFullPending()">Full</button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(250)">
+                                            <i class="bi bi-currency-dollar me-1"></i>$250
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setAmount(500)">
+                                            <i class="bi bi-currency-dollar me-1"></i>$500
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="setFullPending()">
+                                            <i class="bi bi-arrow-up-circle me-1"></i>Full
+                                        </button>
                                     </div>
                                 </div>
                             </div>

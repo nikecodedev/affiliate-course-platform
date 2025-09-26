@@ -85,6 +85,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Plans and Products
         Route::resource('plans', PlanController::class);
         Route::post('plans/{plan}/toggle', [PlanController::class, 'toggleStatus'])->name('plans.toggle.status');
+        Route::get('plans/{plan}/confirm-delete', [PlanController::class, 'confirmDelete'])->name('plans.confirm-delete');
+        Route::delete('plans/{plan}/force-delete', [PlanController::class, 'forceDelete'])->name('plans.force-delete');
+        Route::post('plans/{plan}/delete-with-options', [PlanController::class, 'deleteWithOptions'])->name('plans.delete-with-options');
         Route::resource('products', ProductController::class);
 
         // Sales Management
@@ -183,6 +186,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Plan Management
             Route::resource('plans', PlanController::class);
             Route::post('plans/{plan}/toggle-status', [PlanController::class, 'toggleStatus'])->name('plans.toggle-status');
+            Route::get('plans/{plan}/confirm-delete', [PlanController::class, 'confirmDelete'])->name('plans.confirm-delete');
+            Route::delete('plans/{plan}/force-delete', [PlanController::class, 'forceDelete'])->name('plans.force-delete');
+            Route::post('plans/{plan}/delete-with-options', [PlanController::class, 'deleteWithOptions'])->name('plans.delete-with-options');
 
             // Course Management
             Route::resource('courses', CourseController::class);

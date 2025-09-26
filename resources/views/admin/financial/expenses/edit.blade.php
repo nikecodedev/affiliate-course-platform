@@ -259,7 +259,9 @@
                 </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Cancel
+                </button>
                 <form method="POST" action="{{ route('admin.financial.expenses.destroy', $expense) }}" style="display: inline;">
                     @csrf
                     @method('DELETE')

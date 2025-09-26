@@ -41,7 +41,7 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'status' => 'boolean',
+            'is_active' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -89,7 +89,7 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'status' => 'boolean',
+            'is_active' => 'boolean',
         ]);
 
         if ($validator->fails()) {
@@ -143,12 +143,12 @@ class CourseController extends Controller
      */
     public function toggleStatus(Course $course)
     {
-        $course->status = !$course->status;
+        $course->is_active = !$course->is_active;
         $course->save();
 
         return response()->json([
             'success' => true,
-            'status' => $course->status,
+            'status' => $course->is_active,
         ]);
     }
 }

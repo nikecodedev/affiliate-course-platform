@@ -188,6 +188,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the user's invoices
+     */
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * Get the user's sponsor (referrer)
+     */
+    public function sponsor()
+    {
+        return $this->belongsTo(User::class, 'referral_code', 'affiliate_code');
+    }
+
+    /**
+     * Get the user's bonus payments
+     */
+    public function bonusPayments()
+    {
+        return $this->hasMany(BonusPayment::class, 'client_id');
+    }
+
+    /**
      * Check if user has active invoice
      */
     public function hasActiveInvoice()
