@@ -123,6 +123,33 @@
                         <h6 class="mb-0">{{ $activeInvoice->expires_at->format('d/m/Y') }}</h6>
                     </div>
                 </div>
+
+                @if(optional($activeInvoice->plan)->external_product_url || optional($activeInvoice->plan)->courses()->exists())
+                <hr>
+                <div class="row">
+                    @if(optional($activeInvoice->plan)->external_product_url)
+                    <div class="col-md-6 mb-3">
+                        <a href="{{ $activeInvoice->plan->external_product_url }}" target="_blank" class="btn btn-success w-100">
+                            <i class="bi bi-download me-2"></i>Download Product
+                        </a>
+                    </div>
+                    @endif
+                    @if(optional($activeInvoice->plan)->courses()->exists())
+                    <div class="col-md-6">
+                        <h6 class="text-muted mb-2">Linked Courses</h6>
+                        <ul class="list-unstyled mb-0">
+                            @foreach($activeInvoice->plan->courses as $course)
+                                <li class="mb-1">
+                                    <a href="{{ route('training.show', $course) }}" class="text-decoration-none">
+                                        <i class="bi bi-book me-1"></i>{{ $course->title }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+                </div>
+                @endif
             </div>
         </div>
     </div>

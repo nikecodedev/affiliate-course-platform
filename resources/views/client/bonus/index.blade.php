@@ -160,7 +160,7 @@
                         Recent Bonus Payments
                     </h6>
                     <a href="{{ route('client.bonus.payments') }}" class="btn btn-sm btn-outline-primary">
-                        View All
+                        <i class="bi bi-list me-1"></i>View All
                     </a>
                 </div>
             </div>

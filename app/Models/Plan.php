@@ -25,6 +25,7 @@ class Plan extends Model
         'commission_matrix',
         'commission_profit_sharing',
         'external_url',
+        'external_product_url',
         'course_id',
         'status',
     ];
@@ -86,9 +87,9 @@ class Plan extends Model
     /**
      * Associated courses
      */
-    public function courses(): HasMany
+    public function courses(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasMany(PlanCourse::class);
+        return $this->belongsToMany(Course::class, 'plan_courses');
     }
 
     /**

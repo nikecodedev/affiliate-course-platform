@@ -122,7 +122,7 @@
                         Recent Transactions
                     </h5>
                     <a href="{{ route('client.financial.transactions') }}" class="btn btn-sm btn-outline-primary">
-                        View All
+                        <i class="bi bi-list me-1"></i>View All
                     </a>
                 </div>
             </div>
@@ -185,7 +185,7 @@
                         Active Invoices
                     </h5>
                     <a href="{{ route('client.financial.invoices') }}" class="btn btn-sm btn-outline-primary">
-                        View All
+                        <i class="bi bi-receipt me-1"></i>View All
                     </a>
                 </div>
             </div>
@@ -225,7 +225,7 @@
                         Pending Withdrawals
                     </h5>
                     <a href="{{ route('client.financial.withdrawals') }}" class="btn btn-sm btn-outline-primary">
-                        View All
+                        <i class="bi bi-arrow-up-circle me-1"></i>View All
                     </a>
                 </div>
             </div>

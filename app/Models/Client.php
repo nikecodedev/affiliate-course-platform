@@ -149,6 +149,14 @@ class Client extends Authenticatable
     }
 
     /**
+     * Check if client has at least one active invoice
+     */
+    public function hasActiveInvoice()
+    {
+        return $this->activeInvoices()->exists();
+    }
+
+    /**
      * Check if client has access to courses
      */
     public function hasCourseAccess()
