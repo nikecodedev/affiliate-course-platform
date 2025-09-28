@@ -342,4 +342,164 @@ class BonusCalculationService
 
         return $potentialBonuses;
     }
+
+    /**
+     * Reverse bonuses for a refunded sale
+     */
+    public function reverseBonusesForSale(Sale $sale)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Find all bonus payments related to this sale
+            $bonusPayments = \App\Models\BonusPayment::where('sale_id', $sale->id)->get();
+
+            foreach ($bonusPayments as $bonusPayment) {
+                // Create reversal entry
+                $this->createBonusReversal($bonusPayment, $sale);
+                
+                // Update user's balance
+                $user = $bonusPayment->user;
+                $user->decrement('available_balance', $bonusPayment->amount);
+                $user->decrement('total_earnings', $bonusPayment->amount);
+            }
+
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Bonus reversal failed for sale: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Reverse bonuses for a refunded invoice
+     */
+    public function reverseBonusesForInvoice(ClientInvoice $invoice)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Find all bonus payments related to this invoice
+            $bonusPayments = \App\Models\BonusPayment::where('invoice_id', $invoice->id)->get();
+
+            foreach ($bonusPayments as $bonusPayment) {
+                // Create reversal entry
+                $this->createBonusReversal($bonusPayment, $invoice);
+                
+                // Update user's balance
+                $user = $bonusPayment->user;
+                $user->decrement('available_balance', $bonusPayment->amount);
+                $user->decrement('total_earnings', $bonusPayment->amount);
+            }
+
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Bonus reversal failed for invoice: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Create bonus reversal entry
+     */
+    private function createBonusReversal($bonusPayment, $source)
+    {
+        \App\Models\BonusPayment::create([
+            'user_id' => $bonusPayment->user_id,
+            'sale_id' => $bonusPayment->sale_id,
+            'invoice_id' => $bonusPayment->invoice_id,
+            'bonus_type' => $bonusPayment->bonus_type,
+            'amount' => -$bonusPayment->amount, // Negative amount for reversal
+            'level' => $bonusPayment->level,
+            'description' => "Reversal: " . $bonusPayment->description,
+            'status' => 'completed',
+            'processed_at' => now(),
+        ]);
+    }
+
+    /**
+     * Process daily profit sharing
+     */
+    public function processDailyProfitSharing()
+    {
+        try {
+            DB::beginTransaction();
+
+            $profitSharingSetting = BonusSetting::getByType('profit_sharing');
+            if (!$profitSharingSetting || !$profitSharingSetting->is_active) {
+                return false;
+            }
+
+            // Get total profit for the day
+            $totalProfit = $this->calculateDailyProfit();
+            if ($totalProfit <= 0) {
+                return false;
+            }
+
+            // Get all active users
+            $activeUsers = User::where('active_network', true)->get();
+
+            foreach ($activeUsers as $user) {
+                $userVolume = $this->calculateUserVolume($user);
+                $profitShare = ($userVolume / $this->getTotalVolume()) * $totalProfit;
+
+                if ($profitShare > 0) {
+                    $this->createBonusPayment([
+                        'user_id' => $user->id,
+                        'bonus_type' => 'profit_sharing',
+                        'amount' => $profitShare,
+                        'description' => "Daily profit sharing - " . now()->format('Y-m-d'),
+                        'status' => 'pending',
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return true;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Daily profit sharing failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Calculate daily profit
+     */
+    private function calculateDailyProfit()
+    {
+        $today = now()->startOfDay();
+        $tomorrow = $today->copy()->addDay();
+
+        $totalRevenue = Sale::where('status', 'confirmed')
+            ->whereBetween('created_at', [$today, $tomorrow])
+            ->sum('amount');
+
+        $totalExpenses = \App\Models\Expense::whereBetween('created_at', [$today, $tomorrow])
+            ->sum('amount');
+
+        return $totalRevenue - $totalExpenses;
+    }
+
+    /**
+     * Calculate user volume
+     */
+    private function calculateUserVolume(User $user)
+    {
+        return Sale::where('user_id', $user->id)
+            ->where('status', 'confirmed')
+            ->sum('amount');
+    }
+
+    /**
+     * Get total volume
+     */
+    private function getTotalVolume()
+    {
+        return Sale::where('status', 'confirmed')->sum('amount');
+    }
 }

@@ -3,10 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\User;
-use App\Models\Sale;
-use App\Models\SystemSetting;
-use Illuminate\Support\Facades\DB;
+use App\Services\BonusCalculationService;
 use Illuminate\Support\Facades\Log;
 
 class ProcessDailyProfitSharing extends Command
@@ -16,14 +13,14 @@ class ProcessDailyProfitSharing extends Command
      *
      * @var string
      */
-    protected $signature = 'profit:process-daily-sharing';
+    protected $signature = 'bonus:process-daily-profit-sharing {--dry-run : Run without making changes}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Process daily profit sharing among active affiliates';
+    protected $description = 'Process daily profit sharing bonuses for all active users';
 
     /**
      * Execute the console command.
@@ -33,77 +30,100 @@ class ProcessDailyProfitSharing extends Command
         $this->info('Starting daily profit sharing processing...');
 
         try {
-            DB::beginTransaction();
+            $bonusService = new BonusCalculationService();
+            $isDryRun = $this->option('dry-run');
 
-            // Get yesterday's confirmed sales
-            $yesterday = now()->subDay()->toDateString();
-            $totalRevenue = Sale::confirmed()
-                ->whereDate('sale_date', $yesterday)
-                ->sum('amount');
-
-            if ($totalRevenue <= 0) {
-                $this->info('No revenue for yesterday. Skipping profit sharing.');
-                return 0;
-            }
-
-            // Get profit sharing percentage from settings
-            $profitSharingPercentage = SystemSetting::get('daily_profit_sharing_percentage', 5.0);
-            $totalProfitShare = $totalRevenue * ($profitSharingPercentage / 100);
-
-            // Get all active affiliates with sales in the last 30 days
-            $activeAffiliates = User::affiliates()
-                ->active()
-                ->whereHas('affiliateSales', function ($query) {
-                    $query->confirmed()
-                          ->where('sale_date', '>=', now()->subDays(30));
-                })
-                ->withCount(['affiliateSales as recent_sales_count' => function ($query) {
-                    $query->confirmed()
-                          ->where('sale_date', '>=', now()->subDays(30));
-                }])
-                ->withSum(['affiliateSales as recent_sales_amount' => function ($query) {
-                    $query->confirmed()
-                          ->where('sale_date', '>=', now()->subDays(30));
-                }], 'amount')
-                ->get();
-
-            if ($activeAffiliates->isEmpty()) {
-                $this->info('No active affiliates found. Skipping profit sharing.');
-                return 0;
-            }
-
-            $totalWeight = $activeAffiliates->sum(function ($affiliate) {
-                return $affiliate->recent_sales_count * $affiliate->recent_sales_amount;
-            });
-
-            $distributedAmount = 0;
-
-            foreach ($activeAffiliates as $affiliate) {
-                $weight = $affiliate->recent_sales_count * $affiliate->recent_sales_amount;
-                $sharePercentage = $totalWeight > 0 ? ($weight / $totalWeight) : 0;
-                $shareAmount = $totalProfitShare * $sharePercentage;
-
-                if ($shareAmount > 0) {
-                    // Create profit share record
-                    // You might want to create a separate profit_shares table
-                    Log::info("Profit share: User: {$affiliate->name}, Amount: R$ {$shareAmount}, Weight: {$weight}");
-                    $distributedAmount += $shareAmount;
+            if ($isDryRun) {
+                $this->info('DRY RUN MODE - No changes will be made');
+                $this->displayProfitSharingPreview($bonusService);
+            } else {
+                $result = $bonusService->processDailyProfitSharing();
+                
+                if ($result) {
+                    $this->info('Daily profit sharing processed successfully');
+                    Log::info('Daily profit sharing processed successfully');
+                } else {
+                    $this->error('Failed to process daily profit sharing');
+                    Log::error('Failed to process daily profit sharing');
                 }
             }
 
-            DB::commit();
-
-            $this->info("Daily profit sharing completed. Total distributed: R$ {$distributedAmount}");
-            Log::info("Daily profit sharing completed. Total distributed: R$ {$distributedAmount}");
-
         } catch (\Exception $e) {
-            DB::rollBack();
             $this->error('Error processing daily profit sharing: ' . $e->getMessage());
-            Log::error('Error processing daily profit sharing: ' . $e->getMessage());
+            Log::error('Daily profit sharing error: ' . $e->getMessage());
             return 1;
         }
 
         return 0;
     }
-}
 
+    /**
+     * Display profit sharing preview
+     */
+    private function displayProfitSharingPreview(BonusCalculationService $bonusService)
+    {
+        $this->info('Profit Sharing Preview:');
+        $this->line('========================');
+        
+        // Get profit data
+        $totalProfit = $this->calculateDailyProfit();
+        $totalVolume = $this->getTotalVolume();
+        $activeUsers = \App\Models\User::where('active_network', true)->count();
+
+        $this->line("Total Daily Profit: R$ " . number_format($totalProfit, 2, ',', '.'));
+        $this->line("Total Volume: R$ " . number_format($totalVolume, 2, ',', '.'));
+        $this->line("Active Users: {$activeUsers}");
+
+        if ($totalProfit > 0) {
+            $this->line("\nProfit Distribution Preview:");
+            $this->line("User ID | Volume | Share Amount");
+            $this->line("--------|--------|-------------");
+
+            $users = \App\Models\User::where('active_network', true)->get();
+            foreach ($users as $user) {
+                $userVolume = $this->calculateUserVolume($user);
+                $profitShare = ($userVolume / $totalVolume) * $totalProfit;
+                
+                if ($profitShare > 0) {
+                    $this->line("{$user->id} | R$ " . number_format($userVolume, 2, ',', '.') . " | R$ " . number_format($profitShare, 2, ',', '.'));
+                }
+            }
+        }
+    }
+
+    /**
+     * Calculate daily profit
+     */
+    private function calculateDailyProfit()
+    {
+        $today = now()->startOfDay();
+        $tomorrow = $today->copy()->addDay();
+
+        $totalRevenue = \App\Models\Sale::where('status', 'confirmed')
+            ->whereBetween('created_at', [$today, $tomorrow])
+            ->sum('amount');
+
+        $totalExpenses = \App\Models\Expense::whereBetween('created_at', [$today, $tomorrow])
+            ->sum('amount');
+
+        return $totalRevenue - $totalExpenses;
+    }
+
+    /**
+     * Calculate user volume
+     */
+    private function calculateUserVolume($user)
+    {
+        return \App\Models\Sale::where('user_id', $user->id)
+            ->where('status', 'confirmed')
+            ->sum('amount');
+    }
+
+    /**
+     * Get total volume
+     */
+    private function getTotalVolume()
+    {
+        return \App\Models\Sale::where('status', 'confirmed')->sum('amount');
+    }
+}

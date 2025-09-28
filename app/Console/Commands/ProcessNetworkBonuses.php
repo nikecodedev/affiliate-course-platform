@@ -3,9 +3,9 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Models\User;
 use App\Models\Sale;
-use Illuminate\Support\Facades\DB;
+use App\Models\User;
+use App\Services\BonusCalculationService;
 use Illuminate\Support\Facades\Log;
 
 class ProcessNetworkBonuses extends Command
@@ -15,14 +15,14 @@ class ProcessNetworkBonuses extends Command
      *
      * @var string
      */
-    protected $signature = 'bonus:process-network';
+    protected $signature = 'bonus:process-network {--dry-run : Run without making changes} {--sale= : Process for specific sale ID}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Process network bonuses for multi-level affiliates';
+    protected $description = 'Process network bonuses for confirmed sales';
 
     /**
      * Execute the console command.
@@ -32,31 +32,27 @@ class ProcessNetworkBonuses extends Command
         $this->info('Starting network bonus processing...');
 
         try {
-            DB::beginTransaction();
+            $isDryRun = $this->option('dry-run');
+            $saleId = $this->option('sale');
 
-            // Get all confirmed sales from yesterday
-            $yesterday = now()->subDay()->toDateString();
-            $sales = Sale::confirmed()
-                ->whereDate('sale_date', $yesterday)
-                ->whereNotNull('affiliate_id')
-                ->get();
-
-            $processedBonuses = 0;
-
-            foreach ($sales as $sale) {
-                $this->processNetworkBonus($sale);
-                $processedBonuses++;
+            if ($isDryRun) {
+                $this->info('DRY RUN MODE - No changes will be made');
+                $this->displayNetworkBonusPreview($saleId);
+            } else {
+                $result = $this->processNetworkBonuses($saleId);
+                
+                if ($result) {
+                    $this->info('Network bonuses processed successfully');
+                    Log::info('Network bonuses processed successfully');
+                } else {
+                    $this->error('Failed to process network bonuses');
+                    Log::error('Failed to process network bonuses');
+                }
             }
 
-            DB::commit();
-
-            $this->info("Network bonus processing completed. {$processedBonuses} sales processed.");
-            Log::info("Network bonus processing completed. {$processedBonuses} sales processed.");
-
         } catch (\Exception $e) {
-            DB::rollBack();
             $this->error('Error processing network bonuses: ' . $e->getMessage());
-            Log::error('Error processing network bonuses: ' . $e->getMessage());
+            Log::error('Network bonus error: ' . $e->getMessage());
             return 1;
         }
 
@@ -64,38 +60,74 @@ class ProcessNetworkBonuses extends Command
     }
 
     /**
-     * Process network bonus for a sale
+     * Process network bonuses
      */
-    private function processNetworkBonus(Sale $sale)
+    private function processNetworkBonuses($saleId = null)
     {
-        $affiliate = $sale->affiliate;
-        $levels = [
-            1 => 0.05, // 5% for direct referral
-            2 => 0.03, // 3% for second level
-            3 => 0.02, // 2% for third level
-        ];
+        try {
+            $query = Sale::where('status', 'confirmed')
+                ->where('bonuses_processed', false);
 
-        $currentUser = $affiliate;
-        $level = 1;
+            if ($saleId) {
+                $query->where('id', $saleId);
+            }
 
-        // Process up to 3 levels
-        while ($currentUser && $level <= 3) {
-            $referrer = $currentUser->referrer;
+            $sales = $query->get();
+            $processedCount = 0;
 
-            if ($referrer && $referrer->is_affiliate) {
-                $bonusPercentage = $levels[$level];
-                $bonusAmount = $sale->amount * $bonusPercentage;
+            foreach ($sales as $sale) {
+                $bonusService = new BonusCalculationService();
+                $result = $bonusService->processBonusesForInvoice($sale->invoice);
 
-                // Create bonus record (you might want to create a separate bonuses table)
-                // For now, we'll log the bonus
-                Log::info("Network bonus: Level {$level}, User: {$referrer->name}, Amount: R$ {$bonusAmount}");
+                if ($result) {
+                    $sale->update(['bonuses_processed' => true]);
+                    $processedCount++;
 
-                $currentUser = $referrer;
-                $level++;
-            } else {
-                break;
+                    Log::info('Network bonuses processed for sale', [
+                        'sale_id' => $sale->id,
+                        'amount' => $sale->amount
+                    ]);
+                }
+            }
+
+            $this->info("Processed network bonuses for {$processedCount} sales");
+            return true;
+
+        } catch (\Exception $e) {
+            Log::error('Network bonus processing failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Display network bonus preview
+     */
+    private function displayNetworkBonusPreview($saleId = null)
+    {
+        $this->info('Network Bonus Preview:');
+        $this->line('======================');
+        
+        $query = Sale::where('status', 'confirmed')
+            ->where('bonuses_processed', false);
+
+        if ($saleId) {
+            $query->where('id', $saleId);
+        }
+
+        $sales = $query->get();
+        $totalAmount = $sales->sum('amount');
+
+        $this->line("Pending Sales: {$sales->count()}");
+        $this->line("Total Amount: R$ " . number_format($totalAmount, 2, ',', '.'));
+
+        if ($sales->count() > 0) {
+            $this->line("\nSale Details:");
+            $this->line("Sale ID | User | Amount | Plan");
+            $this->line("--------|------|--------|-----");
+
+            foreach ($sales as $sale) {
+                $this->line("{$sale->id} | {$sale->user->name} | R$ " . number_format($sale->amount, 2, ',', '.') . " | {$sale->plan->title}");
             }
         }
     }
 }
-

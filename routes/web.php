@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\SystemSettingsController;
 use App\Http\Controllers\Admin\PlanController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SaleController;
+use App\Http\Controllers\Admin\DirectSalesController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\ModuleController;
@@ -95,6 +96,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('sales/{sale}/confirm', [SaleController::class, 'confirm'])->name('sales.confirm');
         Route::post('sales/{sale}/cancel', [SaleController::class, 'cancel'])->name('sales.cancel');
         Route::post('sales/{sale}/refund', [SaleController::class, 'refund'])->name('sales.refund');
+
+        // Direct Sales Management
+        Route::prefix('sales/direct')->name('sales.direct.')->group(function () {
+            Route::get('/', [DirectSalesController::class, 'index'])->name('index');
+            Route::get('/create', [DirectSalesController::class, 'create'])->name('create');
+            Route::post('/', [DirectSalesController::class, 'store'])->name('store');
+            Route::get('/{sale}', [DirectSalesController::class, 'show'])->name('show');
+            Route::post('/{sale}/confirm', [DirectSalesController::class, 'confirm'])->name('confirm');
+            Route::post('/{sale}/cancel', [DirectSalesController::class, 'cancel'])->name('cancel');
+            Route::get('/statistics', [DirectSalesController::class, 'getStatistics'])->name('statistics');
+        });
 
         // User Management
         Route::resource('users', UserController::class);

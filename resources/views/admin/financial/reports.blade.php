@@ -5,124 +5,17 @@
 
 @section('content')
 <div class="row">
-    <div class="col-12 mb-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="card-title mb-0"><i class="bi bi-graph-up me-2"></i>Revenue vs Refunds</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="revenueChart" height="100"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-6 mb-4">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Commissions</h6></div>
-            <div class="card-body">
-                <div class="d-flex justify-content-around">
-                    <div class="text-center">
-                        <div class="display-6 text-warning" id="outstandingCommissions">0</div>
-                        <div class="text-muted">Outstanding</div>
-                    </div>
-                    <div class="text-center">
-                        <div class="display-6 text-success" id="paidCommissions">0</div>
-                        <div class="text-muted">Paid</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-6 mb-4">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">Top Salespeople (Month)</h6></div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead><tr><th>User</th><th class="text-end">Total</th></tr></thead>
-                        <tbody id="topSalesTable"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
-
-@section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-async function fetchJson(url){
-    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-    return await res.json();
-}
-
-async function loadRevenueRefunds(){
-    const [revenue, refunds] = await Promise.all([
-        fetchJson("{{ route('admin.financial.reports.revenue') }}"),
-        fetchJson("{{ route('admin.financial.reports.refunds') }}")
-    ]);
-    const labels = [...new Set([...revenue.map(r=>r.date), ...refunds.map(r=>r.date)])].sort();
-    const revMap = Object.fromEntries(revenue.map(r=>[r.date, Number(r.total)]));
-    const refMap = Object.fromEntries(refunds.map(r=>[r.date, Number(r.total)]));
-    const revData = labels.map(d => revMap[d] || 0);
-    const refData = labels.map(d => refMap[d] || 0);
-    new Chart(document.getElementById('revenueChart').getContext('2d'), {
-        type: 'line',
-        data: {
-            labels,
-            datasets: [
-                { label: 'Revenue', data: revData, borderColor: '#28a745', backgroundColor: 'rgba(40,167,69,.1)', tension: .4 },
-                { label: 'Refunds', data: refData, borderColor: '#dc3545', backgroundColor: 'rgba(220,53,69,.1)', tension: .4 }
-            ]
-        },
-        options: { responsive: true, maintainAspectRatio: false }
-    });
-}
-
-async function loadCommissions(){
-    const { outstanding, paid } = await fetchJson("{{ route('admin.financial.reports.commissions') }}");
-    document.getElementById('outstandingCommissions').textContent = outstanding.toFixed(2);
-    document.getElementById('paidCommissions').textContent = paid.toFixed(2);
-}
-
-async function loadTopSales(){
-    const data = await fetchJson("{{ route('admin.financial.reports.top-salespeople') }}?period=month");
-    const tbody = document.getElementById('topSalesTable');
-    tbody.innerHTML = '';
-    data.slice(0, 10).forEach(row => {
-        const tr = document.createElement('tr');
-        const user = row.user?.name || ('User #' + row.user_id);
-        tr.innerHTML = `<td>${user}</td><td class="text-end">${Number(row.total).toFixed(2)}</td>`;
-        tbody.appendChild(tr);
-    });
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
-    await Promise.all([loadRevenueRefunds(), loadCommissions(), loadTopSales()]);
-});
-</script>
-@endsection
-
-@extends('layouts.admin')
-
-@section('title', 'Financial Reports')
-@section('page-title', 'Financial Reports')
-
-@section('content')
-<div class="row">
-    <!-- Period Selection -->
-    <div class="col-12 mb-4">
-        <div class="card">
+    <div class="col-12">
+        <!-- Report Filters -->
+        <div class="card mb-4">
             <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-calendar me-2"></i>Report Period
-                </h5>
+                <h5 class="card-title mb-0">Report Filters</h5>
             </div>
             <div class="card-body">
-                <div class="row">
+                <form method="GET" action="{{ route('admin.financial.reports') }}" class="row g-3">
                     <div class="col-md-3">
                         <label for="period" class="form-label">Period</label>
-                        <select class="form-select" id="period" onchange="updateReport()">
+                        <select name="period" id="period" class="form-select">
                             <option value="week" {{ $period === 'week' ? 'selected' : '' }}>Last Week</option>
                             <option value="month" {{ $period === 'month' ? 'selected' : '' }}>Last Month</option>
                             <option value="quarter" {{ $period === 'quarter' ? 'selected' : '' }}>Last Quarter</option>
@@ -130,219 +23,281 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </select>
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label">Date Range</label>
-                        <div class="text-muted">
-                            {{ $startDate->format('M d, Y') }} - {{ $endDate->format('M d, Y') }}
-                        </div>
+                        <label for="format" class="form-label">Export Format</label>
+                        <select name="format" id="format" class="form-select">
+                            <option value="view">View Only</option>
+                            <option value="pdf">PDF</option>
+                            <option value="excel">Excel</option>
+                            <option value="csv">CSV</option>
+                        </select>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <label class="form-label">&nbsp;</label>
                         <div>
-                            <button type="button" class="btn btn-primary" onclick="exportReport()">
-                                <i class="bi bi-download me-2"></i>Export Report
-                            </button>
+                            <button type="submit" class="btn btn-primary">Generate Report</button>
+                            <a href="{{ route('admin.financial.reports') }}" class="btn btn-secondary">Reset</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Revenue Report -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Revenue Overview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h3 class="text-success">R$ {{ number_format($reports['revenue']['total'], 2, ',', '.') }}</h3>
+                                    <p class="text-muted mb-0">Total Revenue</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h3 class="text-info">R$ {{ number_format($reports['revenue']['average_daily'], 2, ',', '.') }}</h3>
+                                    <p class="text-muted mb-0">Average Daily</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Commission Overview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h3 class="text-warning">R$ {{ number_format($reports['commissions']['total'], 2, ',', '.') }}</h3>
+                                    <p class="text-muted mb-0">Total Commissions</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h3 class="text-danger">R$ {{ number_format($reports['commissions']['pending'], 2, ',', '.') }}</h3>
+                                    <p class="text-muted mb-0">Pending</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Financial Summary Cards -->
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="mb-0">${{ number_format($reports['revenue'], 2) }}</h4>
-                        <p class="mb-0">Total Revenue</p>
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Revenue Trend</h5>
                     </div>
-                    <div class="align-self-center">
-                        <i class="bi bi-currency-dollar display-6"></i>
+                    <div class="card-body">
+                        <canvas id="revenueChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Commission Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="commissionChart" height="300"></canvas>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card bg-success text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="mb-0">${{ number_format($reports['commissions'], 2) }}</h4>
-                        <p class="mb-0">Total Commissions</p>
+        <!-- Top Performers -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Top Sales Performers</h5>
                     </div>
-                    <div class="align-self-center">
-                        <i class="bi bi-graph-up display-6"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card bg-warning text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="mb-0">${{ number_format($reports['expenses'], 2) }}</h4>
-                        <p class="mb-0">Total Expenses</p>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="bi bi-receipt display-6"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-3 col-md-6 mb-4">
-        <div class="card bg-info text-white">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4 class="mb-0">${{ number_format($reports['profit'], 2) }}</h4>
-                        <p class="mb-0">Net Profit</p>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="bi bi-calculator display-6"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Expense Breakdown -->
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-pie-chart me-2"></i>Expenses by Category
-                </h5>
-            </div>
-            <div class="card-body">
-                <canvas id="expenseChart" height="200"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Top Affiliates -->
-    <div class="col-md-6 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-trophy me-2"></i>Top Affiliates
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Sales</th>
-                                <th>Commission</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($topAffiliates as $affiliate)
-                                <tr>
-                                    <td>
-                                        <div class="fw-semibold">{{ $affiliate->name }}</div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-primary">{{ $affiliate->sales_count }}</span>
-                                    </td>
-                                    <td>
-                                        <span class="fw-semibold text-success">${{ number_format($affiliate->total_commission, 2) }}</span>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="text-center text-muted py-3">
-                                        No affiliate data available
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Financial Chart -->
-    <div class="col-12 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="card-title mb-0">
-                        <i class="bi bi-bar-chart me-2"></i>Financial Overview
-                    </h5>
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="updateChart('week')">
-                            Week
-                        </button>
-                        <button type="button" class="btn btn-outline-primary btn-sm active" onclick="updateChart('month')">
-                            Month
-                        </button>
-                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="updateChart('year')">
-                            Year
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="card-body">
-                <canvas id="financialChart" height="100"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- Detailed Reports -->
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="card-title mb-0">
-                    <i class="bi bi-table me-2"></i>Detailed Reports
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="text-center p-3 border rounded">
-                            <div class="text-primary">
-                                <i class="bi bi-arrow-up-circle display-4"></i>
-                            </div>
-                            <h5 class="mt-2">${{ number_format($reports['withdrawals'], 2) }}</h5>
-                            <p class="text-muted mb-0">Withdrawals</p>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Sales</th>
+                                        <th>Revenue</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($reports['top_performers']['top_sales'] as $performer)
+                                    <tr>
+                                        <td>{{ $performer->name }}</td>
+                                        <td>{{ $performer->sales_count }}</td>
+                                        <td>R$ {{ number_format($performer->sales_sum_amount, 2, ',', '.') }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="text-center p-3 border rounded">
-                            <div class="text-warning">
-                                <i class="bi bi-cash-coin display-4"></i>
-                            </div>
-                            <h5 class="mt-2">${{ number_format($reports['commission_payments'], 2) }}</h5>
-                            <p class="text-muted mb-0">Commission Payments</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Top Earners</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>User</th>
+                                        <th>Earnings</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($reports['top_performers']['top_earners'] as $earner)
+                                    <tr>
+                                        <td>{{ $earner->name }}</td>
+                                        <td>R$ {{ number_format($earner->bonus_payments_sum_amount, 2, ',', '.') }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="text-center p-3 border rounded">
-                            <div class="text-success">
-                                <i class="bi bi-graph-up display-4"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversion Rates -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Conversion Rates</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h3 class="text-primary">{{ number_format($reports['conversion_rates']['lead_conversion_rate'], 1) }}%</h3>
+                                    <p class="text-muted mb-0">Lead Conversion</p>
+                                </div>
                             </div>
-                            <h5 class="mt-2">{{ $topAffiliates->count() }}</h5>
-                            <p class="text-muted mb-0">Active Affiliates</p>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h3 class="text-success">{{ number_format($reports['conversion_rates']['sales_conversion_rate'], 1) }}%</h3>
+                                    <p class="text-muted mb-0">Sales Conversion</p>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">Total Leads: {{ $reports['conversion_rates']['total_leads'] }}</small><br>
+                                <small class="text-muted">Converted: {{ $reports['conversion_rates']['converted_leads'] }}</small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Total Users: {{ $reports['conversion_rates']['total_users'] }}</small><br>
+                                <small class="text-muted">Sales: {{ $reports['conversion_rates']['total_sales'] }}</small>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="text-center p-3 border rounded">
-                            <div class="text-info">
-                                <i class="bi bi-percent display-4"></i>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Matrix Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h3 class="text-info">{{ $reports['matrix_performance']['stats']->total_users }}</h3>
+                                    <p class="text-muted mb-0">Total Users</p>
+                                </div>
                             </div>
-                            <h5 class="mt-2">{{ $reports['revenue'] > 0 ? number_format(($reports['commissions'] / $reports['revenue']) * 100, 1) : 0 }}%</h5>
-                            <p class="text-muted mb-0">Commission Rate</p>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h3 class="text-success">{{ $reports['matrix_performance']['stats']->active_users }}</h3>
+                                    <p class="text-muted mb-0">Active Users</p>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-6">
+                                <small class="text-muted">Average Level: {{ number_format($reports['matrix_performance']['stats']->average_level, 1) }}</small>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Max Level: {{ $reports['matrix_performance']['stats']->max_level }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Tables -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Commission by Type</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($reports['commissions']['by_type'] as $type)
+                                    <tr>
+                                        <td>{{ ucfirst(str_replace('_', ' ', $type->bonus_type)) }}</td>
+                                        <td>R$ {{ number_format($type->total, 2, ',', '.') }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Expenses by Category</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($reports['expenses']['by_category'] as $category)
+                                    <tr>
+                                        <td>{{ ucfirst($category->category) }}</td>
+                                        <td>R$ {{ number_format($category->total, 2, ',', '.') }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -355,129 +310,52 @@ document.addEventListener('DOMContentLoaded', async () => {
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Expense Chart
-const expenseCtx = document.getElementById('expenseChart').getContext('2d');
-const expenseData = @json($expenseByCategory);
-
-new Chart(expenseCtx, {
-    type: 'doughnut',
+// Revenue Chart
+const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+const revenueChart = new Chart(revenueCtx, {
+    type: 'line',
     data: {
-        labels: expenseData.map(item => item.category),
+        labels: {!! json_encode($reports['revenue']['daily']->pluck('date')) !!},
         datasets: [{
-            data: expenseData.map(item => item.total),
-            backgroundColor: [
-                '#FF6384',
-                '#36A2EB',
-                '#FFCE56',
-                '#4BC0C0',
-                '#9966FF',
-                '#FF9F40'
-            ]
+            label: 'Daily Revenue',
+            data: {!! json_encode($reports['revenue']['daily']->pluck('revenue')) !!},
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1
         }]
     },
     options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-            },
-            tooltip: {
-                callbacks: {
-                    label: function(context) {
-                        return context.label + ': $' + context.parsed.toLocaleString();
-                    }
-                }
+        scales: {
+            y: {
+                beginAtZero: true
             }
         }
     }
 });
 
-// Financial Chart
-const financialCtx = document.getElementById('financialChart').getContext('2d');
-let financialChart;
-
-function initFinancialChart() {
-    financialChart = new Chart(financialCtx, {
-        type: 'line',
-        data: {
-            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-            datasets: [{
-                label: 'Revenue',
-                data: [{{ $reports['revenue'] / 4 }}, {{ $reports['revenue'] / 4 }}, {{ $reports['revenue'] / 4 }}, {{ $reports['revenue'] / 4 }}],
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                tension: 0.1
-            }, {
-                label: 'Commissions',
-                data: [{{ $reports['commissions'] / 4 }}, {{ $reports['commissions'] / 4 }}, {{ $reports['commissions'] / 4 }}, {{ $reports['commissions'] / 4 }}],
-                borderColor: 'rgb(255, 205, 86)',
-                backgroundColor: 'rgba(255, 205, 86, 0.1)',
-                tension: 0.1
-            }, {
-                label: 'Expenses',
-                data: [{{ $reports['expenses'] / 4 }}, {{ $reports['expenses'] / 4 }}, {{ $reports['expenses'] / 4 }}, {{ $reports['expenses'] / 4 }}],
-                borderColor: 'rgb(255, 99, 132)',
-                backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                tension: 0.1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        callback: function(value) {
-                            return '$' + value.toLocaleString();
-                        }
-                    }
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.dataset.label + ': $' + context.parsed.y.toLocaleString();
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
-
-function updateReport() {
-    const period = document.getElementById('period').value;
-    window.location.href = `{{ route('admin.financial.reports') }}?period=${period}`;
-}
-
-function updateChart(period) {
-    // Remove active class from all buttons
-    document.querySelectorAll('.btn-group .btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    // Add active class to clicked button
-    event.target.classList.add('active');
-    
-    // Here you would typically fetch new data via AJAX
-    console.log('Updating chart for period:', period);
-}
-
-function exportReport() {
-    // Here you would typically generate and download a report
-    console.log('Exporting report...');
-    alert('Report export functionality would be implemented here.');
-}
-
-// Initialize chart when page loads
-document.addEventListener('DOMContentLoaded', function() {
-    initFinancialChart();
+// Commission Chart
+const commissionCtx = document.getElementById('commissionChart').getContext('2d');
+const commissionChart = new Chart(commissionCtx, {
+    type: 'doughnut',
+    data: {
+        labels: {!! json_encode($reports['commissions']['by_type']->pluck('bonus_type')) !!},
+        datasets: [{
+            data: {!! json_encode($reports['commissions']['by_type']->pluck('total')) !!},
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 205, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
 });
 </script>
 @endsection

@@ -29,6 +29,9 @@ class User extends Authenticatable
         'is_active',
         'active_network',
         'email_verified_at',
+        'matrix_parent_id',
+        'matrix_position',
+        'matrix_level',
     ];
 
     protected $hidden = [
@@ -201,6 +204,31 @@ class User extends Authenticatable
     public function sponsor()
     {
         return $this->belongsTo(User::class, 'referral_code', 'affiliate_code');
+    }
+
+    /**
+     * Get matrix parent (in forced matrix structure)
+     */
+    public function matrixParent()
+    {
+        return $this->belongsTo(User::class, 'matrix_parent_id');
+    }
+
+    /**
+     * Get matrix children (in forced matrix structure)
+     */
+    public function matrixChildren()
+    {
+        return $this->hasMany(User::class, 'matrix_parent_id');
+    }
+
+    /**
+     * Get all matrix descendants
+     */
+    public function matrixDescendants()
+    {
+        return $this->hasMany(User::class, 'matrix_parent_id')
+            ->with('matrixDescendants');
     }
 
     /**

@@ -12,23 +12,40 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Process commission payments daily at 9:00 AM
-        $schedule->command('commission:process-payments')
-            ->dailyAt('09:00')
+        // Process commission payments every hour
+        $schedule->command('bonus:process-commissions')
+            ->hourly()
             ->withoutOverlapping()
             ->runInBackground();
 
-        // Process network bonuses daily at 10:00 AM
+        // Process network bonuses every 30 minutes
         $schedule->command('bonus:process-network')
-            ->dailyAt('10:00')
+            ->everyThirtyMinutes()
             ->withoutOverlapping()
             ->runInBackground();
 
-        // Process daily profit sharing daily at 11:00 AM
-        $schedule->command('profit:process-daily-sharing')
-            ->dailyAt('11:00')
+        // Process daily profit sharing daily at 11:00 PM
+        $schedule->command('bonus:process-daily-profit-sharing')
+            ->dailyAt('23:00')
             ->withoutOverlapping()
             ->runInBackground();
+
+        // Clean up old logs weekly
+        $schedule->command('log:clear')
+            ->weekly()
+            ->sundays()
+            ->at('02:00');
+
+        // Backup database daily at 3:00 AM
+        $schedule->command('backup:run')
+            ->dailyAt('03:00')
+            ->withoutOverlapping();
+
+        // Generate daily reports at midnight
+        $schedule->command('reports:generate-daily')
+            ->daily()
+            ->at('00:05')
+            ->withoutOverlapping();
     }
 
     /**
