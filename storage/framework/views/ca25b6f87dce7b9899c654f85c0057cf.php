@@ -1,31 +1,31 @@
-@extends('layouts.client')
 
-@section('title', 'Manage Leads')
-@section('page-title', 'Manage Leads')
 
-@section('page-actions')
+<?php $__env->startSection('title', 'Manage Leads'); ?>
+<?php $__env->startSection('page-title', 'Manage Leads'); ?>
+
+<?php $__env->startSection('page-actions'); ?>
 <div class="btn-toolbar mb-2 mb-md-0">
     <div class="btn-group me-2">
-        <a href="{{ route('client.leads.create') }}" class="btn btn-primary">
+        <a href="<?php echo e(route('client.leads.create')); ?>" class="btn btn-primary">
             <i class="bi bi-plus-circle me-2"></i>New Lead
         </a>
         <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#importModal">
             <i class="bi bi-upload me-2"></i>Import
         </button>
-        <a href="{{ route('client.leads.export', request()->query()) }}" class="btn btn-outline-success">
+        <a href="<?php echo e(route('client.leads.export', request()->query())); ?>" class="btn btn-outline-success">
             <i class="bi bi-download me-2"></i>Export
         </a>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <!-- Statistics Cards -->
 <div class="row mb-4">
     <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title text-primary">{{ $stats['total'] }}</h5>
+                <h5 class="card-title text-primary"><?php echo e($stats['total']); ?></h5>
                 <p class="card-text text-muted">Total</p>
             </div>
         </div>
@@ -33,7 +33,7 @@
     <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title text-success">{{ $stats['active'] }}</h5>
+                <h5 class="card-title text-success"><?php echo e($stats['active']); ?></h5>
                 <p class="card-text text-muted">Ativos</p>
             </div>
         </div>
@@ -41,7 +41,7 @@
     <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title text-warning">{{ $stats['pending'] }}</h5>
+                <h5 class="card-title text-warning"><?php echo e($stats['pending']); ?></h5>
                 <p class="card-text text-muted">Pendentes</p>
             </div>
         </div>
@@ -49,7 +49,7 @@
     <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title text-info">{{ $stats['contacted'] }}</h5>
+                <h5 class="card-title text-info"><?php echo e($stats['contacted']); ?></h5>
                 <p class="card-text text-muted">Contatados</p>
             </div>
         </div>
@@ -57,7 +57,7 @@
     <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title text-success">{{ $stats['converted'] }}</h5>
+                <h5 class="card-title text-success"><?php echo e($stats['converted']); ?></h5>
                 <p class="card-text text-muted">Convertidos</p>
             </div>
         </div>
@@ -65,7 +65,7 @@
     <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
         <div class="card text-center">
             <div class="card-body">
-                <h5 class="card-title text-secondary">{{ $stats['inactive'] }}</h5>
+                <h5 class="card-title text-secondary"><?php echo e($stats['inactive']); ?></h5>
                 <p class="card-text text-muted">Inativos</p>
             </div>
         </div>
@@ -75,43 +75,43 @@
 <!-- Filters and Search -->
 <div class="card mb-4">
     <div class="card-body">
-        <form method="GET" action="{{ route('client.leads.index') }}" class="row g-3">
+        <form method="GET" action="<?php echo e(route('client.leads.index')); ?>" class="row g-3">
             <div class="col-md-3">
                 <label for="search" class="form-label">Search</label>
                 <input type="text" class="form-control" id="search" name="search" 
-                       value="{{ request('search') }}" placeholder="Name, email or phone">
+                       value="<?php echo e(request('search')); ?>" placeholder="Name, email or phone">
             </div>
             <div class="col-md-2">
                 <label for="status" class="form-label">Status</label>
                 <select class="form-select" id="status" name="status">
                     <option value="">All</option>
-                    <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="active" <?php echo e(request('status') === 'active' ? 'selected' : ''); ?>>Active</option>
+                    <option value="inactive" <?php echo e(request('status') === 'inactive' ? 'selected' : ''); ?>>Inactive</option>
+                    <option value="pending" <?php echo e(request('status') === 'pending' ? 'selected' : ''); ?>>Pending</option>
                 </select>
             </div>
             <div class="col-md-2">
                 <label for="contacted" class="form-label">Contacted</label>
                 <select class="form-select" id="contacted" name="contacted">
                     <option value="">All</option>
-                    <option value="true" {{ request('contacted') === 'true' ? 'selected' : '' }}>Yes</option>
-                    <option value="false" {{ request('contacted') === 'false' ? 'selected' : '' }}>No</option>
+                    <option value="true" <?php echo e(request('contacted') === 'true' ? 'selected' : ''); ?>>Yes</option>
+                    <option value="false" <?php echo e(request('contacted') === 'false' ? 'selected' : ''); ?>>No</option>
                 </select>
             </div>
             <div class="col-md-2">
                 <label for="converted" class="form-label">Converted</label>
                 <select class="form-select" id="converted" name="converted">
                     <option value="">All</option>
-                    <option value="true" {{ request('converted') === 'true' ? 'selected' : '' }}>Yes</option>
-                    <option value="false" {{ request('converted') === 'false' ? 'selected' : '' }}>No</option>
+                    <option value="true" <?php echo e(request('converted') === 'true' ? 'selected' : ''); ?>>Yes</option>
+                    <option value="false" <?php echo e(request('converted') === 'false' ? 'selected' : ''); ?>>No</option>
                 </select>
             </div>
             <div class="col-md-2">
                 <label for="sort_by" class="form-label">Sort by</label>
                 <select class="form-select" id="sort_by" name="sort_by">
-                    <option value="created_at" {{ request('sort_by') === 'created_at' ? 'selected' : '' }}>Date</option>
-                    <option value="name" {{ request('sort_by') === 'name' ? 'selected' : '' }}>Name</option>
-                    <option value="status" {{ request('sort_by') === 'status' ? 'selected' : '' }}>Status</option>
+                    <option value="created_at" <?php echo e(request('sort_by') === 'created_at' ? 'selected' : ''); ?>>Date</option>
+                    <option value="name" <?php echo e(request('sort_by') === 'name' ? 'selected' : ''); ?>>Name</option>
+                    <option value="status" <?php echo e(request('sort_by') === 'status' ? 'selected' : ''); ?>>Status</option>
                 </select>
             </div>
             <div class="col-md-1">
@@ -134,7 +134,7 @@
         </h5>
     </div>
     <div class="card-body">
-        @if($leads->count() > 0)
+        <?php if($leads->count() > 0): ?>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
@@ -151,80 +151,81 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($leads as $lead)
+                        <?php $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
                                     <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center me-2">
-                                        <span class="text-white fw-bold">{{ substr($lead->name, 0, 1) }}</span>
+                                        <span class="text-white fw-bold"><?php echo e(substr($lead->name, 0, 1)); ?></span>
                                     </div>
                                     <div>
-                                        <h6 class="mb-0">{{ $lead->name }}</h6>
-                                        @if($lead->notes)
-                                            <small class="text-muted">{{ Str::limit($lead->notes, 50) }}</small>
-                                        @endif
+                                        <h6 class="mb-0"><?php echo e($lead->name); ?></h6>
+                                        <?php if($lead->notes): ?>
+                                            <small class="text-muted"><?php echo e(Str::limit($lead->notes, 50)); ?></small>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </td>
-                            <td>{{ $lead->email }}</td>
-                            <td>{{ $lead->phone ?? '-' }}</td>
+                            <td><?php echo e($lead->email); ?></td>
+                            <td><?php echo e($lead->phone ?? '-'); ?></td>
                             <td>
-                                <span class="badge bg-light text-dark">{{ $lead->source }}</span>
+                                <span class="badge bg-light text-dark"><?php echo e($lead->source); ?></span>
                             </td>
                             <td>
-                                <span class="badge bg-{{ $lead->status_badge_color }}">
-                                    {{ $lead->status_badge_text }}
+                                <span class="badge bg-<?php echo e($lead->status_badge_color); ?>">
+                                    <?php echo e($lead->status_badge_text); ?>
+
                                 </span>
                             </td>
                             <td>
-                                @if($lead->contacted)
+                                <?php if($lead->contacted): ?>
                                     <span class="badge bg-success">
                                         <i class="bi bi-check-circle me-1"></i>Yes
                                     </span>
-                                    @if($lead->contacted_at)
-                                        <br><small class="text-muted">{{ $lead->contacted_at->format('d/m/Y') }}</small>
-                                    @endif
-                                @else
+                                    <?php if($lead->contacted_at): ?>
+                                        <br><small class="text-muted"><?php echo e($lead->contacted_at->format('d/m/Y')); ?></small>
+                                    <?php endif; ?>
+                                <?php else: ?>
                                     <span class="badge bg-secondary">No</span>
-                                @endif
+                                <?php endif; ?>
                             </td>
                             <td>
-                                @if($lead->converted)
+                                <?php if($lead->converted): ?>
                                     <span class="badge bg-success">
                                         <i class="bi bi-check-circle me-1"></i>Yes
                                     </span>
-                                    @if($lead->conversion_value)
-                                        <br><small class="text-success">R$ {{ number_format($lead->conversion_value, 2, ',', '.') }}</small>
-                                    @endif
-                                @else
+                                    <?php if($lead->conversion_value): ?>
+                                        <br><small class="text-success">R$ <?php echo e(number_format($lead->conversion_value, 2, ',', '.')); ?></small>
+                                    <?php endif; ?>
+                                <?php else: ?>
                                     <span class="badge bg-secondary">No</span>
-                                @endif
+                                <?php endif; ?>
                             </td>
                             <td>
-                                <div>{{ $lead->created_at->format('d/m/Y') }}</div>
-                                <small class="text-muted">{{ $lead->created_at->format('H:i') }}</small>
+                                <div><?php echo e($lead->created_at->format('d/m/Y')); ?></div>
+                                <small class="text-muted"><?php echo e($lead->created_at->format('H:i')); ?></small>
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('client.leads.show', $lead) }}" 
+                                    <a href="<?php echo e(route('client.leads.show', $lead)); ?>" 
                                        class="btn btn-sm btn-outline-primary" 
                                        data-bs-toggle="tooltip" title="Ver detalhes">
                                         <i class="bi bi-eye"></i>
                                     </a>
-                                    <a href="{{ route('client.leads.edit', $lead) }}" 
+                                    <a href="<?php echo e(route('client.leads.edit', $lead)); ?>" 
                                        class="btn btn-sm btn-outline-secondary" 
                                        data-bs-toggle="tooltip" title="Edit">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     <button type="button" class="btn btn-sm btn-outline-danger" 
-                                            onclick="deleteLead({{ $lead->id }})" 
+                                            onclick="deleteLead(<?php echo e($lead->id); ?>)" 
                                             data-bs-toggle="tooltip" title="Delete">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
                             </td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
             </div>
@@ -232,23 +233,24 @@
             <!-- Pagination -->
             <div class="d-flex justify-content-between align-items-center mt-4">
                 <div class="text-muted">
-                    Showing {{ $leads->firstItem() }} to {{ $leads->lastItem() }} 
-                    of {{ $leads->total() }} results
+                    Showing <?php echo e($leads->firstItem()); ?> to <?php echo e($leads->lastItem()); ?> 
+                    of <?php echo e($leads->total()); ?> results
                 </div>
                 <div>
-                    {{ $leads->links() }}
+                    <?php echo e($leads->links()); ?>
+
                 </div>
             </div>
-        @else
+        <?php else: ?>
             <div class="text-center py-5">
                 <i class="bi bi-people display-1 text-muted"></i>
                 <h4 class="mt-3 text-muted">No leads found</h4>
                 <p class="text-muted">Start by adding your first lead or import a list.</p>
-                <a href="{{ route('client.leads.create') }}" class="btn btn-primary">
+                <a href="<?php echo e(route('client.leads.create')); ?>" class="btn btn-primary">
                     <i class="bi bi-plus-circle me-2"></i>Add Lead
                 </a>
             </div>
-        @endif
+        <?php endif; ?>
     </div>
 </div>
 
@@ -262,8 +264,8 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form method="POST" action="{{ route('client.leads.import') }}" enctype="multipart/form-data">
-                @csrf
+            <form method="POST" action="<?php echo e(route('client.leads.import')); ?>" enctype="multipart/form-data">
+                <?php echo csrf_field(); ?>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="file" class="form-label">Arquivo CSV</label>
@@ -309,8 +311,8 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <form id="deleteForm" method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('DELETE'); ?>
                     <button type="submit" class="btn btn-danger">
                         <i class="bi bi-trash me-2"></i>Delete
                     </button>
@@ -319,9 +321,9 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('scripts')
+<?php $__env->startSection('scripts'); ?>
 <script>
 function deleteLead(leadId) {
     const form = document.getElementById('deleteForm');
@@ -359,4 +361,6 @@ var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
     return new bootstrap.Tooltip(tooltipTriggerEl);
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.client', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH D:\WORK-Station\freelance\workana\affiliate\resources\views/client/leads/index.blade.php ENDPATH**/ ?>

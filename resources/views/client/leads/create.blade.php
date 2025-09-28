@@ -25,7 +25,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="name" class="form-label">Nome Completo <span class="text-danger">*</span></label>
+                                <label for="name" class="form-label">Full Name <span class="text-danger">*</span></label>
                                 <input type="text" 
                                        class="form-control @error('name') is-invalid @enderror" 
                                        id="name" 
@@ -56,7 +56,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="phone" class="form-label">Telefone</label>
+                                <label for="phone" class="form-label">Phone</label>
                                 <input type="text" 
                                        class="form-control @error('phone') is-invalid @enderror" 
                                        id="phone" 
@@ -70,19 +70,19 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="source" class="form-label">Origem <span class="text-danger">*</span></label>
+                                <label for="source" class="form-label">Source <span class="text-danger">*</span></label>
                                 <select class="form-select @error('source') is-invalid @enderror" 
                                         id="source" 
                                         name="source" 
                                         required>
-                                    <option value="">Selecione a origem</option>
+                                    <option value="">Select source</option>
                                     <option value="website" {{ old('source') === 'website' ? 'selected' : '' }}>Website</option>
                                     <option value="facebook" {{ old('source') === 'facebook' ? 'selected' : '' }}>Facebook</option>
                                     <option value="instagram" {{ old('source') === 'instagram' ? 'selected' : '' }}>Instagram</option>
                                     <option value="google" {{ old('source') === 'google' ? 'selected' : '' }}>Google Ads</option>
-                                    <option value="indicacao" {{ old('source') === 'indicacao' ? 'selected' : '' }}>Indicação</option>
-                                    <option value="evento" {{ old('source') === 'evento' ? 'selected' : '' }}>Evento</option>
-                                    <option value="outro" {{ old('source') === 'outro' ? 'selected' : '' }}>Outro</option>
+                                    <option value="indicacao" {{ old('source') === 'indicacao' ? 'selected' : '' }}>Referral</option>
+                                    <option value="evento" {{ old('source') === 'evento' ? 'selected' : '' }}>Event</option>
+                                    <option value="outro" {{ old('source') === 'outro' ? 'selected' : '' }}>Other</option>
                                 </select>
                                 @error('source')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -99,10 +99,10 @@
                                         id="status" 
                                         name="status" 
                                         required>
-                                    <option value="">Selecione o status</option>
-                                    <option value="active" {{ old('status') === 'active' ? 'selected' : '' }}>Ativo</option>
-                                    <option value="pending" {{ old('status') === 'pending' ? 'selected' : '' }}>Pendente</option>
-                                    <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inativo</option>
+                                    <option value="">Select status</option>
+                                    <option value="active" {{ old('status') === 'active' ? 'selected' : '' }}>Active</option>
+                                    <option value="pending" {{ old('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
                                 </select>
                                 @error('status')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -111,13 +111,13 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="custom_source" class="form-label">Origem Personalizada</label>
+                                <label for="custom_source" class="form-label">Custom Source</label>
                                 <input type="text" 
                                        class="form-control @error('custom_source') is-invalid @enderror" 
                                        id="custom_source" 
                                        name="custom_source" 
                                        value="{{ old('custom_source') }}" 
-                                       placeholder="Digite se selecionou 'Outro'"
+                                       placeholder="Enter if you selected 'Other'"
                                        style="display: none;">
                                 @error('custom_source')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -127,12 +127,12 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="notes" class="form-label">Observações</label>
+                        <label for="notes" class="form-label">Notes</label>
                         <textarea class="form-control @error('notes') is-invalid @enderror" 
                                   id="notes" 
                                   name="notes" 
                                   rows="4" 
-                                  placeholder="Adicione observações sobre este lead...">{{ old('notes') }}</textarea>
+                                  placeholder="Add notes about this lead...">{{ old('notes') }}</textarea>
                         @error('notes')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -140,7 +140,7 @@
 
                     <!-- Custom Fields Section -->
                     <div class="mb-3">
-                        <label class="form-label">Campos Personalizados</label>
+                        <label class="form-label">Custom Fields</label>
                         <div id="customFields">
                             <!-- Custom fields will be added here dynamically -->
                         </div>
@@ -167,30 +167,30 @@
         <div class="card">
             <div class="card-header">
                 <h6 class="card-title mb-0">
-                    <i class="bi bi-lightbulb me-2"></i>Dicas Rápidas
+                    <i class="bi bi-lightbulb me-2"></i>Quick Tips
                 </h6>
             </div>
             <div class="card-body">
                 <ul class="list-unstyled mb-0">
                     <li class="mb-2">
                         <i class="bi bi-check-circle text-success me-2"></i>
-                        <strong>Nome completo</strong> facilita a identificação
+                        <strong>Full name</strong> makes identification easier
                     </li>
                     <li class="mb-2">
                         <i class="bi bi-check-circle text-success me-2"></i>
-                        <strong>Email válido</strong> é obrigatório para contato
+                        <strong>Valid email</strong> is required for contact
                     </li>
                     <li class="mb-2">
                         <i class="bi bi-check-circle text-success me-2"></i>
-                        <strong>Origem</strong> ajuda a identificar canais eficazes
+                        <strong>Source</strong> helps identify effective channels
                     </li>
                     <li class="mb-2">
                         <i class="bi bi-check-circle text-success me-2"></i>
-                        <strong>Observações</strong> são importantes para o acompanhamento
+                        <strong>Notes</strong> are important for tracking
                     </li>
                     <li class="mb-0">
                         <i class="bi bi-check-circle text-success me-2"></i>
-                        Use <strong>campos personalizados</strong> para informações específicas
+                        Use <strong>custom fields</strong> for specific information
                     </li>
                 </ul>
             </div>
@@ -200,7 +200,7 @@
         <div class="card mt-3">
             <div class="card-header">
                 <h6 class="card-title mb-0">
-                    <i class="bi bi-graph-up me-2"></i>Origens Mais Usadas
+                    <i class="bi bi-graph-up me-2"></i>Most Used Sources
                 </h6>
             </div>
             <div class="card-body">
